@@ -1,6 +1,6 @@
 {
-    "name": "pillo",
-    "short_name": "pillo",
+    "name": "dose_plus",
+    "short_name": "dose_plus",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

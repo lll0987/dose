@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants.dart';
-import '../core/data/models/pill_model.dart';
-import '../core/data/models/transaction_model.dart';
-import '../core/data/providers/transaction_provider.dart';
+import '../models/pill_model.dart';
+import '../models/transaction_model.dart';
+import '../providers/transaction_provider.dart';
+import '../utils/datetime.dart';
 import '../widgets/pill_card.dart';
 import '../widgets/quantity_input.dart';
 
@@ -29,12 +29,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
     final now = DateTime.now();
     _startTime = TimeOfDay.fromDateTime(now);
     _model = TransactionModel(
-      pillId: widget.initialData.id,
+      pillId: widget.initialData.id!,
       quantities: [],
       timestamp: now,
       startTime: now,
     );
-    _model.quantities.add(Quantity(qty: 1, unit: widget.initialData.getUnit()));
+    _model.quantities.add(
+      QuantityModel(qty: 1, unit: widget.initialData.getUnit()),
+    );
     _units = widget.initialData.packSpecs.map((e) => e.unit).toList();
   }
 
@@ -151,9 +153,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   Expanded(
                                     child: QuantityInput(
                                       labelText: '数量',
-                                      initialInteger: item.qty,
-                                      initialNumerator: item.numerator,
-                                      initialDenominator: item.denominator,
+                                      initialValue: Number(
+                                        integer: item.qty,
+                                        numerator: item.numerator,
+                                        denominator: item.denominator,
+                                      ),
                                       onChange: (value) {
                                         setState(() {
                                           item.qty = value.integer;
@@ -195,7 +199,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               onPressed:
                                   () => setState(
                                     () => _model.quantities.add(
-                                      Quantity(
+                                      QuantityModel(
                                         qty: 1,
                                         unit: widget.initialData.getUnit(),
                                       ),

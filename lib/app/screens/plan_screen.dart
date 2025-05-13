@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/data/models/pill_model.dart';
-import '../core/data/models/plan_model.dart';
-import '../core/data/providers/pill_provider.dart';
-import '../core/data/providers/plan_provider.dart';
-import '../core/data/services/pill_service.dart';
+import '../database/repository/pill_repository.dart';
+import '../models/pill_model.dart';
+import '../models/plan_model.dart';
+import '../providers/pill_provider.dart';
+import '../providers/plan_provider.dart';
 import '../widgets/plan_card.dart';
 import 'plan_form_screen.dart';
 
@@ -47,7 +47,7 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final flag = await context.read<PillService>().isEmpty();
+          final flag = await context.read<PillRepository>().isEmpty();
           if (flag) {
             // 提醒用户添加药品
             ScaffoldMessenger.of(context).showSnackBar(

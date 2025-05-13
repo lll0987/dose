@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants.dart';
-import '../core/data/models/plan_model.dart';
+import '../models/plan_model.dart';
+import '../utils/datetime.dart';
 import '../widgets/list_wheel_picker.dart';
 
 class RepeatScreen extends StatefulWidget {
@@ -122,7 +122,7 @@ class _RepeatSettingsState extends State<RepeatScreen> {
     widget.initialData.startDate = getFormatDate(_startDate);
     widget.initialData.endDate =
         _endDate == null ? '' : getFormatDate(_endDate!);
-    widget.initialData.repeatUnit = _repeatUnit!.value;
+    widget.initialData.repeatUnit = _repeatUnit!.toString();
     switch (_repeatUnit) {
       case DateUnit.day:
         widget.initialData.repeatValues = [_dayValue];

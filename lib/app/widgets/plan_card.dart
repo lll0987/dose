@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/data/models/plan_model.dart';
+import '../models/plan_model.dart';
 
 class PlanCard extends StatelessWidget {
   final PlanModel plan;

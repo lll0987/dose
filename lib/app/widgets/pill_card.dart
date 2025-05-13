@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/data/models/pill_model.dart';
+import '../models/pill_model.dart';
 import 'pill_image.dart';
 
 class PillCard extends StatelessWidget {

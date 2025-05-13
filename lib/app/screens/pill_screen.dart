@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/data/providers/pill_provider.dart';
+import '../providers/pill_provider.dart';
 import '../widgets/pill_card.dart';
 import 'pill_form_screen.dart';
 import 'transaction_screen.dart';

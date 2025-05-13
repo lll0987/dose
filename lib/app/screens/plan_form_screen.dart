@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants.dart';
-import '../core/data/models/pill_model.dart';
-import '../core/data/models/plan_model.dart';
-import '../core/data/providers/plan_provider.dart';
-import '../core/data/services/pill_service.dart';
+import '../database/repository/pill_repository.dart';
+import '../models/pill_model.dart';
+import '../models/plan_model.dart';
+import '../providers/plan_provider.dart';
+import '../utils/datetime.dart';
 import '../widgets/list_wheel_picker.dart';
 import '../widgets/quantity_input.dart';
 import 'reminder_screen.dart';
@@ -28,7 +28,7 @@ class _PlanFormState extends State<PlanFormScreen> {
   List<String> _units = [];
 
   PlanModel _model = PlanModel(
-    pillId: '',
+    pillId: 0,
     name: '',
     qty: 1,
     unit: '',
@@ -43,10 +43,22 @@ class _PlanFormState extends State<PlanFormScreen> {
   TimeOfDay _startTime = TimeOfDay(hour: 0, minute: 0);
 
   final List<WheelOption> _cycleUnits = [
-    WheelOption(value: DateUnit.day.value, label: DateUnit.day.displayName),
-    WheelOption(value: DateUnit.week.value, label: DateUnit.week.displayName),
-    WheelOption(value: DateUnit.month.value, label: DateUnit.month.displayName),
-    WheelOption(value: DateUnit.year.value, label: DateUnit.year.displayName),
+    WheelOption(
+      value: DateUnit.day.toString(),
+      label: DateUnit.day.displayName,
+    ),
+    WheelOption(
+      value: DateUnit.week.toString(),
+      label: DateUnit.week.displayName,
+    ),
+    WheelOption(
+      value: DateUnit.month.toString(),
+      label: DateUnit.month.displayName,
+    ),
+    WheelOption(
+      value: DateUnit.year.toString(),
+      label: DateUnit.year.displayName,
+    ),
   ];
   bool _isCycle = false;
   int _cycleValue = 1;
@@ -116,9 +128,11 @@ class _PlanFormState extends State<PlanFormScreen> {
                           Expanded(
                             child: QuantityInput(
                               labelText: '计划用药数量',
-                              initialInteger: _model.qty,
-                              initialNumerator: _model.numerator,
-                              initialDenominator: _model.denominator,
+                              initialValue: Number(
+                                integer: _model.qty,
+                                numerator: _model.numerator,
+                                denominator: _model.denominator,
+                              ),
                               onChange:
                                   (v) => setState(() {
                                     _model.qty = v.integer;
@@ -213,7 +227,7 @@ class _PlanFormState extends State<PlanFormScreen> {
                     child: GestureDetector(
                       onTap:
                           () => setState(() {
-                            _reloadPill(tab.id);
+                            _reloadPill(tab.id!);
                           }),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
@@ -504,7 +518,7 @@ class _PlanFormState extends State<PlanFormScreen> {
   void _showCycleDialog(bool isStop) async {
     final cycle = _model.cycles.firstWhere(
       (c) => c.isStop == isStop,
-      orElse: () => Cycle(value: 1, unit: 'day', isStop: isStop),
+      orElse: () => CycleModel(value: 1, unit: 'day', isStop: isStop),
     );
     _cycleValue = cycle.value;
     _cycleUnit = cycle.unit;
@@ -520,14 +534,14 @@ class _PlanFormState extends State<PlanFormScreen> {
       if (index == -1) {
         // 未找到时添加新元素
         _model.cycles.add(
-          Cycle(
+          CycleModel(
             value: isStop ? 1 : _cycleValue,
             unit: _cycleUnit,
             isStop: false,
           ),
         );
         _model.cycles.add(
-          Cycle(
+          CycleModel(
             value: isStop ? _cycleValue : 1,
             unit: _cycleUnit,
             isStop: true,
@@ -589,7 +603,7 @@ class _PlanFormState extends State<PlanFormScreen> {
     );
   }
 
-  void _reloadPill(String pillId) {
+  void _reloadPill(int pillId) {
     _model.pillId = pillId;
     _units =
         _pillList
@@ -601,12 +615,12 @@ class _PlanFormState extends State<PlanFormScreen> {
   }
 
   Future<void> _getPills() async {
-    final list = await context.read<PillService>().getAllPills();
+    final list = await context.read<PillRepository>().getAllPills();
     setState(() {
       _pillList = list;
       _pills = list.length > 3 ? list.sublist(0, 3) : list;
-      if (_model.pillId.isEmpty) {
-        _reloadPill(list.first.id);
+      if (_model.pillId == 0) {
+        _reloadPill(list.first.id!);
       }
     });
   }

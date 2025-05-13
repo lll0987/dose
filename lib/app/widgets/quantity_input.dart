@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
 
+class Number {
+  final int integer;
+  final int? numerator;
+  final int? denominator;
+
+  Number({required this.integer, this.numerator, this.denominator});
+
+  String getDisplayText() {
+    if (denominator == null || numerator == null) {
+      return '$integer';
+    }
+    return '$integer + $numerator/$denominator';
+  }
+}
+
 class QuantityInput extends StatefulWidget {
   final bool enabled;
   final String labelText;
   final bool? filled;
   final Color? fillColor;
-  final int initialInteger;
-  final int? initialNumerator;
-  final int? initialDenominator;
-  final Function(QuantityResult) onChange;
+  final Number? initialValue;
+  final Function(Number) onChange;
 
   const QuantityInput({
     super.key,
@@ -16,9 +29,7 @@ class QuantityInput extends StatefulWidget {
     required this.labelText,
     this.filled,
     this.fillColor,
-    required this.initialInteger,
-    this.initialNumerator,
-    this.initialDenominator,
+    this.initialValue,
     required this.onChange,
   });
 
@@ -28,39 +39,30 @@ class QuantityInput extends StatefulWidget {
 
 class _QuantityInputState extends State<QuantityInput> {
   final TextEditingController _displayController = TextEditingController();
-  late int _integer;
-  late int? _numerator;
-  late int? _denominator;
+  Number _value = Number(integer: 0, numerator: null, denominator: null);
 
   @override
   void initState() {
     super.initState();
-    _integer = widget.initialInteger;
-    _numerator = widget.initialNumerator;
-    _denominator = widget.initialDenominator;
+    if (widget.initialValue != null) {
+      _value = widget.initialValue!;
+    }
     _updateDisplay();
   }
 
   void _updateDisplay() {
-    _displayController.text = _getDisplayText();
+    _displayController.text = _value.getDisplayText();
   }
 
   void _showEditDialog() async {
-    final result = await showDialog<QuantityResult>(
+    final result = await showDialog<Number>(
       context: context,
-      builder:
-          (context) => QuantityInputDialog(
-            initialInteger: _integer,
-            initialNumerator: _numerator,
-            initialDenominator: _denominator,
-          ),
+      builder: (context) => QuantityInputDialog(initialValue: _value),
     );
 
     if (result != null) {
       setState(() {
-        _integer = result.integer;
-        _numerator = result.numerator;
-        _denominator = result.denominator;
+        _value = result;
         _updateDisplay();
         widget.onChange(result);
       });
@@ -85,13 +87,6 @@ class _QuantityInputState extends State<QuantityInput> {
     );
   }
 
-  String _getDisplayText() {
-    if (_denominator == null || _numerator == null) {
-      return '$_integer';
-    }
-    return '$_integer + $_numerator/$_denominator';
-  }
-
   @override
   void dispose() {
     _displayController.dispose();
@@ -100,16 +95,9 @@ class _QuantityInputState extends State<QuantityInput> {
 }
 
 class QuantityInputDialog extends StatefulWidget {
-  final int initialInteger;
-  final int? initialNumerator;
-  final int? initialDenominator;
+  final Number initialValue;
 
-  const QuantityInputDialog({
-    super.key,
-    required this.initialInteger,
-    required this.initialNumerator,
-    required this.initialDenominator,
-  });
+  const QuantityInputDialog({super.key, required this.initialValue});
 
   @override
   State<QuantityInputDialog> createState() => _QuantityInputDialogState();
@@ -137,9 +125,9 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
   @override
   void initState() {
     super.initState();
-    _integer = widget.initialInteger;
-    _numerator = widget.initialNumerator;
-    _denominator = widget.initialDenominator;
+    _integer = widget.initialValue.integer;
+    _numerator = widget.initialValue.numerator;
+    _denominator = widget.initialValue.denominator;
     _integerController = TextEditingController(
       text: _integer.toString(),
     ); // 初始化控制器
@@ -331,7 +319,7 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                 return;
               }
               Navigator.of(context).pop(
-                QuantityResult(
+                Number(
                   integer: _integer,
                   numerator: _selectedFraction == 'none' ? null : _numerator,
                   denominator:
@@ -368,14 +356,6 @@ class Fraction {
 
   @override
   int get hashCode => Object.hash(numerator, denominator);
-}
-
-class QuantityResult {
-  final int integer;
-  final int? numerator;
-  final int? denominator;
-
-  QuantityResult({required this.integer, this.numerator, this.denominator});
 }
 
 // 新建PresetOption类：

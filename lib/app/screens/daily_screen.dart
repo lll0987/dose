@@ -2,14 +2,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants.dart';
-import '../core/data/models/pill_model.dart';
-import '../core/data/models/plan_model.dart';
-import '../core/data/models/transaction_model.dart';
-import '../core/data/providers/pill_provider.dart';
-import '../core/data/providers/plan_provider.dart';
-import '../core/data/providers/transaction_provider.dart';
-import '../core/data/services/transaction_service.dart';
+import '../models/pill_model.dart';
+import '../models/plan_model.dart';
+import '../models/transaction_model.dart';
+import '../providers/pill_provider.dart';
+import '../providers/plan_provider.dart';
+import '../providers/transaction_provider.dart';
+import '../utils/datetime.dart';
 import '../widgets/pill_image.dart';
 
 class DailyScreen extends StatefulWidget {
@@ -20,21 +19,19 @@ class DailyScreen extends StatefulWidget {
 }
 
 class _DailyScreenState extends State<DailyScreen> {
-  late List<TransactionModel> _transactionModels;
-
   int getUnitDifference(DateTime startDate, DateTime today, String unit) {
     final days = today.difference(startDate).inDays;
-    if (unit == DateUnit.day.value) return days;
-    if (unit == DateUnit.week.value) return days ~/ 7;
-    if (unit == DateUnit.month.value) {
+    if (unit == DateUnit.day.toString()) return days;
+    if (unit == DateUnit.week.toString()) return days ~/ 7;
+    if (unit == DateUnit.month.toString()) {
       return (today.year - startDate.year) * 12 +
           (today.month - startDate.month);
     }
-    if (unit == DateUnit.year.value) return today.year - startDate.year;
+    if (unit == DateUnit.year.toString()) return today.year - startDate.year;
     return 0;
   }
 
-  bool isPlanStop(List<Cycle> cycles) {
+  bool isPlanStop(List<CycleModel> cycles) {
     if (cycles.isEmpty) return false;
     // final firstUnit = cycles[0].unit;
     // for (var cycle in cycles) {
@@ -79,19 +76,19 @@ class _DailyScreenState extends State<DailyScreen> {
     final isStop = isPlanStop(plan.cycles);
     if (isStop) return false;
 
-    if (unit == DateUnit.day.value) {
+    if (unit == DateUnit.day.toString()) {
       final val = plan.repeatValues[0];
       if (val < 2) return true;
       final daysDiff = today.difference(startDay).inDays;
       return daysDiff % val == 0;
     }
 
-    if (unit == DateUnit.week.value) {
+    if (unit == DateUnit.week.toString()) {
       final currentWeekday = now.weekday; // Monday = 1 ... Sunday = 7
       return plan.repeatValues.contains(currentWeekday);
     }
 
-    if (unit == DateUnit.month.value) {
+    if (unit == DateUnit.month.toString()) {
       final currentDay = now.day;
       final values = plan.repeatValues;
       if (values[0] == -1) {
@@ -101,7 +98,7 @@ class _DailyScreenState extends State<DailyScreen> {
       return values.contains(currentDay);
     }
 
-    if (unit == DateUnit.year.value) {
+    if (unit == DateUnit.year.toString()) {
       if (plan.repeatValues.length != 2) return false;
       final month = plan.repeatValues[0];
       final day = plan.repeatValues[1];
@@ -111,22 +108,12 @@ class _DailyScreenState extends State<DailyScreen> {
     return false;
   }
 
-  void _refreshItems() async {
-    final today = DateTime.now();
-    final transactions = await context
-        .read<TransactionService>()
-        .getTodayTransactions(today);
-    setState(() {
-      _transactionModels = transactions;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
     context.read<PillProvider>().loadPills();
     context.read<PlanProvider>().loadPlans();
-    _refreshItems();
+    context.read<TransactionProvider>().loadTransactions(null);
   }
 
   @override
@@ -135,14 +122,17 @@ class _DailyScreenState extends State<DailyScreen> {
       appBar: AppBar(
         actions: [
           // NEXT 年视图
-          IconButton(
-            onPressed: () => _refreshItems(),
-            icon: Icon(Icons.calendar_month),
-          ),
+          IconButton(onPressed: () {}, icon: Icon(Icons.calendar_month)),
         ],
       ),
-      body: Consumer2<PlanProvider, PillProvider>(
-        builder: (context, planProvider, pillProvider, child) {
+      body: Consumer3<PlanProvider, PillProvider, TransactionProvider>(
+        builder: (
+          context,
+          planProvider,
+          pillProvider,
+          transactionProvider,
+          child,
+        ) {
           if (planProvider.allPlans.isEmpty) {
             return Center(child: Text("No plans yet."));
           }
@@ -179,10 +169,18 @@ class _DailyScreenState extends State<DailyScreen> {
                         plans[index - 1].startTime == plan.startTime) {
                       plan.startTime = '';
                     }
+                    final pill = pillProvider.pillMap[plan.pillId]!;
+                    final transactions =
+                        transactionProvider.todayTransactions
+                            .where(
+                              (transaction) => transaction.planId == plan.id,
+                            )
+                            .toList();
                     return _buildItem(
                       context: context,
                       plan: plan,
-                      pill: pillProvider.pillMap[plan.pillId]!,
+                      pill: pill,
+                      transactions: transactions,
                       isLast: index == length - 1,
                     );
                   },
@@ -199,11 +197,9 @@ class _DailyScreenState extends State<DailyScreen> {
     required BuildContext context,
     required PlanModel plan,
     required PillModel pill,
+    required List<TransactionModel> transactions,
     bool isLast = false,
   }) {
-    final transactions = _transactionModels.where(
-      (transaction) => transaction.planId == plan.id,
-    );
     final disabled = transactions.isNotEmpty;
     final isDone = transactions.any((t) => t.quantities.isNotEmpty);
     final isChild = plan.startTime.isEmpty;
@@ -332,7 +328,7 @@ class _DailyScreenState extends State<DailyScreen> {
 
   void _onPressed(PlanModel plan) async {
     final quantities = [
-      Quantity(
+      QuantityModel(
         qty: plan.qty,
         unit: plan.unit,
         numerator: plan.numerator,
@@ -357,7 +353,7 @@ class _DailyScreenState extends State<DailyScreen> {
 
   void _onSubmit({
     required PlanModel plan,
-    List<Quantity>? quantities,
+    List<QuantityModel>? quantities,
     int? hour,
     int? minute,
   }) async {
@@ -386,6 +382,5 @@ class _DailyScreenState extends State<DailyScreen> {
         isNegative: true,
       ),
     );
-    _refreshItems();
   }
 }

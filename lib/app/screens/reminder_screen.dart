@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/data/models/plan_model.dart';
+import '../models/plan_model.dart';
 
 class ReminderScreen extends StatefulWidget {
   final PlanModel initialData;

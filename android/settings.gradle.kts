@@ -13,6 +13,13 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven { url=uri("https://maven.aliyun.com/repository/google") }
+        maven { url=uri("https://maven.aliyun.com/repository/jcenter") }
+        maven { url=uri("https://maven.aliyun.com/nexus/content/groups/public") }
+        maven { url=uri("https://storage.googleapis.com/download.flutter.io") }
+        maven { url=uri("https://jitpack.io") }
+        maven { url=uri("https://developer.hihonor.com/repo") }
+        maven { url=uri("https://developer.huawei.com/repo") }
     }
 }
 

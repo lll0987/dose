@@ -2,8 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/data/models/pill_model.dart';
-import '../core/data/providers/pill_provider.dart';
+import '../models/pill_model.dart';
+import '../providers/pill_provider.dart';
 import '../widgets/quantity_input.dart';
 
 class PillFormScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _PillFormScreenState extends State<PillFormScreen> {
     initialQty: 0,
     initialUnit: '',
     qty: 0,
-    packSpecs: [Spec(qty: 1, unit: '')],
+    packSpecs: [SpecModel(qty: 1, unit: '')],
   );
 
   final int _specDepth = 5;
@@ -60,7 +60,7 @@ class _PillFormScreenState extends State<PillFormScreen> {
   void _addPackSpec() {
     if (_model.packSpecs.length >= _specDepth) return;
     setState(() {
-      _model.packSpecs.add(Spec(qty: 1, unit: ''));
+      _model.packSpecs.add(SpecModel(qty: 1, unit: ''));
     });
   }
 
@@ -258,9 +258,11 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                   Theme.of(
                                     context,
                                   ).colorScheme.surfaceContainerLow,
-                              initialInteger: _model.initialQty,
-                              initialNumerator: _model.initialNum,
-                              initialDenominator: _model.initialDen,
+                              initialValue: Number(
+                                integer: _model.initialQty,
+                                numerator: _model.initialNum,
+                                denominator: _model.initialDen,
+                              ),
                               onChange:
                                   (v) => setState(() {
                                     _model.initialQty = v.integer;
