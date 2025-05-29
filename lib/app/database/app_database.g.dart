@@ -2645,6 +2645,18 @@ class $TransactionsTable extends Transactions
       'REFERENCES plans (id)',
     ),
   );
+  static const VerificationMeta _calcQtyMeta = const VerificationMeta(
+    'calcQty',
+  );
+  @override
+  late final GeneratedColumn<String> calcQty = GeneratedColumn<String>(
+    'calc_qty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(""),
+  );
   static const VerificationMeta _isNegativeMeta = const VerificationMeta(
     'isNegative',
   );
@@ -2720,6 +2732,7 @@ class $TransactionsTable extends Transactions
     id,
     pillId,
     planId,
+    calcQty,
     isNegative,
     timestamp,
     remark,
@@ -2754,6 +2767,12 @@ class $TransactionsTable extends Transactions
       context.handle(
         _planIdMeta,
         planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
+      );
+    }
+    if (data.containsKey('calc_qty')) {
+      context.handle(
+        _calcQtyMeta,
+        calcQty.isAcceptableOrUnknown(data['calc_qty']!, _calcQtyMeta),
       );
     }
     if (data.containsKey('is_negative')) {
@@ -2823,6 +2842,11 @@ class $TransactionsTable extends Transactions
         DriftSqlType.int,
         data['${effectivePrefix}plan_id'],
       ),
+      calcQty:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}calc_qty'],
+          )!,
       isNegative:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
@@ -2864,6 +2888,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final int id;
   final int pillId;
   final int? planId;
+  final String calcQty;
   final bool isNegative;
   final DateTime timestamp;
   final String? remark;
@@ -2874,6 +2899,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     required this.id,
     required this.pillId,
     this.planId,
+    required this.calcQty,
     required this.isNegative,
     required this.timestamp,
     this.remark,
@@ -2889,6 +2915,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     if (!nullToAbsent || planId != null) {
       map['plan_id'] = Variable<int>(planId);
     }
+    map['calc_qty'] = Variable<String>(calcQty);
     map['is_negative'] = Variable<bool>(isNegative);
     map['timestamp'] = Variable<DateTime>(timestamp);
     if (!nullToAbsent || remark != null) {
@@ -2908,6 +2935,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       pillId: Value(pillId),
       planId:
           planId == null && nullToAbsent ? const Value.absent() : Value(planId),
+      calcQty: Value(calcQty),
       isNegative: Value(isNegative),
       timestamp: Value(timestamp),
       remark:
@@ -2930,6 +2958,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       id: serializer.fromJson<int>(json['id']),
       pillId: serializer.fromJson<int>(json['pillId']),
       planId: serializer.fromJson<int?>(json['planId']),
+      calcQty: serializer.fromJson<String>(json['calcQty']),
       isNegative: serializer.fromJson<bool>(json['isNegative']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
       remark: serializer.fromJson<String?>(json['remark']),
@@ -2945,6 +2974,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'id': serializer.toJson<int>(id),
       'pillId': serializer.toJson<int>(pillId),
       'planId': serializer.toJson<int?>(planId),
+      'calcQty': serializer.toJson<String>(calcQty),
       'isNegative': serializer.toJson<bool>(isNegative),
       'timestamp': serializer.toJson<DateTime>(timestamp),
       'remark': serializer.toJson<String?>(remark),
@@ -2958,6 +2988,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     int? id,
     int? pillId,
     Value<int?> planId = const Value.absent(),
+    String? calcQty,
     bool? isNegative,
     DateTime? timestamp,
     Value<String?> remark = const Value.absent(),
@@ -2968,6 +2999,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     id: id ?? this.id,
     pillId: pillId ?? this.pillId,
     planId: planId.present ? planId.value : this.planId,
+    calcQty: calcQty ?? this.calcQty,
     isNegative: isNegative ?? this.isNegative,
     timestamp: timestamp ?? this.timestamp,
     remark: remark.present ? remark.value : this.remark,
@@ -2980,6 +3012,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       id: data.id.present ? data.id.value : this.id,
       pillId: data.pillId.present ? data.pillId.value : this.pillId,
       planId: data.planId.present ? data.planId.value : this.planId,
+      calcQty: data.calcQty.present ? data.calcQty.value : this.calcQty,
       isNegative:
           data.isNegative.present ? data.isNegative.value : this.isNegative,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
@@ -2996,6 +3029,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('id: $id, ')
           ..write('pillId: $pillId, ')
           ..write('planId: $planId, ')
+          ..write('calcQty: $calcQty, ')
           ..write('isNegative: $isNegative, ')
           ..write('timestamp: $timestamp, ')
           ..write('remark: $remark, ')
@@ -3011,6 +3045,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     id,
     pillId,
     planId,
+    calcQty,
     isNegative,
     timestamp,
     remark,
@@ -3025,6 +3060,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.id == this.id &&
           other.pillId == this.pillId &&
           other.planId == this.planId &&
+          other.calcQty == this.calcQty &&
           other.isNegative == this.isNegative &&
           other.timestamp == this.timestamp &&
           other.remark == this.remark &&
@@ -3037,6 +3073,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> id;
   final Value<int> pillId;
   final Value<int?> planId;
+  final Value<String> calcQty;
   final Value<bool> isNegative;
   final Value<DateTime> timestamp;
   final Value<String?> remark;
@@ -3047,6 +3084,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.id = const Value.absent(),
     this.pillId = const Value.absent(),
     this.planId = const Value.absent(),
+    this.calcQty = const Value.absent(),
     this.isNegative = const Value.absent(),
     this.timestamp = const Value.absent(),
     this.remark = const Value.absent(),
@@ -3058,6 +3096,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.id = const Value.absent(),
     required int pillId,
     this.planId = const Value.absent(),
+    this.calcQty = const Value.absent(),
     required bool isNegative,
     required DateTime timestamp,
     this.remark = const Value.absent(),
@@ -3073,6 +3112,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<int>? id,
     Expression<int>? pillId,
     Expression<int>? planId,
+    Expression<String>? calcQty,
     Expression<bool>? isNegative,
     Expression<DateTime>? timestamp,
     Expression<String>? remark,
@@ -3084,6 +3124,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (id != null) 'id': id,
       if (pillId != null) 'pill_id': pillId,
       if (planId != null) 'plan_id': planId,
+      if (calcQty != null) 'calc_qty': calcQty,
       if (isNegative != null) 'is_negative': isNegative,
       if (timestamp != null) 'timestamp': timestamp,
       if (remark != null) 'remark': remark,
@@ -3097,6 +3138,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Value<int>? id,
     Value<int>? pillId,
     Value<int?>? planId,
+    Value<String>? calcQty,
     Value<bool>? isNegative,
     Value<DateTime>? timestamp,
     Value<String?>? remark,
@@ -3108,6 +3150,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       id: id ?? this.id,
       pillId: pillId ?? this.pillId,
       planId: planId ?? this.planId,
+      calcQty: calcQty ?? this.calcQty,
       isNegative: isNegative ?? this.isNegative,
       timestamp: timestamp ?? this.timestamp,
       remark: remark ?? this.remark,
@@ -3128,6 +3171,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     }
     if (planId.present) {
       map['plan_id'] = Variable<int>(planId.value);
+    }
+    if (calcQty.present) {
+      map['calc_qty'] = Variable<String>(calcQty.value);
     }
     if (isNegative.present) {
       map['is_negative'] = Variable<bool>(isNegative.value);
@@ -3156,6 +3202,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('id: $id, ')
           ..write('pillId: $pillId, ')
           ..write('planId: $planId, ')
+          ..write('calcQty: $calcQty, ')
           ..write('isNegative: $isNegative, ')
           ..write('timestamp: $timestamp, ')
           ..write('remark: $remark, ')
@@ -5664,6 +5711,7 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<int> id,
       required int pillId,
       Value<int?> planId,
+      Value<String> calcQty,
       required bool isNegative,
       required DateTime timestamp,
       Value<String?> remark,
@@ -5676,6 +5724,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int> pillId,
       Value<int?> planId,
+      Value<String> calcQty,
       Value<bool> isNegative,
       Value<DateTime> timestamp,
       Value<String?> remark,
@@ -5757,6 +5806,11 @@ class $$TransactionsTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calcQty => $composableBuilder(
+    column: $table.calcQty,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5876,6 +5930,11 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get calcQty => $composableBuilder(
+    column: $table.calcQty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isNegative => $composableBuilder(
     column: $table.isNegative,
     builder: (column) => ColumnOrderings(column),
@@ -5964,6 +6023,9 @@ class $$TransactionsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get calcQty =>
+      $composableBuilder(column: $table.calcQty, builder: (column) => column);
 
   GeneratedColumn<bool> get isNegative => $composableBuilder(
     column: $table.isNegative,
@@ -6093,6 +6155,7 @@ class $$TransactionsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> pillId = const Value.absent(),
                 Value<int?> planId = const Value.absent(),
+                Value<String> calcQty = const Value.absent(),
                 Value<bool> isNegative = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String?> remark = const Value.absent(),
@@ -6103,6 +6166,7 @@ class $$TransactionsTableTableManager
                 id: id,
                 pillId: pillId,
                 planId: planId,
+                calcQty: calcQty,
                 isNegative: isNegative,
                 timestamp: timestamp,
                 remark: remark,
@@ -6115,6 +6179,7 @@ class $$TransactionsTableTableManager
                 Value<int> id = const Value.absent(),
                 required int pillId,
                 Value<int?> planId = const Value.absent(),
+                Value<String> calcQty = const Value.absent(),
                 required bool isNegative,
                 required DateTime timestamp,
                 Value<String?> remark = const Value.absent(),
@@ -6125,6 +6190,7 @@ class $$TransactionsTableTableManager
                 id: id,
                 pillId: pillId,
                 planId: planId,
+                calcQty: calcQty,
                 isNegative: isNegative,
                 timestamp: timestamp,
                 remark: remark,

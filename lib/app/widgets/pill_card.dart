@@ -6,38 +6,71 @@ import 'pill_image.dart';
 class PillCard extends StatelessWidget {
   final PillModel pill;
   final Widget? trailing;
-  final Function? onTap;
+  final Widget? child;
+  final VoidCallback? onTap;
+  final double? imgSize;
 
-  const PillCard({super.key, required this.pill, this.trailing, this.onTap});
+  const PillCard({
+    super.key,
+    required this.pill,
+    this.trailing,
+    this.child,
+    this.onTap,
+    this.imgSize,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: ListTile(
-          onTap: () => onTap?.call(),
-          title: Row(
-            spacing: 6,
+    return InkWell(
+      onTap: onTap == null ? () {} : () => onTap!(),
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Column(
+            spacing: 8,
             children: [
-              Container(
-                width: 4,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: pill.getThemeColor(),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+              Row(
+                spacing: 16,
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  PillImage(pill: pill, size: imgSize ?? 48),
+                  Expanded(
+                    child: Text(
+                      pill.name,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (child != trailing) trailing!,
+                ],
               ),
-              Text(pill.name, style: TextStyle(fontWeight: FontWeight.bold)),
+              _buildSubRow(context, pill.getQtyText()),
+              // _buildSubRow(context, '10次'),
+              if (child != null) child!,
             ],
           ),
-          subtitle: Text(pill.getQtyText()),
-          leading: PillImage(imagePath: pill.imagePath),
-          trailing: trailing,
         ),
       ),
+    );
+  }
+
+  Widget _buildSubRow(BuildContext context, String text) {
+    return Row(
+      spacing: 2,
+      children: [
+        Icon(
+          Icons.numbers,
+          size: 14,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        Text(text, style: TextStyle(fontSize: 14)),
+      ],
     );
   }
 }

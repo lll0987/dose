@@ -7,6 +7,7 @@ class Transactions extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get pillId => integer().references(Pills, #id)();
   IntColumn get planId => integer().nullable().references(Plans, #id)();
+  TextColumn get calcQty => text().withDefault(const Constant(""))();
   BoolColumn get isNegative => boolean()();
   DateTimeColumn get timestamp => dateTime()();
   TextColumn get remark => text().nullable()();

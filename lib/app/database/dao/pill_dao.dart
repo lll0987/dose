@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../models/pill_model.dart';
-import '../../models/transaction_model.dart';
+import '../../utils/result.dart';
 import '../app_database.dart';
 import '../tables/pills.dart';
 import '../tables/specs.dart';
@@ -13,8 +13,8 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
   PillDao(super.db);
 
   Future<bool> isEmpty() async {
-    final res = await db.select(pills).getSingleOrNull();
-    return res == null;
+    final result = await (select(pills)..limit(1)).getSingleOrNull();
+    return result == null;
   }
 
   Future<List<SpecModel>> getAllSpecs(int pillId) async {
@@ -64,6 +64,10 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
     return (delete(pills)..where((tbl) => tbl.id.equals(id))).go();
   }
 
+  Future<List<Pill>> getPills(List<int> ids) async {
+    return await (select(pills)..where((tbl) => tbl.id.isIn(ids))).get();
+  }
+
   Future<List<PillModel>> getAllPills() async {
     final allPills = await all();
     final List<PillModel> result = [];
@@ -81,10 +85,19 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
     return PillModel.fromPill(pill, specList);
   }
 
-  Future<int> addPill(PillModel pill) async {
+  Future<Result<int>> addPill(PillModel pill) async {
+    final i = pill.packSpecs.indexWhere(
+      (p) => p.unit == pill.initialQuantity.unit,
+    );
+    if (i == -1) return Result.failure('初始数量单位应在包装规格列表中');
+    final total = pill.initialQuantity.qty * pill.getTotalQtyMultiple(i);
+    pill.quantity.qty = total;
+    pill.quantity.fraction.numerator = pill.initialQuantity.fraction.numerator;
+    pill.quantity.fraction.denominator =
+        pill.initialQuantity.fraction.denominator;
     final id = await add1(pill.toCompanion());
     await insertSpecs(id, pill.packSpecs);
-    return id;
+    return Result.success(id);
   }
 
   Future<bool> updatePill(PillModel pill) async {
@@ -98,104 +111,5 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
 
   Future<void> deletePill(int id) async {
     await delete1(id);
-  }
-
-  Future<bool> updatePillQty(TransactionModel transaction) async {
-    final pill = await firstPill(transaction.pillId);
-
-    // 计算整数部分总和
-    int total = transaction.quantities.fold(0, (sum, q) {
-      final index = pill.packSpecs.indexWhere((p) => p.unit == q.unit);
-      return sum + q.qty * pill.getTotalQtyMultiple(index);
-    });
-
-    // 计算分数部分总和
-    final (int sumNum, int sumDenom) = _calculateTotalFraction(transaction);
-
-    // 处理分数部分的整数进位
-    int fractionInt = sumNum ~/ sumDenom;
-    int remainingNum = sumNum % sumDenom;
-
-    // 总整数变化量
-    int totalChange = total + fractionInt;
-    int sign = transaction.isNegative ? -1 : 1;
-    int totalChangeSigned = totalChange * sign;
-
-    // 更新pill的分数部分
-    final (int newNum, int newDenom) = _updateFraction(
-      pill.numerator ?? 0,
-      pill.denominator ?? 1,
-      remainingNum * sign,
-      sumDenom,
-    );
-
-    // 处理分数进位
-    int fractionIntFromFraction = newNum ~/ newDenom;
-    int remainingNumFinal = newNum % newDenom;
-
-    // 更新pill的qty
-    pill.qty += totalChangeSigned + fractionIntFromFraction;
-
-    // 更新分数部分
-    if (remainingNumFinal == 0) {
-      pill.numerator = null;
-      pill.denominator = null;
-    } else {
-      pill.numerator = remainingNumFinal;
-      pill.denominator = newDenom;
-    }
-
-    return await update1(pill.toPill()!);
-  }
-
-  (int, int) _calculateTotalFraction(TransactionModel transaction) {
-    int sumNum = 0;
-    int sumDenom = 1;
-
-    for (var item in transaction.quantities) {
-      if (item.numerator == null ||
-          item.denominator == null ||
-          item.denominator == 0) {
-        continue;
-      }
-
-      (sumNum, sumDenom) = _addFractions(
-        sumNum,
-        sumDenom,
-        item.numerator!,
-        item.denominator!,
-      );
-    }
-
-    return (sumNum, sumDenom);
-  }
-
-  (int, int) _addFractions(int aNum, int aDenom, int bNum, int bDenom) {
-    int lcm = (aDenom * bDenom) ~/ _gcd(aDenom, bDenom);
-    int newNum = aNum * (lcm ~/ aDenom) + bNum * (lcm ~/ bDenom);
-    int newDenom = lcm;
-    int gcdValue = _gcd(newNum, newDenom);
-    return (newNum ~/ gcdValue, newDenom ~/ gcdValue);
-  }
-
-  (int, int) _updateFraction(
-    int existingNum,
-    int existingDenom,
-    int changeNum,
-    int changeDenom,
-  ) {
-    int newNum = existingNum * changeDenom + changeNum * existingDenom;
-    int newDenom = existingDenom * changeDenom;
-    int gcdValue = _gcd(newNum, newDenom);
-    return (newNum ~/ gcdValue, newDenom ~/ gcdValue);
-  }
-
-  int _gcd(int a, int b) {
-    while (b != 0) {
-      int temp = b;
-      b = a % b;
-      a = temp;
-    }
-    return a;
   }
 }

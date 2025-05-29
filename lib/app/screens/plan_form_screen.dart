@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../database/repository/pill_repository.dart';
 import '../models/pill_model.dart';
 import '../models/plan_model.dart';
+import '../models/quantity_model.dart';
 import '../providers/plan_provider.dart';
+import '../providers/theme_provider.dart';
 import '../utils/datetime.dart';
 import '../widgets/list_wheel_picker.dart';
 import '../widgets/quantity_input.dart';
+import 'cycle_screen.dart';
 import 'reminder_screen.dart';
 import 'repeat_screen.dart';
 
@@ -30,8 +34,11 @@ class _PlanFormState extends State<PlanFormScreen> {
   PlanModel _model = PlanModel(
     pillId: 0,
     name: '',
-    qty: 1,
-    unit: '',
+    quantity: QuantityModel(
+      qty: 1,
+      unit: '',
+      fraction: FractionModel(null, null),
+    ),
     startDate: getFormatDate(DateTime.now()),
     endDate: '',
     startTime: '',
@@ -40,38 +47,22 @@ class _PlanFormState extends State<PlanFormScreen> {
     cycles: [],
   );
 
-  TimeOfDay _startTime = TimeOfDay(hour: 0, minute: 0);
+  TimeOfDay _startTime = TimeOfDay(hour: 8, minute: 0);
 
-  final List<WheelOption> _cycleUnits = [
-    WheelOption(
-      value: DateUnit.day.toString(),
-      label: DateUnit.day.displayName,
-    ),
-    WheelOption(
-      value: DateUnit.week.toString(),
-      label: DateUnit.week.displayName,
-    ),
-    WheelOption(
-      value: DateUnit.month.toString(),
-      label: DateUnit.month.displayName,
-    ),
-    WheelOption(
-      value: DateUnit.year.toString(),
-      label: DateUnit.year.displayName,
-    ),
-  ];
   bool _isCycle = false;
-  int _cycleValue = 1;
-  String _cycleUnit = 'day';
 
   int _durationValue = 1;
   String _durationUnit = 'hour';
 
   bool _isUpdate = false;
 
+  bool _unitDisabled = false;
+  String? _unitHintText;
+
   @override
   void initState() {
     super.initState();
+    _model.startTime = getFormatTime(_startTime);
     if (widget.plan != null) {
       final times = widget.plan!.startTime.split(':');
       setState(() {
@@ -82,10 +73,6 @@ class _PlanFormState extends State<PlanFormScreen> {
           minute: int.parse(times[1]),
         );
         _isCycle = _model.cycles.isNotEmpty;
-        if (_isCycle) {
-          _cycleValue = _model.cycles.first.value;
-          _cycleUnit = _model.cycles.first.unit;
-        }
         if (_model.duration != null) _durationValue = _model.duration!;
         if (_model.durationUnit != null) _durationUnit = _model.durationUnit!;
       });
@@ -96,7 +83,13 @@ class _PlanFormState extends State<PlanFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isUpdate ? '编辑计划' : '新建计划')),
+      appBar: AppBar(
+        title: Text(
+          _isUpdate
+              ? AppLocalizations.of(context)!.updatePlan
+              : AppLocalizations.of(context)!.addPlan,
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -111,10 +104,15 @@ class _PlanFormState extends State<PlanFormScreen> {
                       _buildPills(),
                       const SizedBox(height: 8),
                       TextFormField(
-                        decoration: InputDecoration(labelText: '计划标题'),
+                        decoration: InputDecoration(
+                          labelText:
+                              AppLocalizations.of(context)!.planForm_name,
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '请输入计划标题';
+                            return AppLocalizations.of(
+                              context,
+                            )!.validToken_planName_required;
                           }
                           return null;
                         },
@@ -122,31 +120,45 @@ class _PlanFormState extends State<PlanFormScreen> {
                         onChanged: (v) => setState(() => _model.name = v),
                       ),
                       const SizedBox(height: 16),
+
                       Row(
                         spacing: 16,
                         children: [
                           Expanded(
                             child: QuantityInput(
-                              labelText: '计划用药数量',
-                              initialValue: Number(
-                                integer: _model.qty,
-                                numerator: _model.numerator,
-                                denominator: _model.denominator,
-                              ),
+                              labelText:
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.planForm_quantity,
+                              initialValue: _model.quantity,
                               onChange:
                                   (v) => setState(() {
-                                    _model.qty = v.integer;
-                                    _model.numerator = v.numerator;
-                                    _model.denominator = v.denominator;
+                                    _model.quantity.qty = v.qty;
+                                    _model.quantity.fraction = v.fraction;
+                                    _unitDisabled = v.fraction.isNotEmpty;
+                                    if (_unitDisabled) {
+                                      _unitHintText =
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.quantityUnitWarning;
+                                      _model.quantity.unit = _units.last;
+                                    } else {
+                                      _unitHintText = null;
+                                    }
                                   }),
                             ),
                           ),
                           Expanded(
-                            child: DropdownButtonFormField(
-                              decoration: InputDecoration(labelText: '药物单位'),
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText:
+                                    AppLocalizations.of(context)!.planForm_unit,
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return '请选择药物单位';
+                                  return AppLocalizations.of(
+                                    context,
+                                  )!.validToken_planUnit_required;
                                 }
                                 return null;
                               },
@@ -159,17 +171,28 @@ class _PlanFormState extends State<PlanFormScreen> {
                                         ),
                                       )
                                       .toList(),
-                              value: _model.unit,
+                              value: _model.quantity.unit,
                               onChanged:
-                                  (v) => setState(() => _model.unit = v!),
+                                  _unitDisabled
+                                      ? null
+                                      : (v) => setState(
+                                        () => _model.quantity.unit = v!,
+                                      ),
                             ),
                           ),
                         ],
                       ),
+                      if (_unitHintText != null)
+                        Text(
+                          _unitHintText!,
+                          style: TextStyle(
+                            color: context.read<ThemeProvider>().hintColor,
+                          ),
+                        ),
                       const SizedBox(height: 16),
-                      _buildTimeSection(),
-                      const SizedBox(height: 8),
                       _buildRepeatSection(),
+                      const SizedBox(height: 8),
+                      _buildTimeSection(),
                       const SizedBox(height: 8),
                       _buildReminderSection(),
                       const SizedBox(height: 8),
@@ -199,7 +222,7 @@ class _PlanFormState extends State<PlanFormScreen> {
                       textStyle: TextStyle(fontSize: 16),
                     ),
                     onPressed: () => _onSubmit(),
-                    child: const Text('保存'),
+                    child: Text(AppLocalizations.of(context)!.save),
                   ),
                 ),
               ],
@@ -211,87 +234,94 @@ class _PlanFormState extends State<PlanFormScreen> {
   }
 
   Widget _buildPills() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(
-              children: [
-                ..._pills.map((tab) {
-                  final isSelected = tab.id == _model.pillId;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap:
-                          () => setState(() {
-                            _reloadPill(tab.id!);
-                          }),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutQuint,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 0,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              isSelected
-                                  ? Theme.of(
-                                    context,
-                                  ).colorScheme.secondaryContainer
-                                  : Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainer,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                color: tab.getThemeColor(),
-                                shape: BoxShape.circle,
-                              ),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Row(
+                  children: [
+                    ..._pills.map((tab) {
+                      final isSelected = tab.id == _model.pillId;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap:
+                              () => setState(() {
+                                _reloadPill(tab.id!);
+                              }),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutQuint,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 0,
+                              vertical: 12,
                             ),
-                            const SizedBox(width: 8),
-                            AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOutQuint,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight:
-                                    isSelected
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                color:
-                                    isSelected
-                                        ? Theme.of(
-                                          context,
-                                        ).colorScheme.onSurface
-                                        : Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                              ),
-                              child: Text(tab.name),
+                            decoration: BoxDecoration(
+                              color:
+                                  isSelected
+                                      ? Theme.of(
+                                        context,
+                                      ).colorScheme.secondaryContainer
+                                      : Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainer,
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: themeProvider.getColor(
+                                      tab.themeValue,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                AnimatedDefaultTextStyle(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOutQuint,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight:
+                                        isSelected
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                    color:
+                                        isSelected
+                                            ? Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface
+                                            : Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                  ),
+                                  child: Text(tab.name),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                }),
-              ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-        if (_pillList.length > 3)
-          IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
-      ],
+            // TODO 更多药物选择列表
+            if (_pillList.length > 3)
+              IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+          ],
+        );
+      },
     );
   }
 
@@ -314,40 +344,48 @@ class _PlanFormState extends State<PlanFormScreen> {
     return Card(
       child: Column(
         children: [
-          _buildListTile('计划用药时间', _model.startTime, () async {
-            final newTime = await showTimePicker(
-              context: context,
-              initialTime: _startTime,
-              initialEntryMode: TimePickerEntryMode.input,
-            );
-            if (newTime != null) {
-              setState(() {
-                _startTime = newTime;
-                _model.startTime = getFormatTime(newTime);
-              });
-            }
-          }),
+          _buildListTile(
+            AppLocalizations.of(context)!.planForm_startTime,
+            _model.startTime,
+            () async {
+              final newTime = await showTimePicker(
+                context: context,
+                initialTime: _startTime,
+                initialEntryMode: TimePickerEntryMode.input,
+              );
+              if (newTime != null) {
+                setState(() {
+                  _startTime = newTime;
+                  _model.startTime = getFormatTime(newTime);
+                });
+              }
+            },
+          ),
           ListTile(
-            title: Text('实际用药时间'),
+            title: Text(AppLocalizations.of(context)!.planForm_isExactTime),
             trailing: Switch(
               value: _model.isExactTime,
               onChanged: (v) => setState(() => _model.isExactTime = v),
             ),
           ),
           if (_model.isExactTime)
-            _buildListTile('药效时长', _model.getDurationText(), () async {
-              _durationValue = _model.duration ?? 1;
-              _durationUnit = _model.durationUnit ?? 'hour';
-              final result = await showDialog<bool>(
-                context: context,
-                builder: (context) => _buildDurationDialog(),
-              );
-              if (result == null || result == false) return;
-              setState(() {
-                _model.duration = _durationValue;
-                _model.durationUnit = _durationUnit;
-              });
-            }),
+            _buildListTile(
+              AppLocalizations.of(context)!.planForm_duration,
+              _model.getDurationText(context),
+              () async {
+                _durationValue = _model.duration ?? 1;
+                _durationUnit = _model.durationUnit ?? 'hour';
+                final result = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => _buildDurationDialog(),
+                );
+                if (result == null || result == false) return;
+                setState(() {
+                  _model.duration = _durationValue;
+                  _model.durationUnit = _durationUnit;
+                });
+              },
+            ),
         ],
       ),
     );
@@ -355,7 +393,7 @@ class _PlanFormState extends State<PlanFormScreen> {
 
   AlertDialog _buildDurationDialog() {
     return AlertDialog(
-      title: Text('设置药效时长'),
+      title: Text(AppLocalizations.of(context)!.planForm_durationTitle),
       content: SizedBox(
         height: 200,
         child: Row(
@@ -380,7 +418,10 @@ class _PlanFormState extends State<PlanFormScreen> {
                   // MEMO 药效时长暂时仅支持小时单位
                   options: [
                     // WheelOption(label: '分钟', value: 'minute'),
-                    WheelOption(label: '小时', value: 'hour'),
+                    WheelOption(
+                      label: AppLocalizations.of(context)!.hour,
+                      value: 'hour',
+                    ),
                   ],
                   fontSize: 24,
                   initialValue: _durationUnit,
@@ -394,17 +435,17 @@ class _PlanFormState extends State<PlanFormScreen> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
-          child: const Text('确定'),
+          child: Text(AppLocalizations.of(context)!.confirm),
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
     );
   }
 
-  void toRepeatScreen() async {
+  void _toRepeatScreen() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => RepeatScreen(initialData: _model)),
@@ -423,14 +464,54 @@ class _PlanFormState extends State<PlanFormScreen> {
     return Card(
       child: Column(
         children: [
-          _buildListTile('重复', _model.getRepeatText(), toRepeatScreen),
-          _buildListTile('结束重复', _model.getRepeatEndText(), toRepeatScreen),
+          _buildListTile(
+            AppLocalizations.of(context)!.repeatSetting,
+            _model.getRepeatText(context),
+            _toRepeatScreen,
+          ),
+          _buildListTile(
+            AppLocalizations.of(context)!.planForm_startDate,
+            _model.startDate,
+            () async {
+              final newDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.parse(_model.startDate),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              );
+              if (newDate != null) {
+                setState(() {
+                  _model.startDate = getFormatDate(newDate);
+                });
+              }
+            },
+          ),
+          _buildListTile(
+            AppLocalizations.of(context)!.planForm_endDate,
+            _model.endDate,
+            () async {
+              final newDate = await showDatePicker(
+                context: context,
+                initialDate:
+                    _model.endDate.isEmpty
+                        ? DateTime.now()
+                        : DateTime.parse(_model.endDate),
+                firstDate: DateTime.parse(_model.startDate),
+                lastDate: DateTime(2100),
+              );
+              if (newDate != null) {
+                setState(() {
+                  _model.endDate = getFormatDate(newDate);
+                });
+              }
+            },
+          ),
         ],
       ),
     );
   }
 
-  void toReminderScreen() async {
+  void _toReminderScreen() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => ReminderScreen(initialData: _model)),
@@ -448,10 +529,16 @@ class _PlanFormState extends State<PlanFormScreen> {
     return Card(
       child: Column(
         children: [
-          _buildListTile('提醒', _model.getReminderText(), toReminderScreen),
+          _buildListTile(
+            AppLocalizations.of(context)!.reminderSetting,
+            _model.getReminderText(context),
+            _toReminderScreen,
+          ),
           if (_model.reminderValue != null)
             ListTile(
-              title: const Text('提醒方式'),
+              title: Text(
+                AppLocalizations.of(context)!.planForm_reminderMethod,
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -462,7 +549,10 @@ class _PlanFormState extends State<PlanFormScreen> {
                       setState(() => _model.reminderMethod = v!);
                     },
                   ),
-                  const Text('通知', style: TextStyle(fontSize: 14)),
+                  Text(
+                    AppLocalizations.of(context)!.reminderMethod_notify,
+                    style: TextStyle(fontSize: 14),
+                  ),
                   const SizedBox(width: 16),
                   Radio(
                     value: 'clock',
@@ -471,7 +561,10 @@ class _PlanFormState extends State<PlanFormScreen> {
                       setState(() => _model.reminderMethod = v!);
                     },
                   ),
-                  const Text('闹钟', style: TextStyle(fontSize: 14)),
+                  Text(
+                    AppLocalizations.of(context)!.reminderMethod_clock,
+                    style: TextStyle(fontSize: 14),
+                  ),
                 ],
               ),
             ),
@@ -480,126 +573,58 @@ class _PlanFormState extends State<PlanFormScreen> {
     );
   }
 
+  void _toCycleScreen() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CycleScreen(initialData: _model)),
+    );
+    if (result is PlanModel) {
+      setState(() {
+        _model.reminderValue = result.reminderValue;
+        _model.reminderUnit = result.reminderUnit;
+        _model.reminderMethod = result.reminderMethod;
+      });
+    }
+  }
+
   Widget _buildCycleSection() {
     return Card(
       child: Column(
         children: [
           ListTile(
-            title: Text('停药周期'),
+            title: Text(AppLocalizations.of(context)!.isPlanCycle),
             trailing: Switch(
               value: _isCycle,
-              onChanged: (v) => setState(() => _isCycle = v),
+              onChanged:
+                  (v) => setState(() {
+                    _isCycle = v;
+                    if (!v) _model.cycles = [];
+                  }),
             ),
           ),
-          // NEXT 重构周期代码，支持完全自定义
           if (_isCycle)
             Column(
               children:
                   _model.cycles.isEmpty
                       ? [
-                        _buildListTile('用药', '', () => _showCycleDialog(false)),
-                        _buildListTile('停药', '', () => _showCycleDialog(true)),
+                        _buildListTile(
+                          AppLocalizations.of(context)!.noInterruptionNeeded,
+                          '',
+                          () => _toCycleScreen(),
+                        ),
                       ]
                       : _model.cycles
                           .map(
                             (cycle) => _buildListTile(
-                              cycle.getNameText(),
-                              cycle.getCycleText(),
-                              () => _showCycleDialog(cycle.isStop),
+                              cycle.getNameText(context),
+                              cycle.getCycleText(context),
+                              () => _toCycleScreen(),
                             ),
                           )
                           .toList(),
             ),
         ],
       ),
-    );
-  }
-
-  void _showCycleDialog(bool isStop) async {
-    final cycle = _model.cycles.firstWhere(
-      (c) => c.isStop == isStop,
-      orElse: () => CycleModel(value: 1, unit: 'day', isStop: isStop),
-    );
-    _cycleValue = cycle.value;
-    _cycleUnit = cycle.unit;
-    final title = isStop ? '设置停药周期' : '设置用药周期';
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => _buildCycleDialog(title),
-    );
-    if (result == null || result == false) return;
-    // 使用 indexWhere 查找符合条件的索引
-    final index = _model.cycles.indexWhere((c) => c.isStop == isStop);
-    setState(() {
-      if (index == -1) {
-        // 未找到时添加新元素
-        _model.cycles.add(
-          CycleModel(
-            value: isStop ? 1 : _cycleValue,
-            unit: _cycleUnit,
-            isStop: false,
-          ),
-        );
-        _model.cycles.add(
-          CycleModel(
-            value: isStop ? _cycleValue : 1,
-            unit: _cycleUnit,
-            isStop: true,
-          ),
-        );
-      } else {
-        // 找到时更新现有元素
-        _model.cycles[index]
-          ..value = _cycleValue
-          ..unit = _cycleUnit;
-      }
-    });
-  }
-
-  AlertDialog _buildCycleDialog(String title) {
-    return AlertDialog(
-      title: Text(title),
-      content: SizedBox(
-        height: 200,
-        child: Row(
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 200,
-                child: ListWheelPicker(
-                  min: 1,
-                  max: 99,
-                  fontSize: 24,
-                  initialValue: _cycleValue,
-                  onChanged: (v) => setState(() => _cycleValue = v),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: SizedBox(
-                height: 200,
-                child: ListWheelPicker(
-                  options: _cycleUnits,
-                  fontSize: 24,
-                  initialValue: _cycleUnit,
-                  onChanged: (v) => setState(() => _cycleUnit = v),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('取消'),
-        ),
-        TextButton(
-          child: const Text('确定'),
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
-      ],
     );
   }
 
@@ -611,7 +636,7 @@ class _PlanFormState extends State<PlanFormScreen> {
             .packSpecs
             .map((e) => e.unit)
             .toList();
-    _model.unit = _units.last;
+    _model.quantity.unit = _units.last;
   }
 
   Future<void> _getPills() async {
@@ -619,9 +644,9 @@ class _PlanFormState extends State<PlanFormScreen> {
     setState(() {
       _pillList = list;
       _pills = list.length > 3 ? list.sublist(0, 3) : list;
-      if (_model.pillId == 0) {
-        _reloadPill(list.first.id!);
-      }
+      int pillId = _model.pillId;
+      if (_model.pillId == 0) pillId = list.first.id!;
+      _reloadPill(pillId);
     });
   }
 
@@ -629,8 +654,10 @@ class _PlanFormState extends State<PlanFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_model.startTime.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('请设置计划用药时间'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.validToken_planStartTime_required,
+          ),
           duration: Duration(seconds: 1),
         ),
       );

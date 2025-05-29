@@ -1,10 +1,15 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../models/pill_model.dart';
 import '../models/plan_model.dart';
+import '../models/quantity_model.dart';
 import '../models/transaction_model.dart';
+import '../providers/datetime_provider.dart';
 import '../providers/pill_provider.dart';
 import '../providers/plan_provider.dart';
 import '../providers/transaction_provider.dart';
@@ -19,177 +24,166 @@ class DailyScreen extends StatefulWidget {
 }
 
 class _DailyScreenState extends State<DailyScreen> {
-  int getUnitDifference(DateTime startDate, DateTime today, String unit) {
-    final days = today.difference(startDate).inDays;
-    if (unit == DateUnit.day.toString()) return days;
-    if (unit == DateUnit.week.toString()) return days ~/ 7;
-    if (unit == DateUnit.month.toString()) {
-      return (today.year - startDate.year) * 12 +
-          (today.month - startDate.month);
-    }
-    if (unit == DateUnit.year.toString()) return today.year - startDate.year;
-    return 0;
-  }
-
-  bool isPlanStop(List<CycleModel> cycles) {
-    if (cycles.isEmpty) return false;
-    // final firstUnit = cycles[0].unit;
-    // for (var cycle in cycles) {
-    //   if (cycle.unit != firstUnit) {
-    //     throw ArgumentError('所有周期的单位必须一致，发现不一致的单位：$firstUnit vs ${cycle.unit}');
-    //   }
-    // }
-    // final totalUnits = getUnitDifference(startDay, today, cycles[0].unit);
-    // final totalCycleLength = cycles.map((c) => c.value).reduce((a, b) => a + b);
-    // if (totalCycleLength > 0) {
-    //   final currentPosition = totalUnits % totalCycleLength;
-    //   int cumulative = 0;
-    //   for (var cycle in cycles) {
-    //     if (currentPosition >= cumulative &&
-    //         currentPosition < cumulative + cycle.value &&
-    //         cycle.isStop) {
-    //       return false;
-    //     }
-    //     cumulative += cycle.value;
-    //   }
-    // }
-    return false;
-  }
-
-  bool isPlanActive(PlanModel plan, DateTime now) {
-    if (plan.isEnabled == false) return false;
-    if (plan.repeatValues.isEmpty) return false;
-    if (plan.endDate.isNotEmpty) {
-      final endDate = DateTime.parse(plan.endDate).add(Duration(days: 1));
-      if (now.isAfter(endDate)) return false;
-    }
-
-    final unit = plan.repeatUnit;
-    final today = DateTime(now.year, now.month, now.day);
-    final startDate = plan.startDate.split('-');
-    final startDay = DateTime(
-      int.parse(startDate[0]),
-      int.parse(startDate[1]),
-      int.parse(startDate[2]),
-    );
-
-    final isStop = isPlanStop(plan.cycles);
-    if (isStop) return false;
-
-    if (unit == DateUnit.day.toString()) {
-      final val = plan.repeatValues[0];
-      if (val < 2) return true;
-      final daysDiff = today.difference(startDay).inDays;
-      return daysDiff % val == 0;
-    }
-
-    if (unit == DateUnit.week.toString()) {
-      final currentWeekday = now.weekday; // Monday = 1 ... Sunday = 7
-      return plan.repeatValues.contains(currentWeekday);
-    }
-
-    if (unit == DateUnit.month.toString()) {
-      final currentDay = now.day;
-      final values = plan.repeatValues;
-      if (values[0] == -1) {
-        final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
-        return currentDay == lastDayOfMonth;
-      }
-      return values.contains(currentDay);
-    }
-
-    if (unit == DateUnit.year.toString()) {
-      if (plan.repeatValues.length != 2) return false;
-      final month = plan.repeatValues[0];
-      final day = plan.repeatValues[1];
-      return today.month == month && today.day == day;
-    }
-
-    return false;
-  }
-
   @override
   void initState() {
     super.initState();
     context.read<PillProvider>().loadPills();
     context.read<PlanProvider>().loadPlans();
-    context.read<TransactionProvider>().loadTransactions(null);
+    context.read<TransactionProvider>().loadTransactions();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          // NEXT 年视图
-          IconButton(onPressed: () {}, icon: Icon(Icons.calendar_month)),
-        ],
-      ),
-      body: Consumer3<PlanProvider, PillProvider, TransactionProvider>(
-        builder: (
-          context,
-          planProvider,
-          pillProvider,
-          transactionProvider,
-          child,
-        ) {
-          if (planProvider.allPlans.isEmpty) {
-            return Center(child: Text("No plans yet."));
-          }
-          final today = DateTime.now();
-          final plans =
-              planProvider.allPlans
-                  .where((plan) => isPlanActive(plan, today))
-                  .sorted((a, b) {
-                    // 将 HH:mm 转换为总分钟数，便于比较
-                    int toMinutes(String time) {
-                      final parts = time.split(':');
-                      final hour = int.parse(parts[0]);
-                      final minute = int.parse(parts[1]);
-                      return hour * 60 + minute;
-                    }
+    return Consumer4<
+      DatetimeProvider,
+      PlanProvider,
+      PillProvider,
+      TransactionProvider
+    >(
+      builder: (
+        context,
+        datetimeProvider,
+        planProvider,
+        pillProvider,
+        transactionProvider,
+        child,
+      ) {
+        if (planProvider.allPlans.isEmpty) {
+          return Center(
+            child: Text(AppLocalizations.of(context)!.empty_todayPlanList),
+          );
+        }
 
-                    final aMin = toMinutes(a.startTime);
-                    final bMin = toMinutes(b.startTime);
-                    return aMin.compareTo(bMin); // 升序排列
-                    // 若需要降序，则改为 bMin.compareTo(aMin)
-                  })
-                  .toList();
-          final length = plans.length;
-          return Column(
-            children: [
-              // NEXT 首页UI，增加日期等信息展示
-              // Text(DateTime.now().toString().split(' ').first),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: length,
-                  itemBuilder: (context, index) {
-                    final plan = plans[index];
-                    if (index > 0 &&
-                        plans[index - 1].startTime == plan.startTime) {
-                      plan.startTime = '';
-                    }
-                    final pill = pillProvider.pillMap[plan.pillId]!;
-                    final transactions =
-                        transactionProvider.todayTransactions
-                            .where(
-                              (transaction) => transaction.planId == plan.id,
-                            )
-                            .toList();
-                    return _buildItem(
-                      context: context,
-                      plan: plan,
-                      pill: pill,
-                      transactions: transactions,
-                      isLast: index == length - 1,
-                    );
-                  },
+        final todayPlans = planProvider.getDailyPlans(datetimeProvider.today);
+
+        final allMissedPlans = planProvider.getDailyPlans(
+          datetimeProvider.yesterday,
+        );
+        final missedTransactions = transactionProvider.missedTransactions;
+        final missedPlans =
+            allMissedPlans.where((e) {
+              final todayPlan = getTodayPlan(todayPlans, e);
+              if (todayPlan != null) {
+                final todayTransaction = transactionProvider.todayTransactions
+                    .firstWhereOrNull((t) => t.planId == todayPlan.id);
+                if (todayTransaction != null &&
+                    todayTransaction.quantities.length > 1) {
+                  return false;
+                }
+              }
+              if (missedTransactions.isEmpty) return true;
+              if (missedTransactions.any((t) => t.planId == e.id)) return false;
+              return true;
+            }).toList();
+
+        if (todayPlans.isEmpty && missedPlans.isEmpty) {
+          return Center(
+            child: Text(AppLocalizations.of(context)!.empty_todayPlan),
+          );
+        }
+
+        final todayCount = todayPlans.length;
+        final missedCount = missedPlans.length;
+
+        return Column(
+          children: [
+            // NEXT 首页增加日期等信息展示
+            // Text(DateTime.now().toString().split(' ').first),
+            if (missedPlans.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryFixed,
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ExpansionTile(
+                    shape: Border(),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(AppLocalizations.of(context)!.missedPlanTitle),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.error,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$missedCount',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onError,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    children: [
+                      SizedBox(
+                        height: min(missedCount.toDouble(), 2) * 75,
+                        child: ListView.separated(
+                          itemCount: missedCount,
+                          itemBuilder: (content, index) {
+                            final plan = missedPlans[index];
+                            final pill = pillProvider.pillMap[plan.pillId]!;
+                            final todayPlan = getTodayPlan(todayPlans, plan);
+                            return _buildMissedItem(
+                              context: content,
+                              plan: plan,
+                              pill: pill,
+                              todayPlan: todayPlan,
+                              todayDate: datetimeProvider.today,
+                              missedDate: datetimeProvider.yesterday,
+                            );
+                          },
+                          separatorBuilder: (_, __) => const Divider(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          );
-        },
-      ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: todayCount,
+                itemBuilder: (context, index) {
+                  final plan = todayPlans[index];
+                  // 忽略重复的开始时间
+                  if (index > 0 &&
+                      todayPlans[index - 1].startTime == plan.startTime) {
+                    plan.startTime = '';
+                  }
+                  final pill = pillProvider.pillMap[plan.pillId]!;
+                  final transactions =
+                      transactionProvider.todayTransactions
+                          .where((transaction) => transaction.planId == plan.id)
+                          .toList();
+                  final missedPlan = missedPlans.firstWhereOrNull(
+                    (e) =>
+                        e.pillId == plan.pillId &&
+                        e.startTime == plan.startTime,
+                  );
+                  return _buildItem(
+                    context: context,
+                    plan: plan,
+                    pill: pill,
+                    transactions: transactions,
+                    isLast: index == todayCount - 1,
+                    missedPlan: missedPlan,
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -198,15 +192,13 @@ class _DailyScreenState extends State<DailyScreen> {
     required PlanModel plan,
     required PillModel pill,
     required List<TransactionModel> transactions,
+    PlanModel? missedPlan,
     bool isLast = false,
   }) {
     final disabled = transactions.isNotEmpty;
     final isDone = transactions.any((t) => t.quantities.isNotEmpty);
     final isChild = plan.startTime.isEmpty;
-    final qty =
-        plan.numerator == null || plan.denominator == null
-            ? '${plan.qty}${plan.unit}'
-            : '${plan.qty} + ${plan.numerator}/${plan.denominator}${plan.unit}';
+    final qtyText = '${plan.quantity.displayText}${plan.quantity.unit}';
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Row(
@@ -228,7 +220,7 @@ class _DailyScreenState extends State<DailyScreen> {
             children: [
               Container(
                 width: 2,
-                height: isLast ? 108 : 124,
+                height: isLast ? 104 : 120,
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.secondaryFixed,
                 ),
@@ -261,7 +253,7 @@ class _DailyScreenState extends State<DailyScreen> {
             child: Card(
               margin: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 8),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Column(
                   children: [
                     Padding(
@@ -272,18 +264,7 @@ class _DailyScreenState extends State<DailyScreen> {
                             plan.name,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          TextButton(
-                            onPressed:
-                                disabled ? null : () => _onSubmit(plan: plan),
-                            child: Text(
-                              isDone
-                                  ? ''
-                                  : disabled
-                                  ? '已忽略'
-                                  : '忽略',
-                            ),
-                          ),
-                          if (disabled && plan.isExactTime)
+                          if (disabled && isDone && plan.isExactTime)
                             Expanded(
                               child: Text(
                                 '${getFormatTime(TimeOfDay.fromDateTime(transactions.first.startTime))} - ${getFormatTime(TimeOfDay.fromDateTime(transactions.first.endTime!))}',
@@ -303,17 +284,45 @@ class _DailyScreenState extends State<DailyScreen> {
                         ),
                       ),
                       subtitle: Tooltip(
-                        message: qty,
+                        message: qtyText,
                         child: Text(
-                          qty,
+                          qtyText,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
                       ),
-                      leading: PillImage(imagePath: pill.imagePath),
-                      trailing: FilledButton(
-                        onPressed: disabled ? null : () => _onPressed(plan),
-                        child: Text(isDone ? '已用药' : '用药'),
+                      leading: PillImage(pill: pill),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextButton(
+                            onPressed:
+                                disabled
+                                    ? null
+                                    : () => _onSubmit(
+                                      now: DateTime.now(),
+                                      plan: plan,
+                                    ),
+                            child: Text(
+                              isDone
+                                  ? ''
+                                  : disabled
+                                  ? AppLocalizations.of(context)!.ignored
+                                  : AppLocalizations.of(context)!.ignore,
+                            ),
+                          ),
+                          FilledButton(
+                            onPressed:
+                                disabled
+                                    ? null
+                                    : () => _onPressed(plan, missedPlan),
+                            child: Text(
+                              isDone
+                                  ? AppLocalizations.of(context)!.taken
+                                  : AppLocalizations.of(context)!.take,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -326,39 +335,162 @@ class _DailyScreenState extends State<DailyScreen> {
     );
   }
 
-  void _onPressed(PlanModel plan) async {
-    final quantities = [
-      QuantityModel(
-        qty: plan.qty,
-        unit: plan.unit,
-        numerator: plan.numerator,
-        denominator: plan.denominator,
+  Widget _buildMissedItem({
+    required BuildContext context,
+    required PlanModel plan,
+    required PillModel pill,
+    PlanModel? todayPlan,
+    required DateTime todayDate,
+    required DateTime missedDate,
+  }) {
+    final title = [
+      plan.startTime,
+      '${plan.quantity.displayText}${plan.quantity.unit}',
+      pill.name,
+    ].join(', ');
+
+    return ListTile(
+      title: Tooltip(message: title, child: Text(title)),
+      subtitle: Text(plan.name),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextButton(
+            onPressed: () {
+              _onSubmit(now: missedDate, plan: plan);
+            },
+            child: Text(AppLocalizations.of(context)!.ignore),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // 打开底部弹窗
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return Container(
+                    padding: EdgeInsets.only(top: 16, bottom: 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          title: Text(
+                            AppLocalizations.of(context)!.takenYesterday,
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(
+                            AppLocalizations.of(context)!.takenYesterdaySub,
+                          ),
+                          onTap: () async {
+                            int? hour, minute;
+                            if (plan.isExactTime) {
+                              (hour, minute) = await _showExactTimePicker();
+                            }
+                            _onSubmit(
+                              now: missedDate,
+                              plan: plan,
+                              quantities: [plan.quantity],
+                              hour: hour,
+                              minute: minute,
+                            );
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        if (!plan.isExactTime)
+                          ListTile(
+                            title: Text(
+                              AppLocalizations.of(context)!.takenToday,
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Text(
+                              AppLocalizations.of(context)!.takenTodaySub,
+                            ),
+                            onTap: () async {
+                              final quantities =
+                                  todayPlan == null
+                                      ? [plan.quantity]
+                                      : [plan.quantity, todayPlan.quantity];
+                              _onSubmit(
+                                now: todayDate,
+                                plan: plan,
+                                quantities: quantities,
+                              );
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            child: Text(AppLocalizations.of(context)!.take),
+          ),
+        ],
       ),
-    ];
+    );
+  }
+
+  Future<(int?, int?)> _showExactTimePicker() async {
     int? hour, minute;
+    final now = DateTime.now();
+    final newTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: now.hour, minute: now.minute),
+      initialEntryMode: TimePickerEntryMode.input,
+    );
+    if (newTime != null) {
+      hour = newTime.hour;
+      minute = newTime.minute;
+    }
+    return (hour, minute);
+  }
+
+  void _onPressed(PlanModel plan, PlanModel? missedPlan) async {
+    int? hour, minute;
+    List<QuantityModel> quantities = [plan.quantity];
+
     if (plan.isExactTime) {
-      final now = DateTime.now();
-      final newTime = await showTimePicker(
+      (hour, minute) = await _showExactTimePicker();
+    } else if (missedPlan != null) {
+      final result = await showDialog<bool>(
         context: context,
-        initialTime: TimeOfDay(hour: now.hour, minute: now.minute),
-        initialEntryMode: TimePickerEntryMode.input,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(AppLocalizations.of(context)!.takeBothTitle),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(AppLocalizations.of(context)!.takeOnlyToday),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(AppLocalizations.of(context)!.takeBoth),
+              ),
+            ],
+          );
+        },
       );
-      if (newTime != null) {
-        hour = newTime.hour;
-        minute = newTime.minute;
+      if (result!) {
+        quantities.add(missedPlan.quantity);
       }
     }
-    _onSubmit(plan: plan, quantities: quantities, hour: hour, minute: minute);
+    _onSubmit(
+      now: DateTime.now(),
+      plan: plan,
+      quantities: quantities,
+      hour: hour,
+      minute: minute,
+    );
   }
 
   void _onSubmit({
+    required DateTime now,
     required PlanModel plan,
     List<QuantityModel>? quantities,
     int? hour,
     int? minute,
   }) async {
     final time = plan.startTime.split(':');
-    final now = DateTime.now();
     final startTime = DateTime(
       now.year,
       now.month,
@@ -376,11 +508,16 @@ class _DailyScreenState extends State<DailyScreen> {
         pillId: plan.pillId,
         planId: plan.id,
         quantities: quantities ?? [],
-        timestamp: now,
         startTime: startTime,
         endTime: endTime,
         isNegative: true,
       ),
     );
   }
+}
+
+PlanModel? getTodayPlan(List<PlanModel> todayPlans, PlanModel plan) {
+  return todayPlans.firstWhereOrNull(
+    (p) => p.pillId == plan.pillId && p.startTime == plan.startTime,
+  );
 }

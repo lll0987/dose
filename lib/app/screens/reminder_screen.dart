@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/plan_model.dart';
 
@@ -12,21 +13,8 @@ class ReminderScreen extends StatefulWidget {
 }
 
 class _ReminderSettingsState extends State<ReminderScreen> {
-  final _reminders = [
-    {'label': '不提醒', 'value': 'none'},
-    {'label': '计划时间开始时', 'value': 'start'},
-    {'label': '提前5分钟', 'value': '5min'},
-    {'label': '提前30分钟', 'value': '30min'},
-    {'label': '提前1小时', 'value': '1hour'},
-    {'label': '提前2小时', 'value': '2hour'},
-    {'label': '自定义', 'value': 'custom'},
-  ];
   String _selectedReminder = 'none';
 
-  final _units = [
-    {'label': '分钟', 'value': 'minute'},
-    {'label': '小时', 'value': 'hour'},
-  ];
   String _selectedUnit = 'minute';
   String _customValue = '';
 
@@ -34,27 +22,43 @@ class _ReminderSettingsState extends State<ReminderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final reminderOptions = {
+      'none': AppLocalizations.of(context)!.reminderOption_none,
+      'start': AppLocalizations.of(context)!.reminderOption_start,
+      '5min': AppLocalizations.of(context)!.reminderOption_5min,
+      '30min': AppLocalizations.of(context)!.reminderOption_30min,
+      '1hour': AppLocalizations.of(context)!.reminderOption_1hour,
+      '2hour': AppLocalizations.of(context)!.reminderOption_2hour,
+      'custom': AppLocalizations.of(context)!.reminderOption_custom,
+    };
+
+    final unitOptions = {
+      'minute': AppLocalizations.of(context)!.minute,
+      'hour': AppLocalizations.of(context)!.hour,
+    };
+
     return Scaffold(
-      appBar: AppBar(title: const Text('重复设置')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.reminderSetting),
+      ),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  ..._reminders.map((item) {
+                  ...reminderOptions.entries.map((item) {
+                    final label = item.value;
+                    final value = item.key;
                     return ListTile(
-                      title: Text(item['label']!),
+                      title: Text(label),
                       leading: Radio<String>(
-                        value: item['value']!,
+                        value: value,
                         groupValue: _selectedReminder,
                         onChanged:
                             (v) => setState(() => _selectedReminder = v!),
                       ),
-                      onTap:
-                          () => setState(
-                            () => _selectedReminder = item['value']!,
-                          ),
+                      onTap: () => setState(() => _selectedReminder = value),
                     );
                   }),
                   if (_selectedReminder == 'custom')
@@ -63,7 +67,12 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                         SizedBox(width: 64),
                         Expanded(
                           child: TextFormField(
-                            decoration: InputDecoration(labelText: '时长'),
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.reminderForm_duration,
+                            ),
                             initialValue: _customValue,
                             onChanged: (v) => setState(() => _customValue = v),
                           ),
@@ -72,13 +81,18 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                         SizedBox(
                           width: 128,
                           child: DropdownButtonFormField(
-                            decoration: InputDecoration(labelText: '单位'),
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.reminderForm_unit,
+                            ),
                             items:
-                                _units
+                                unitOptions.entries
                                     .map(
                                       (e) => DropdownMenuItem(
-                                        value: e['value']!,
-                                        child: Text(e['label']!),
+                                        value: e.key,
+                                        child: Text(e.value),
                                       ),
                                     )
                                     .toList(),
@@ -95,8 +109,10 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                       padding: EdgeInsets.only(left: 12, right: 12, top: 16),
                       child: Card(
                         child: ListTile(
-                          title: const Text(
-                            '提醒方式',
+                          title: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.planForm_reminderMethod,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           trailing: Row(
@@ -109,7 +125,12 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                                   setState(() => _selectedMethod = v!);
                                 },
                               ),
-                              const Text('通知', style: TextStyle(fontSize: 14)),
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.reminderMethod_notify,
+                                style: TextStyle(fontSize: 14),
+                              ),
                               const SizedBox(width: 16),
                               Radio(
                                 value: 'clock',
@@ -118,7 +139,12 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                                   setState(() => _selectedMethod = v!);
                                 },
                               ),
-                              const Text('闹钟', style: TextStyle(fontSize: 14)),
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.reminderMethod_clock,
+                                style: TextStyle(fontSize: 14),
+                              ),
                             ],
                           ),
                         ),
@@ -136,7 +162,7 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                 minimumSize: const Size(double.infinity, 48),
                 textStyle: TextStyle(fontSize: 16),
               ),
-              child: const Text('确认'),
+              child: Text(AppLocalizations.of(context)!.confirm),
             ),
           ),
         ],

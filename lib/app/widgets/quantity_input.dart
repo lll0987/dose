@@ -1,27 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class Number {
-  final int integer;
-  final int? numerator;
-  final int? denominator;
-
-  Number({required this.integer, this.numerator, this.denominator});
-
-  String getDisplayText() {
-    if (denominator == null || numerator == null) {
-      return '$integer';
-    }
-    return '$integer + $numerator/$denominator';
-  }
-}
+import '../models/quantity_model.dart';
 
 class QuantityInput extends StatefulWidget {
   final bool enabled;
   final String labelText;
   final bool? filled;
   final Color? fillColor;
-  final Number? initialValue;
-  final Function(Number) onChange;
+  final QuantityModel? initialValue;
+  final Function(QuantityModel) onChange;
 
   const QuantityInput({
     super.key,
@@ -39,7 +27,10 @@ class QuantityInput extends StatefulWidget {
 
 class _QuantityInputState extends State<QuantityInput> {
   final TextEditingController _displayController = TextEditingController();
-  Number _value = Number(integer: 0, numerator: null, denominator: null);
+  QuantityModel _value = QuantityModel(
+    qty: 0,
+    fraction: FractionModel(null, null),
+  );
 
   @override
   void initState() {
@@ -51,11 +42,11 @@ class _QuantityInputState extends State<QuantityInput> {
   }
 
   void _updateDisplay() {
-    _displayController.text = _value.getDisplayText();
+    _displayController.text = _value.displayText;
   }
 
   void _showEditDialog() async {
-    final result = await showDialog<Number>(
+    final result = await showDialog<QuantityModel>(
       context: context,
       builder: (context) => QuantityInputDialog(initialValue: _value),
     );
@@ -95,7 +86,7 @@ class _QuantityInputState extends State<QuantityInput> {
 }
 
 class QuantityInputDialog extends StatefulWidget {
-  final Number initialValue;
+  final QuantityModel initialValue;
 
   const QuantityInputDialog({super.key, required this.initialValue});
 
@@ -109,15 +100,6 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
   late int? _denominator;
 
   String _selectedFraction = 'none';
-  final List<PresetOption> _presetOptions = [
-    PresetOption(key: 'none', label: '不分割', fraction: null),
-    PresetOption(key: 'half', label: '1/2', fraction: Fraction(1, 2)),
-    PresetOption(key: 'third', label: '1/3', fraction: Fraction(1, 3)),
-    PresetOption(key: 'quarter', label: '1/4', fraction: Fraction(1, 4)),
-    PresetOption(key: 'twoThirds', label: '2/3', fraction: Fraction(2, 3)),
-    PresetOption(key: 'threeQuarters', label: '3/4', fraction: Fraction(3, 4)),
-    PresetOption(key: 'custom', label: '自定义', fraction: null),
-  ];
 
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _integerController; // 新增控制器
@@ -125,33 +107,34 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
   @override
   void initState() {
     super.initState();
-    _integer = widget.initialValue.integer;
-    _numerator = widget.initialValue.numerator;
-    _denominator = widget.initialValue.denominator;
+    _integer = widget.initialValue.qty;
+    _numerator = widget.initialValue.fraction.numerator;
+    _denominator = widget.initialValue.fraction.denominator;
     _integerController = TextEditingController(
       text: _integer.toString(),
     ); // 初始化控制器
-
-    // 初始化选中状态
-    if (_denominator == 0) {
-      _selectedFraction = _presetOptions.first.key;
-      return;
-    }
-    final currentFraction =
-        _numerator != null && _denominator != null
-            ? Fraction(_numerator!, _denominator!)
-            : null;
-    final match = _presetOptions.firstWhere(
-      (opt) => opt.fraction == currentFraction,
-      orElse: () => _presetOptions.last,
-    );
-    _selectedFraction = match.key;
   }
 
   @override
   Widget build(BuildContext context) {
+    final presetOptions = getOptions(context);
+    // 初始化选中状态
+    if (_denominator == 0) {
+      _selectedFraction = presetOptions.first.key;
+    } else {
+      final currentFraction =
+          _numerator != null && _denominator != null
+              ? FractionModel(_numerator!, _denominator!)
+              : null;
+      final match = presetOptions.firstWhere(
+        (opt) => opt.fraction == currentFraction,
+        orElse: () => presetOptions.last,
+      );
+      _selectedFraction = match.key;
+    }
+
     return AlertDialog(
-      title: Text('修改数量'),
+      title: Text(AppLocalizations.of(context)!.quantityAlertTitle),
       content: Form(
         key: _formKey,
         child: StatefulBuilder(
@@ -192,10 +175,14 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '数量不可为空';
+                            return AppLocalizations.of(
+                              context,
+                            )!.validToken_qty_required;
                           }
                           if (int.tryParse(value) == null) {
-                            return '请输入整数';
+                            return AppLocalizations.of(
+                              context,
+                            )!.validToken_qty_integer;
                           }
                           return null;
                         },
@@ -223,7 +210,7 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                   spacing: 8.0,
                   runSpacing: 8,
                   children:
-                      _presetOptions.map((option) {
+                      presetOptions.map((option) {
                         return ChoiceChip(
                           label: Text(option.label),
                           selected: _selectedFraction == option.key,
@@ -252,7 +239,8 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                           initialValue: _numerator?.toString(),
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: '分子',
+                            labelText:
+                                AppLocalizations.of(context)!.numeratorLabel,
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (value) {
@@ -262,11 +250,15 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return '分子不可为空';
+                              return AppLocalizations.of(
+                                context,
+                              )!.validToken_numerator_required;
                             }
                             if (int.tryParse(value) == null ||
                                 int.parse(value) <= 0) {
-                              return '请输入正整数';
+                              return AppLocalizations.of(
+                                context,
+                              )!.validToken_qty_integer;
                             }
                             return null;
                           },
@@ -278,7 +270,8 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                           initialValue: _denominator?.toString(),
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: '分母',
+                            labelText:
+                                AppLocalizations.of(context)!.denominatorLabel,
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (value) {
@@ -288,11 +281,15 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return '分母不可为空';
+                              return AppLocalizations.of(
+                                context,
+                              )!.validToken_denominator_required;
                             }
                             if (int.tryParse(value) == null ||
                                 int.parse(value) <= 0) {
-                              return '请输入正整数';
+                              return AppLocalizations.of(
+                                context,
+                              )!.validToken_qty_integer;
                             }
                             return null;
                           },
@@ -307,23 +304,33 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: Navigator.of(context).pop, child: Text('取消')),
         TextButton(
-          child: Text('保存'),
+          onPressed: Navigator.of(context).pop,
+          child: Text(AppLocalizations.of(context)!.cancel),
+        ),
+        TextButton(
+          child: Text(AppLocalizations.of(context)!.submit),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               if (_selectedFraction != 'none' && _denominator! <= 0) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('分母不能为0')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.validToken_denominator_notZero,
+                    ),
+                  ),
+                );
                 return;
               }
               Navigator.of(context).pop(
-                Number(
-                  integer: _integer,
-                  numerator: _selectedFraction == 'none' ? null : _numerator,
-                  denominator:
-                      _selectedFraction == 'none' ? null : _denominator,
+                QuantityModel(
+                  qty: _integer,
+                  fraction: FractionModel(
+                    _selectedFraction == 'none' ? null : _numerator,
+                    _selectedFraction == 'none' ? null : _denominator,
+                  ),
                 ),
               );
             }
@@ -340,29 +347,35 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
   }
 }
 
-class Fraction {
-  final int numerator;
-  final int denominator;
-
-  Fraction(this.numerator, this.denominator);
-
-  @override
-  bool operator ==(Object other) {
-    if (other is Fraction) {
-      return numerator == other.numerator && denominator == other.denominator;
-    }
-    return false;
-  }
-
-  @override
-  int get hashCode => Object.hash(numerator, denominator);
-}
-
 // 新建PresetOption类：
 class PresetOption {
   final String key;
   final String label;
-  final Fraction? fraction;
+  final FractionModel? fraction;
 
   PresetOption({required this.key, required this.label, this.fraction});
+}
+
+List<PresetOption> getOptions(BuildContext context) {
+  return [
+    PresetOption(
+      key: 'none',
+      label: AppLocalizations.of(context)!.splitNone,
+      fraction: null,
+    ),
+    PresetOption(key: 'half', label: '1/2', fraction: FractionModel(1, 2)),
+    PresetOption(key: 'third', label: '1/3', fraction: FractionModel(1, 3)),
+    PresetOption(key: 'quarter', label: '1/4', fraction: FractionModel(1, 4)),
+    PresetOption(key: 'twoThirds', label: '2/3', fraction: FractionModel(2, 3)),
+    PresetOption(
+      key: 'threeQuarters',
+      label: '3/4',
+      fraction: FractionModel(3, 4),
+    ),
+    PresetOption(
+      key: 'custom',
+      label: AppLocalizations.of(context)!.custom,
+      fraction: null,
+    ),
+  ];
 }

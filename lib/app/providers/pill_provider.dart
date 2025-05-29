@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../database/repository/pill_repository.dart';
 import '../models/pill_model.dart';
+import '../utils/result.dart';
 
 class PillProvider with ChangeNotifier {
   final PillRepository _pillRepository;
@@ -25,13 +26,24 @@ class PillProvider with ChangeNotifier {
     return result;
   }
 
-  Future<void> addPill(PillModel pill) async {
-    await _pillRepository.addPill(pill);
-    await loadPills();
+  Future<Result<int>> addPill(PillModel pill) async {
+    final result = await _pillRepository.addPill(pill);
+    if (result.isSuccess) {
+      await loadPills();
+    }
+    return result;
   }
 
   Future<void> updatePill(PillModel pill) async {
     await _pillRepository.updatePill(pill);
     await loadPills();
+  }
+
+  Future<Result<void>> deletePill(int id) async {
+    final result = await _pillRepository.deletePill(id);
+    if (result.isSuccess) {
+      await loadPills();
+    }
+    return result;
   }
 }

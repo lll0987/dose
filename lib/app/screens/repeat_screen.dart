@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 import '../models/plan_model.dart';
 import '../utils/datetime.dart';
@@ -68,7 +70,7 @@ class _RepeatSettingsState extends State<RepeatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('重复设置')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.repeatSetting)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -80,14 +82,14 @@ class _RepeatSettingsState extends State<RepeatScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDateField(
-                      '计划开始日期',
+                      AppLocalizations.of(context)!.planForm_startDate,
                       _startDate,
                       (d) => setState(() => _startDate = d),
                       null,
                     ),
                     const SizedBox(height: 16),
                     _buildDateField(
-                      '计划结束日期',
+                      AppLocalizations.of(context)!.planForm_endDate,
                       _endDate,
                       (d) => setState(() => _endDate = d),
                       _startDate,
@@ -110,7 +112,7 @@ class _RepeatSettingsState extends State<RepeatScreen> {
                 minimumSize: const Size(double.infinity, 48),
                 textStyle: TextStyle(fontSize: 16),
               ),
-              child: const Text('确认'),
+              child: Text(AppLocalizations.of(context)!.confirm),
             ),
           ],
         ),
@@ -154,7 +156,7 @@ class _RepeatSettingsState extends State<RepeatScreen> {
         final newDate = await showDatePicker(
           context: context,
           initialDate: date ?? DateTime.now(),
-          firstDate: firstDate ?? DateTime(2020),
+          firstDate: firstDate ?? DateTime(2000),
           lastDate: DateTime(2100),
         );
         if (newDate != null) onDateChanged(newDate);
@@ -167,11 +169,15 @@ class _RepeatSettingsState extends State<RepeatScreen> {
   }
 
   Widget _buildUnitOptions() {
+    final options = <DateUnit, String>{};
+    for (final value in DateUnit.values) {
+      options[value] = value.displayName(context);
+    }
     return Row(
       children:
-          DateUnit.options.map((option) {
-            final value = option['value'] as DateUnit;
-            final label = option['label'] as String;
+          options.entries.map((option) {
+            final value = option.key;
+            final label = option.value;
             return Expanded(
               child: Row(
                 spacing: 4,
@@ -181,7 +187,7 @@ class _RepeatSettingsState extends State<RepeatScreen> {
                     groupValue: _repeatUnit,
                     onChanged: (v) => setState(() => _repeatUnit = v),
                   ),
-                  Text('每$label'),
+                  Text(label),
                 ],
               ),
             );
@@ -190,10 +196,14 @@ class _RepeatSettingsState extends State<RepeatScreen> {
   }
 
   Widget _buildDayValuePicker() {
+    // NEXT 支持其它语言，不使用固定的三段式结构
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('每', style: TextStyle(fontSize: 18)),
+        Text(
+          AppLocalizations.of(context)!.every,
+          style: TextStyle(fontSize: 18),
+        ),
         // 数字滚轮选择器
         SizedBox(
           width: 120,
@@ -205,7 +215,7 @@ class _RepeatSettingsState extends State<RepeatScreen> {
             onChanged: (v) => setState(() => _dayValue = v),
           ),
         ),
-        const Text('天', style: TextStyle(fontSize: 18)),
+        Text(DateUnit.day.displayName(context), style: TextStyle(fontSize: 18)),
       ],
     );
   }
@@ -214,8 +224,8 @@ class _RepeatSettingsState extends State<RepeatScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(7, (index) {
-        final label = weekdays[index];
         final value = index + 1;
+        final label = getWeekdayDisplayName(context, value);
         final isSelected = _weekValues.contains(value);
         return InkWell(
           onTap:
@@ -262,7 +272,10 @@ class _RepeatSettingsState extends State<RepeatScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('每月最后一天', style: TextStyle(fontSize: 16)),
+            Text(
+              AppLocalizations.of(context)!.monthlyLastDay,
+              style: TextStyle(fontSize: 16),
+            ),
             Switch(
               value: _isLastDayOfMonth,
               onChanged: (v) => setState(() => _isLastDayOfMonth = v),
@@ -325,10 +338,11 @@ class _RepeatSettingsState extends State<RepeatScreen> {
   }
 
   Widget _buildYearValuePicker() {
-    // 获取月份和日期文本
-    final text = '${_startDate.month.toString()}月${_startDate.day.toString()}日';
+    final locale = Localizations.localeOf(context).toString();
+    final pattern = AppLocalizations.of(context)!.repeatYearPattern;
+    final text = DateFormat(pattern, locale).format(_startDate);
     return Text(
-      '每${DateUnit.year.displayName}$text',
+      text,
       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
   }

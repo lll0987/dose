@@ -89,4 +89,24 @@ class PlanDao extends DatabaseAccessor<AppDatabase> with _$PlanDaoMixin {
   Future<void> deletePlan(int id) async {
     await delete1(id);
   }
+
+  Future<void> disablePlan(int id) async {
+    await (update(plans)..where(
+      (tbl) => tbl.id.equals(id),
+    )).write(PlansCompanion(isEnabled: Value(false)));
+  }
+
+  Future<void> enablePlan(int id) async {
+    await (update(plans)..where(
+      (tbl) => tbl.id.equals(id),
+    )).write(PlansCompanion(isEnabled: Value(true)));
+  }
+
+  // 根据药物id获取是否有计划
+  Future<bool> hasPlanByPill(int pillId) async {
+    final result =
+        await (select(plans)
+          ..where((tbl) => tbl.pillId.equals(pillId))).getSingleOrNull();
+    return result != null;
+  }
 }

@@ -1,9 +1,18 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../models/pill_model.dart';
+import '../models/quantity_model.dart';
 import '../providers/pill_provider.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/pill_image.dart';
 import '../widgets/quantity_input.dart';
 
 class PillFormScreen extends StatefulWidget {
@@ -20,9 +29,12 @@ class _PillFormScreenState extends State<PillFormScreen> {
 
   PillModel _model = PillModel(
     name: '',
-    initialQty: 0,
-    initialUnit: '',
-    qty: 0,
+    initialQuantity: QuantityModel(
+      qty: 0,
+      unit: '',
+      fraction: FractionModel(null, null),
+    ),
+    quantity: QuantityModel(qty: 0, fraction: FractionModel(null, null)),
     packSpecs: [SpecModel(qty: 1, unit: '')],
   );
 
@@ -31,24 +43,10 @@ class _PillFormScreenState extends State<PillFormScreen> {
 
   List<String> _units = [];
   String? _selectedUnit;
+  bool _unitDisabled = false;
+  String? _unitHintText;
   String? _selectedPreUnit;
 
-  final _colorOptions = [
-    {'label': '默认', 'value': Colors.lightGreen.shade500},
-    {'label': '青橙', 'value': Colors.lime.shade500},
-    {'label': '蓝绿', 'value': Colors.teal.shade500},
-    {'label': '灰蓝', 'value': Colors.blueGrey.shade500},
-    {'label': '靛蓝', 'value': Colors.indigo.shade500},
-    {'label': '棕色', 'value': Colors.brown.shade500},
-    {'label': '粉色', 'value': Colors.pink.shade500},
-    {'label': '红色', 'value': Colors.red.shade500},
-    {'label': '橙色', 'value': Colors.orange.shade500},
-    {'label': '黄色', 'value': Colors.yellow.shade500},
-    {'label': '绿色', 'value': Colors.green.shade500},
-    {'label': '青色', 'value': Colors.cyan.shade500},
-    {'label': '蓝色', 'value': Colors.blue.shade500},
-    {'label': '紫色', 'value': Colors.purple.shade500},
-  ];
   Color? _selectedColor;
 
   bool _isUpdate = false;
@@ -64,13 +62,23 @@ class _PillFormScreenState extends State<PillFormScreen> {
     });
   }
 
-  void _removePackSpec(int index) {
+  void _removePackSpec(BuildContext context, int index) {
     final spec = _model.packSpecs[index];
     setState(() {
       _model.packSpecs.removeAt(index);
       _reloadUnits();
+      _setUnit(context);
       if (_selectedUnit == spec.unit) _selectedUnit = null;
     });
+  }
+
+  void _setUnit(BuildContext context) {
+    if (!_unitDisabled) {
+      _unitHintText = null;
+      return;
+    }
+    _selectedUnit = _units.isEmpty ? null : _units.last;
+    _unitHintText = AppLocalizations.of(context)!.quantityUnitWarning;
   }
 
   @override
@@ -81,7 +89,7 @@ class _PillFormScreenState extends State<PillFormScreen> {
         _isUpdate = true;
         _model = widget.pill!;
         _reloadUnits();
-        _selectedUnit = widget.pill!.initialUnit;
+        _selectedUnit = widget.pill!.initialQuantity.unit;
         _selectedPreUnit = widget.pill!.preferredUnit;
         if (widget.pill!.themeValue != null) {
           _selectedColor = Color(widget.pill!.themeValue!);
@@ -93,7 +101,13 @@ class _PillFormScreenState extends State<PillFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isUpdate ? '编辑药物' : '新增药物')),
+      appBar: AppBar(
+        title: Text(
+          _isUpdate
+              ? AppLocalizations.of(context)!.updatePill
+              : AppLocalizations.of(context)!.addPill,
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -105,6 +119,28 @@ class _PillFormScreenState extends State<PillFormScreen> {
                   child: Column(
                     spacing: 16,
                     children: [
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText:
+                              AppLocalizations.of(context)!.pillForm_name,
+                          filled: true,
+                          fillColor:
+                              Theme.of(context).colorScheme.surfaceContainerLow,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            )!.validToken_pillName_required;
+                          }
+                          return null;
+                        },
+                        initialValue: _model.name,
+                        onChanged:
+                            (value) => setState(() {
+                              _model.name = value;
+                            }),
+                      ),
                       Card(
                         child: Padding(
                           padding: EdgeInsets.all(16),
@@ -114,15 +150,11 @@ class _PillFormScreenState extends State<PillFormScreen> {
                               Row(
                                 children: [
                                   Text(
-                                    '包装规格',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).colorScheme.onSecondaryFixed,
-                                    ),
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.pillForm_packSpecs,
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall,
                                   ),
                                 ],
                               ),
@@ -148,14 +180,21 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                       child: TextFormField(
                                         enabled: !isFirst && !_isUpdate,
                                         decoration: InputDecoration(
-                                          labelText: '数量',
+                                          labelText:
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.pillForm_qty,
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return '请输入数量';
+                                            return AppLocalizations.of(
+                                              context,
+                                            )!.validToken_qty_required;
                                           }
                                           if (int.tryParse(value) == null) {
-                                            return '请输入整数';
+                                            return AppLocalizations.of(
+                                              context,
+                                            )!.validToken_qty_integer;
                                           }
                                           return null;
                                         },
@@ -172,17 +211,24 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                       child: TextFormField(
                                         enabled: !_isUpdate,
                                         decoration: InputDecoration(
-                                          labelText: '单位',
+                                          labelText:
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.pillForm_unit,
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return '请输入单位';
+                                            return AppLocalizations.of(
+                                              context,
+                                            )!.validToken_pillUnit_required;
                                           }
                                           if (_model.packSpecs.indexWhere(
                                                 (s) => s.unit == value,
                                               ) !=
                                               index) {
-                                            return '单位不可重复';
+                                            return AppLocalizations.of(
+                                              context,
+                                            )!.validToken_pillUnit_noRepeat;
                                           }
                                           return null;
                                         },
@@ -192,6 +238,7 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                               item.unit = value;
                                               // _units.add(value);
                                               _reloadUnits();
+                                              _setUnit(context);
                                             }),
                                       ),
                                     ),
@@ -204,7 +251,10 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                               ? null
                                               : isFirst
                                               ? () => _addPackSpec()
-                                              : () => _removePackSpec(index),
+                                              : () => _removePackSpec(
+                                                context,
+                                                index,
+                                              ),
                                     ),
                                   ],
                                 );
@@ -213,103 +263,88 @@ class _PillFormScreenState extends State<PillFormScreen> {
                           ),
                         ),
                       ),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: '药物名称',
-                          filled: true,
-                          fillColor:
-                              Theme.of(context).colorScheme.surfaceContainerLow,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '请输入药物名称';
-                          }
-                          return null;
-                        },
-                        initialValue: _model.name,
-                        onChanged:
-                            (value) => setState(() {
-                              _model.name = value;
-                            }),
-                      ),
-                      // NEXT 药物图片选择保存
-                      TextFormField(
-                        enabled: false,
-                        decoration: InputDecoration(
-                          labelText: '药物图片',
-                          filled: true,
-                          fillColor:
-                              Theme.of(context).colorScheme.surfaceContainerLow,
-                        ),
-                        initialValue: _model.imagePath,
-                        onChanged:
-                            (value) => setState(() {
-                              _model.imagePath = value;
-                            }),
-                      ),
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: QuantityInput(
-                              enabled: !_isUpdate,
-                              labelText: '当前数量',
-                              filled: true,
-                              fillColor:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainerLow,
-                              initialValue: Number(
-                                integer: _model.initialQty,
-                                numerator: _model.initialNum,
-                                denominator: _model.initialDen,
+                          if (_unitHintText != null)
+                            Text(
+                              _unitHintText!,
+                              style: TextStyle(
+                                color: context.read<ThemeProvider>().hintColor,
                               ),
-                              onChange:
-                                  (v) => setState(() {
-                                    _model.initialQty = v.integer;
-                                    _model.initialNum = v.numerator;
-                                    _model.initialDen = v.denominator;
-                                  }),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
-                                labelText: '单位',
-                                filled: true,
-                                fillColor:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.surfaceContainerLow,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: QuantityInput(
+                                  enabled: !_isUpdate,
+                                  labelText:
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.pillForm_initQty,
+                                  filled: true,
+                                  fillColor:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerLow,
+                                  initialValue: _model.initialQuantity,
+                                  onChange:
+                                      (v) => setState(() {
+                                        _model.initialQuantity = v;
+                                        _unitDisabled =
+                                            v.fraction.numerator != null;
+                                        _setUnit(context);
+                                      }),
+                                ),
                               ),
-                              items:
-                                  _units
-                                      .map(
-                                        (option) => DropdownMenuItem(
-                                          value: option,
-                                          child: Text(option),
-                                        ),
-                                      )
-                                      .toList(),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return '请选择当前数量的单位';
-                                }
-                                return null;
-                              },
-                              value: _selectedUnit,
-                              onChanged:
-                                  _isUpdate
-                                      ? null
-                                      : (value) =>
-                                          setState(() => _selectedUnit = value),
-                            ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: DropdownButtonFormField<String>(
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.pillForm_initUnit,
+                                    filled: true,
+                                    fillColor:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerLow,
+                                  ),
+                                  items:
+                                      _units
+                                          .map(
+                                            (option) => DropdownMenuItem(
+                                              value: option,
+                                              child: Text(option),
+                                            ),
+                                          )
+                                          .toList(),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return AppLocalizations.of(
+                                        context,
+                                      )!.validToken_pillInitUnit_required;
+                                    }
+                                    return null;
+                                  },
+                                  value: _selectedUnit,
+                                  onChanged:
+                                      _isUpdate || _unitDisabled
+                                          ? null
+                                          : (value) => setState(
+                                            () => _selectedUnit = value,
+                                          ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                       DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: '首选单位',
+                          labelText:
+                              AppLocalizations.of(context)!.pillForm_preUnit,
                           filled: true,
                           fillColor:
                               Theme.of(context).colorScheme.surfaceContainerLow,
@@ -327,38 +362,88 @@ class _PillFormScreenState extends State<PillFormScreen> {
                         onChanged:
                             (value) => setState(() => _selectedPreUnit = value),
                       ),
-                      DropdownButtonFormField<Color>(
-                        value: _selectedColor,
-                        items:
-                            _colorOptions
-                                .map(
-                                  (item) => DropdownMenuItem(
-                                    value: item['value'] as Color,
-                                    child: Row(
-                                      spacing: 8,
-                                      children: [
-                                        Container(
-                                          width: 12,
-                                          height: 12,
-                                          decoration: BoxDecoration(
-                                            color: item['value'] as Color,
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                        Text(item['label'] as String),
-                                      ],
-                                    ),
+                      Card(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: ListTile(
+                            title: Text(
+                              AppLocalizations.of(context)!.pillForm_image,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (_model.imagePath == null ||
+                                    _model.imagePath!.isEmpty)
+                                  IconButton(
+                                    onPressed: () => _showBottomModal(context),
+                                    icon: Icon(Icons.add_a_photo_outlined),
                                   ),
-                                )
-                                .toList(),
-                        onChanged:
-                            (value) => setState(() => _selectedColor = value),
-                        decoration: InputDecoration(
-                          labelText: '主题色',
-                          filled: true,
-                          fillColor:
-                              Theme.of(context).colorScheme.surfaceContainerLow,
+                                if (_model.imagePath != null &&
+                                    _model.imagePath!.isNotEmpty) ...[
+                                  InkWell(
+                                    child: PillImage(pill: _model, size: 64),
+                                    onTap: () => _showBottomModal(context),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() async {
+                                        await File(_model.imagePath!).delete();
+                                        _model.imagePath = '';
+                                      });
+                                    },
+                                    icon: Icon(Icons.cancel_outlined),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
+                      ),
+                      Consumer<ThemeProvider>(
+                        builder: (context, themeProvider, child) {
+                          return DropdownButtonFormField<Color>(
+                            value: _selectedColor,
+                            items:
+                                themeProvider
+                                    .getColorOptions(context)
+                                    .entries
+                                    .map((item) {
+                                      final value = item.value;
+                                      final label = item.key;
+                                      return DropdownMenuItem(
+                                        value: value,
+                                        child: Row(
+                                          spacing: 8,
+                                          children: [
+                                            Container(
+                                              width: 12,
+                                              height: 12,
+                                              decoration: BoxDecoration(
+                                                color: value,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            Text(label),
+                                          ],
+                                        ),
+                                      );
+                                    })
+                                    .toList(),
+                            onChanged:
+                                (value) =>
+                                    setState(() => _selectedColor = value),
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context)!.pillForm_color,
+                              filled: true,
+                              fillColor:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerLow,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -367,12 +452,12 @@ class _PillFormScreenState extends State<PillFormScreen> {
             ),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: () => _onSubmit(),
+              onPressed: () => _onSubmit(context),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
                 textStyle: TextStyle(fontSize: 16),
               ),
-              child: const Text('保存'),
+              child: Text(AppLocalizations.of(context)!.pillForm_submit),
             ),
           ],
         ),
@@ -380,17 +465,97 @@ class _PillFormScreenState extends State<PillFormScreen> {
     );
   }
 
-  void _onSubmit() async {
+  _showBottomModal(BuildContext context) async {
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(top: 16, bottom: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text(AppLocalizations.of(context)!.pillForm_camera),
+                onTap: () {
+                  Navigator.of(context).pop(true);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text(
+                  AppLocalizations.of(context)!.pillForm_photoLibrary,
+                ),
+                onTap: () {
+                  Navigator.of(context).pop(false);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    final XFile? pickedFile = await _pickImage(result!);
+    if (pickedFile == null) return;
+
+    final File originalFile = File(pickedFile.path);
+    // final File? croppedFile = await _cropImage(
+    //   originalFile,
+    // );
+    // if (croppedFile == null) return;
+
+    final String savedPath = await _saveImageToAppDocDir(originalFile);
+
+    setState(() {
+      _model.imagePath = savedPath;
+    });
+  }
+
+  Future<XFile?> _pickImage(bool isCamera) async {
+    final ImagePicker picker = ImagePicker();
+    return await picker.pickImage(
+      source: isCamera ? ImageSource.camera : ImageSource.gallery,
+    );
+  }
+
+  Future<String> _saveImageToAppDocDir(File imageFile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final name = "image_${DateTime.now().millisecondsSinceEpoch}.jpg";
+    final newPath = join(directory.path, name);
+    final newImage = await imageFile.copy(newPath);
+    return newImage.path;
+  }
+
+  void _onSubmit(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
-    _model.initialUnit = _selectedUnit!;
+    _model.initialQuantity.unit = _selectedUnit!;
     _model.themeValue = _selectedColor?.toARGB32();
     _model.preferredUnit = _selectedPreUnit;
     final provider = context.read<PillProvider>();
     if (_isUpdate) {
       await provider.updatePill(_model);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.success_update),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      Navigator.of(context).pop();
     } else {
-      await provider.addPill(_model);
+      final result = await provider.addPill(_model);
+      if (result.isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.success_add),
+            duration: Duration(seconds: 1),
+          ),
+        );
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(result.error!)));
+      }
     }
-    Navigator.of(context).pop();
   }
 }

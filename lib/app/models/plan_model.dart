@@ -1,6 +1,11 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 import '../database/app_database.dart';
+import '../utils/datetime.dart';
+import 'quantity_model.dart';
 
 class PlanModel {
   int? id;
@@ -14,15 +19,14 @@ class PlanModel {
   // 计划名称
   String name;
 
-  // 计划数量
-  int qty;
+  // // 计划数量
+  // int qty;
+  // // 计划数量单位
+  // String unit;
+  // int? numerator; // 计划数量分子
+  // int? denominator; // 计划数量分母
 
-  // 计划数量单位
-  String unit;
-
-  int? numerator; // 计划数量分子
-
-  int? denominator; // 计划数量分母
+  QuantityModel quantity; // 计划数量
 
   // 开始日期
   String startDate; // "YYYY-MM-DD"
@@ -65,10 +69,7 @@ class PlanModel {
     required this.pillId,
     this.isEnabled = true,
     required this.name,
-    required this.qty,
-    required this.unit,
-    this.numerator,
-    this.denominator,
+    required this.quantity,
     required this.startDate,
     required this.endDate,
     required this.repeatValues,
@@ -81,73 +82,101 @@ class PlanModel {
     this.reminderUnit,
     this.reminderMethod,
     required this.cycles,
-  }); // 自动生成 UUID 作为 ID
+  });
 
   // 处理频率显示
-  String getRepeatText() {
+  String getRepeatText(BuildContext context) {
     if (repeatValues.isEmpty) return '';
-    if (repeatUnit == 'day') {
+    final dateUnit = DateUnit.fromString(repeatUnit);
+    if (dateUnit == DateUnit.day) {
       if (repeatValues.length != 1) return '';
-      final unit = DateUnit.day.displayName;
       final val = repeatValues[0];
-      if (val == 1) return '每$unit';
-      return '每${val.toString()}$unit';
+      if (val == 1) return AppLocalizations.of(context)!.repeatRule_every_day;
+      return AppLocalizations.of(context)!.repeatRule_day(val);
     }
-    if (repeatUnit == 'week') {
-      final weekNames = repeatValues
+    if (dateUnit == DateUnit.week) {
+      return repeatValues
           .where((element) => element >= 1 && element <= 7)
-          .map((e) => weekdays[e - 1])
+          .map((e) => getWeekdayDisplayName(context, e))
           .toList()
-          .join('、');
-      final unit = DateUnit.week.displayName;
-      return '每$unit$weekNames';
+          .join(', ');
     }
-    if (repeatUnit == 'month') {
-      final unit = DateUnit.month.displayName;
-      return '每$unit${repeatValues.where((i) => i > 0 && i < 32).join('、')}号';
+    if (dateUnit == DateUnit.month) {
+      return AppLocalizations.of(context)!.repeatRule_month_day(
+        repeatValues.where((i) => i > 0 && i < 32).join(', '),
+      );
     }
     if (repeatUnit == 'year') {
-      final unit = DateUnit.year.displayName;
-      return '每$unit$startDate';
+      if (repeatValues.length != 2) return '';
+      final date = DateTime.now().copyWith(
+        month: repeatValues[0],
+        day: repeatValues[1],
+      );
+      final locale = Localizations.localeOf(context).toString();
+      return DateFormat.MMMd(locale).format(date);
     }
     return '';
   }
 
   // 处理提醒显示
-  String getReminderText() {
-    if (reminderValue == null) return '不提醒';
-    if (reminderValue == 0) return '计划时间开始时';
-    final unit = reminderUnit == 'minute' ? '分钟' : '小时';
-    return '提前$reminderValue$unit';
+  String getReminderText(BuildContext context) {
+    if (reminderValue == null) {
+      return AppLocalizations.of(context)!.reminderOption_none;
+    }
+    if (reminderValue == 0) {
+      return AppLocalizations.of(context)!.reminderOption_start;
+    }
+    final unit =
+        reminderUnit == 'hour'
+            ? AppLocalizations.of(context)!.hour
+            : AppLocalizations.of(context)!.minute;
+    return AppLocalizations.of(context)!.reminderRule('$reminderValue$unit');
   }
 
-  String getReminderAllText() {
-    String str = getReminderText();
+  String getReminderAllText(BuildContext context) {
+    String str = getReminderText(context);
     if (reminderValue == null) return str;
-    if (reminderMethod == 'clock') str += '，闹钟提醒';
-    if (reminderMethod == 'notify') str += '，通知提醒';
+    if (reminderMethod == 'clock') {
+      str += ', ${AppLocalizations.of(context)!.reminderMethod_clock}';
+    }
+    if (reminderMethod == 'notify') {
+      str += ', ${AppLocalizations.of(context)!.reminderMethod_notify}';
+    }
     return str;
   }
 
   // 处理停药条件
-  String getCycleText() {
-    if (cycles.isEmpty) return '无需停药';
-    return cycles.map((c) => c.getCycleText() + c.getNameText()).join('，');
+  String getCycleText(BuildContext context) {
+    if (cycles.isEmpty) {
+      return AppLocalizations.of(context)!.noInterruptionNeeded;
+    }
+    return cycles
+        .map((c) => c.getCycleText(context) + c.getNameText(context))
+        .join('，');
   }
 
-  String getDurationText() {
+  String getDurationText(BuildContext context) {
     if (duration == null || duration == 0) return '';
-    final unit = durationUnit == 'minute' ? '分钟' : '小时';
+    final unit =
+        durationUnit == 'hour'
+            ? AppLocalizations.of(context)!.hour
+            : AppLocalizations.of(context)!.minute;
     return '$duration$unit';
   }
 
-  String getRepeatEndText() {
-    if (endDate.isEmpty) return '不结束';
-    return '截止$endDate';
+  String getRepeatStartText(BuildContext context) {
+    return AppLocalizations.of(context)!.startOn(startDate);
   }
 
-  String getStatusText() {
-    return isEnabled ? '启用' : '停用';
+  String getRepeatEndText(BuildContext context) {
+    if (endDate.isEmpty) return '';
+    return AppLocalizations.of(context)!.endOn(endDate);
+  }
+
+  String getStatusText(BuildContext context) {
+    return isEnabled
+        ? AppLocalizations.of(context)!.enable
+        : AppLocalizations.of(context)!.disable;
   }
 
   Plan? toPlan() {
@@ -157,10 +186,10 @@ class PlanModel {
       pillId: pillId,
       isEnabled: isEnabled,
       name: name,
-      qty: qty,
-      unit: unit,
-      numerator: numerator,
-      denominator: denominator,
+      qty: quantity.qty,
+      unit: quantity.unit!,
+      numerator: quantity.fraction.numerator,
+      denominator: quantity.fraction.denominator,
       startDate: startDate,
       endDate: endDate,
       repeatValues: repeatValues.join(','),
@@ -180,10 +209,10 @@ class PlanModel {
       pillId: Value(pillId),
       isEnabled: Value(isEnabled),
       name: Value(name),
-      qty: Value(qty),
-      unit: Value(unit),
-      numerator: Value(numerator),
-      denominator: Value(denominator),
+      qty: Value(quantity.qty),
+      unit: Value(quantity.unit!),
+      numerator: Value(quantity.fraction.numerator),
+      denominator: Value(quantity.fraction.denominator),
       startDate: Value(startDate),
       endDate: Value(endDate),
       repeatValues: Value(repeatValues.join(',')),
@@ -204,10 +233,11 @@ class PlanModel {
       pillId: plan.pillId,
       isEnabled: plan.isEnabled,
       name: plan.name,
-      qty: plan.qty,
-      unit: plan.unit,
-      numerator: plan.numerator,
-      denominator: plan.denominator,
+      quantity: QuantityModel(
+        qty: plan.qty,
+        unit: plan.unit,
+        fraction: FractionModel(plan.numerator, plan.denominator),
+      ),
       startDate: plan.startDate,
       endDate: plan.endDate,
       repeatValues:
@@ -238,18 +268,33 @@ class CycleModel {
 
   CycleModel({required this.value, required this.unit, required this.isStop});
 
-  String getCycleText() {
+  String getCycleText(BuildContext context) {
     DateUnit? dateUnit = DateUnit.fromString(unit);
     if (dateUnit == null) return '';
-    return '$value${dateUnit.displayName}';
+    return '$value${dateUnit.displayName(context)}';
   }
 
-  String getNameText() {
-    return isStop ? '停药' : '用药';
+  String getNameText(BuildContext context) {
+    return isStop
+        ? AppLocalizations.of(context)!.withdrawal
+        : AppLocalizations.of(context)!.medication;
   }
 }
 
-final List<String> weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+class PlanItemModel {
+  int id;
+  int pillId;
+  String text;
+  String startTime;
+
+  PlanItemModel({
+    required this.id,
+    required this.pillId,
+    required this.text,
+    required this.startTime,
+  });
+}
+
 final int lastDayOfMonth = -1;
 
 // 定义枚举
@@ -260,32 +305,23 @@ enum DateUnit {
   year;
 
   // 获取显示名称
-  String get displayName {
+  String displayName(BuildContext context) {
     switch (this) {
       case DateUnit.day:
-        return '天';
+        return AppLocalizations.of(context)!.day;
       case DateUnit.week:
-        return '周';
+        return AppLocalizations.of(context)!.week;
       case DateUnit.month:
-        return '月';
+        return AppLocalizations.of(context)!.month;
       case DateUnit.year:
-        return '年';
+        return AppLocalizations.of(context)!.year;
     }
   }
 
   // 获取字符串值
   @override
   String toString() {
-    switch (this) {
-      case DateUnit.day:
-        return 'day';
-      case DateUnit.week:
-        return 'week';
-      case DateUnit.month:
-        return 'month';
-      case DateUnit.year:
-        return 'year';
-    }
+    return super.toString().split('.').last;
   }
 
   // 根据字符串值返回对应的枚举值
@@ -302,12 +338,5 @@ enum DateUnit {
       default:
         return null; // 如果字符串无效，返回 null
     }
-  }
-
-  // 获取所有枚举值及其显示名称
-  static List<Map<String, dynamic>> get options {
-    return DateUnit.values
-        .map((freq) => {'value': freq, 'label': freq.displayName})
-        .toList();
   }
 }

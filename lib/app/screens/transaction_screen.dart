@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../models/pill_model.dart';
+import '../models/quantity_model.dart';
 import '../models/transaction_model.dart';
+import '../providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../utils/datetime.dart';
 import '../widgets/pill_card.dart';
@@ -23,6 +26,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
   List<String> _units = [];
   Set<bool> _selectedSign = {false};
 
+  final List<bool> _unitDisabled = [];
+
+  void _addQuantity() {
+    _model.quantities.add(
+      QuantityModel(
+        qty: 1,
+        unit: widget.initialData.getUnit(),
+        fraction: FractionModel(null, null),
+      ),
+    );
+    _unitDisabled.add(false);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,19 +47,16 @@ class _TransactionScreenState extends State<TransactionScreen> {
     _model = TransactionModel(
       pillId: widget.initialData.id!,
       quantities: [],
-      timestamp: now,
       startTime: now,
     );
-    _model.quantities.add(
-      QuantityModel(qty: 1, unit: widget.initialData.getUnit()),
-    );
+    _addQuantity();
     _units = widget.initialData.packSpecs.map((e) => e.unit).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('调整药物数量')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.updateQuantity)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -81,7 +94,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               });
                             },
                             child: InputDecorator(
-                              decoration: InputDecoration(labelText: '日期'),
+                              decoration: InputDecoration(
+                                labelText:
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.transactionForm_date,
+                              ),
                               child: Text(getFormatDate(_model.startTime)),
                             ),
                           ),
@@ -107,7 +125,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               });
                             },
                             child: InputDecorator(
-                              decoration: InputDecoration(labelText: '时间'),
+                              decoration: InputDecoration(
+                                labelText:
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.transactionForm_time,
+                              ),
                               child: Text(getFormatTime(_startTime)),
                             ),
                           ),
@@ -116,7 +139,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     ),
                     // 备注
                     TextFormField(
-                      decoration: InputDecoration(labelText: '备注'),
+                      decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(
+                              context,
+                            )!.transactionForm_remark,
+                      ),
                       initialValue: _model.remark,
                       onChanged:
                           (value) => setState(() => _model.remark = value),
@@ -125,11 +153,23 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('数量变更方式'),
+                        Text(
+                          AppLocalizations.of(context)!.transactionForm_symbol,
+                        ),
                         SegmentedButton(
                           segments: [
-                            ButtonSegment(label: Text('增加'), value: false),
-                            ButtonSegment(label: Text('减少'), value: true),
+                            ButtonSegment(
+                              label: Text(
+                                AppLocalizations.of(context)!.symbol_add,
+                              ),
+                              value: false,
+                            ),
+                            ButtonSegment(
+                              label: Text(
+                                AppLocalizations.of(context)!.symbol_substract,
+                              ),
+                              value: true,
+                            ),
                           ],
                           selected: _selectedSign,
                           onSelectionChanged:
@@ -138,82 +178,119 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       ],
                     ),
                     // 数量
-                    Card(
-                      elevation: 1,
-                      margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                          spacing: 16,
-                          children: [
-                            ..._model.quantities.map(
-                              (item) => Row(
-                                spacing: 16,
-                                children: [
-                                  Expanded(
-                                    child: QuantityInput(
-                                      labelText: '数量',
-                                      initialValue: Number(
-                                        integer: item.qty,
-                                        numerator: item.numerator,
-                                        denominator: item.denominator,
-                                      ),
-                                      onChange: (value) {
-                                        setState(() {
-                                          item.qty = value.integer;
-                                          item.numerator = value.numerator;
-                                          item.denominator = value.denominator;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: DropdownButtonFormField(
-                                      decoration: InputDecoration(
-                                        labelText: '单位',
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return '请选择药物单位';
-                                        }
-                                        return null;
-                                      },
-                                      items:
-                                          _units
-                                              .map(
-                                                (option) => DropdownMenuItem(
-                                                  value: option,
-                                                  child: Text(option),
-                                                ),
-                                              )
-                                              .toList(),
-                                      value: item.unit,
-                                      onChanged:
-                                          (v) => setState(() => item.unit = v!),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                    Column(
+                      spacing: 8,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (_unitDisabled.any((e) => e))
+                          Text(
+                            AppLocalizations.of(context)!.quantityUnitWarning,
+                            style: TextStyle(
+                              color: context.read<ThemeProvider>().hintColor,
                             ),
-                            ElevatedButton.icon(
-                              onPressed:
-                                  () => setState(
-                                    () => _model.quantities.add(
-                                      QuantityModel(
-                                        qty: 1,
-                                        unit: widget.initialData.getUnit(),
-                                      ),
+                          ),
+                        ..._model.quantities.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: Card(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 16,
+                                    ),
+                                    child: Row(
+                                      spacing: 16,
+                                      children: [
+                                        Expanded(
+                                          child: QuantityInput(
+                                            labelText:
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.transactionForm_qty,
+                                            initialValue: item,
+                                            onChange: (value) {
+                                              setState(() {
+                                                item.qty = value.qty;
+                                                item.fraction = value.fraction;
+                                                _unitDisabled[index] =
+                                                    value.fraction.isNotEmpty;
+                                                if (_unitDisabled[index]) {
+                                                  item.unit = _units.last;
+                                                }
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: DropdownButtonFormField<
+                                            String
+                                          >(
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.transactionForm_unit,
+                                            ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return AppLocalizations.of(
+                                                  context,
+                                                )!.validToken_transactionUnit_required;
+                                              }
+                                              return null;
+                                            },
+                                            items:
+                                                _units
+                                                    .map(
+                                                      (option) =>
+                                                          DropdownMenuItem(
+                                                            value: option,
+                                                            child: Text(option),
+                                                          ),
+                                                    )
+                                                    .toList(),
+                                            value: item.unit,
+                                            onChanged:
+                                                _unitDisabled[index]
+                                                    ? null
+                                                    : (v) => setState(
+                                                      () => item.unit = v!,
+                                                    ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                              label: Text('增加一行'),
-                              icon: Icon(Icons.add),
-                              style: ElevatedButton.styleFrom(
-                                elevation: 2,
-                                minimumSize: const Size(double.infinity, 40),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                              IconButton.filledTonal(
+                                onPressed:
+                                    index == 0
+                                        ? null
+                                        : () {
+                                          setState(() {
+                                            _model.quantities.removeAt(index);
+                                            _unitDisabled.removeAt(index);
+                                          });
+                                        },
+                                icon: Icon(Icons.close),
+                              ),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => setState(() => _addQuantity()),
+                      label: Text(AppLocalizations.of(context)!.addRow),
+                      icon: Icon(Icons.add),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 2,
+                        minimumSize: const Size(double.infinity, 40),
                       ),
                     ),
                   ],
@@ -227,7 +304,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 minimumSize: const Size(double.infinity, 48),
                 textStyle: TextStyle(fontSize: 16),
               ),
-              child: const Text('保存'),
+              child: Text(AppLocalizations.of(context)!.save),
             ),
           ],
         ),
@@ -236,8 +313,15 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   void _onPressed() async {
+    _model.isCustom = true;
     _model.isNegative = _selectedSign.first;
     await context.read<TransactionProvider>().addTransaction(_model);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.success_save),
+        duration: Duration(seconds: 1),
+      ),
+    );
     Navigator.of(context).pop(widget.initialData);
   }
 }
