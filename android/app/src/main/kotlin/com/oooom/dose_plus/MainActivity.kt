@@ -1,4 +1,4 @@
-package com.example.pillo
+package com.oooom.dose_plus
 
 import io.flutter.embedding.android.FlutterActivity
 
