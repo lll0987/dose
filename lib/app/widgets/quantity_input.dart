@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/quantity_model.dart';
+import 'required_label.dart';
 
 class QuantityInput extends StatefulWidget {
   final bool enabled;
@@ -69,7 +70,7 @@ class _QuantityInputState extends State<QuantityInput> {
           enabled: widget.enabled,
           controller: _displayController,
           decoration: InputDecoration(
-            labelText: widget.labelText,
+            label: RequiredLabel(text: widget.labelText),
             filled: widget.filled,
             fillColor: widget.fillColor,
           ),
@@ -104,6 +105,14 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _integerController; // 新增控制器
 
+  QuantityModel get _quantity => QuantityModel(
+    qty: _integer,
+    fraction: FractionModel(
+      _selectedFraction == 'none' ? null : _numerator,
+      _selectedFraction == 'none' ? null : _denominator,
+    ),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -135,172 +144,203 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
 
     return AlertDialog(
       title: Text(AppLocalizations.of(context)!.quantityAlertTitle),
-      content: Form(
-        key: _formKey,
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 整数输入行
-                Row(
-                  spacing: 8,
-                  children: [
-                    IconButton.filled(
-                      style: FilledButton.styleFrom(
-                        minimumSize: Size(36, 36),
-                        iconSize: 24,
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                      icon: Icon(Icons.remove),
-                      onPressed: () {
-                        setState(() {
-                          if (_integer > 0) _integer--;
-                          _integerController.text =
-                              _integer.toString(); // 同步控制器
-                        });
-                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            '${AppLocalizations.of(context)!.quantity}: ${_quantity.displayText}',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    Expanded(
-                      child: TextFormField(
-                        textAlign: TextAlign.center,
-                        controller: _integerController, // 使用控制器
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
+                  ),
+                  SizedBox(height: 16),
+                  // 整数输入行
+                  Row(
+                    spacing: 8,
+                    children: [
+                      IconButton.filled(
+                        style: FilledButton.styleFrom(
+                          minimumSize: Size(36, 36),
+                          iconSize: 24,
                         ),
-                        onChanged: (value) {
+                        icon: Icon(Icons.remove),
+                        onPressed: () {
                           setState(() {
-                            _integer = int.tryParse(value) ?? 0;
+                            if (_integer > 0) _integer--;
+                            _integerController.text =
+                                _integer.toString(); // 同步控制器
                           });
                         },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.validToken_qty_required;
-                          }
-                          if (int.tryParse(value) == null) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.validToken_qty_integer;
-                          }
-                          return null;
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          textAlign: TextAlign.center,
+                          controller: _integerController, // 使用控制器
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _integer = int.tryParse(value) ?? 0;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return AppLocalizations.of(
+                                context,
+                              )!.validToken_qty_required;
+                            }
+                            if (int.tryParse(value) == null) {
+                              return AppLocalizations.of(
+                                context,
+                              )!.validToken_qty_integer;
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      IconButton.filled(
+                        style: FilledButton.styleFrom(
+                          minimumSize: Size(36, 36),
+                          iconSize: 24,
+                        ),
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            _integer++;
+                            _integerController.text =
+                                _integer.toString(); // 同步控制器
+                          });
                         },
-                      ),
-                    ),
-                    IconButton.filled(
-                      style: FilledButton.styleFrom(
-                        minimumSize: Size(36, 36),
-                        iconSize: 24,
-                      ),
-                      icon: Icon(Icons.add),
-                      onPressed: () {
-                        setState(() {
-                          _integer++;
-                          _integerController.text =
-                              _integer.toString(); // 同步控制器
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                // 分数选项行
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8,
-                  children:
-                      presetOptions.map((option) {
-                        return ChoiceChip(
-                          label: Text(option.label),
-                          selected: _selectedFraction == option.key,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedFraction = option.key;
-                              if (option.fraction != null) {
-                                _numerator = option.fraction!.numerator;
-                                _denominator = option.fraction!.denominator;
-                              } else {
-                                _numerator = option.key == 'custom' ? 1 : null;
-                                _denominator = null;
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                ),
-                if (_selectedFraction == 'custom') ...[
-                  SizedBox(height: 16),
-                  Row(
-                    spacing: 8.0,
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: _numerator?.toString(),
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText:
-                                AppLocalizations.of(context)!.numeratorLabel,
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _numerator = int.tryParse(value);
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(
-                                context,
-                              )!.validToken_numerator_required;
-                            }
-                            if (int.tryParse(value) == null ||
-                                int.parse(value) <= 0) {
-                              return AppLocalizations.of(
-                                context,
-                              )!.validToken_qty_integer;
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      Text('/', style: TextStyle(fontSize: 24)),
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: _denominator?.toString(),
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText:
-                                AppLocalizations.of(context)!.denominatorLabel,
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _denominator = int.tryParse(value);
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(
-                                context,
-                              )!.validToken_denominator_required;
-                            }
-                            if (int.tryParse(value) == null ||
-                                int.parse(value) <= 0) {
-                              return AppLocalizations.of(
-                                context,
-                              )!.validToken_qty_integer;
-                            }
-                            return null;
-                          },
-                        ),
                       ),
                     ],
                   ),
+                  SizedBox(height: 16),
+                  // 分数选项行
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8,
+                    children:
+                        presetOptions.map((option) {
+                          return ChoiceChip(
+                            label: Text(option.label),
+                            selected: _selectedFraction == option.key,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedFraction = option.key;
+                                if (option.fraction != null) {
+                                  _numerator = option.fraction!.numerator;
+                                  _denominator = option.fraction!.denominator;
+                                } else {
+                                  _numerator =
+                                      option.key == 'custom' ? 1 : null;
+                                  _denominator = null;
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                  ),
+                  if (_selectedFraction == 'custom') ...[
+                    SizedBox(height: 16),
+                    Row(
+                      spacing: 8.0,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: _numerator?.toString(),
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              label: RequiredLabel(
+                                text:
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.numeratorLabel,
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _numerator = int.tryParse(value);
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(
+                                  context,
+                                )!.validToken_numerator_required;
+                              }
+                              if (int.tryParse(value) == null ||
+                                  int.parse(value) <= 0) {
+                                return AppLocalizations.of(
+                                  context,
+                                )!.validToken_qty_integer;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        Text('/', style: TextStyle(fontSize: 24)),
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: _denominator?.toString(),
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              label: RequiredLabel(
+                                text:
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.denominatorLabel,
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _denominator = int.tryParse(value);
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(
+                                  context,
+                                )!.validToken_denominator_required;
+                              }
+                              if (int.tryParse(value) == null ||
+                                  int.parse(value) <= 0) {
+                                return AppLocalizations.of(
+                                  context,
+                                )!.validToken_qty_integer;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
       actions: [
@@ -324,15 +364,7 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                 );
                 return;
               }
-              Navigator.of(context).pop(
-                QuantityModel(
-                  qty: _integer,
-                  fraction: FractionModel(
-                    _selectedFraction == 'none' ? null : _numerator,
-                    _selectedFraction == 'none' ? null : _denominator,
-                  ),
-                ),
-              );
+              Navigator.of(context).pop(_quantity);
             }
           },
         ),

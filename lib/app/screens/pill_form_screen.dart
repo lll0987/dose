@@ -12,8 +12,10 @@ import '../models/pill_model.dart';
 import '../models/quantity_model.dart';
 import '../providers/pill_provider.dart';
 import '../providers/theme_provider.dart';
+import '../widgets/color_picker.dart';
 import '../widgets/pill_image.dart';
 import '../widgets/quantity_input.dart';
+import '../widgets/required_label.dart';
 
 class PillFormScreen extends StatefulWidget {
   final PillModel? pill;
@@ -55,8 +57,16 @@ class _PillFormScreenState extends State<PillFormScreen> {
     _units = _model.packSpecs.map((s) => s.unit).toSet().toList();
   }
 
-  void _addPackSpec() {
-    if (_model.packSpecs.length >= _specDepth) return;
+  void _addPackSpec(BuildContext context) {
+    if (_model.packSpecs.length >= _specDepth) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.specDepthMax(_specDepth)),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
     setState(() {
       _model.packSpecs.add(SpecModel(qty: 1, unit: ''));
     });
@@ -121,8 +131,9 @@ class _PillFormScreenState extends State<PillFormScreen> {
                     children: [
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.pillForm_name,
+                          label: RequiredLabel(
+                            text: AppLocalizations.of(context)!.pillForm_name,
+                          ),
                           filled: true,
                           fillColor:
                               Theme.of(context).colorScheme.surfaceContainerLow,
@@ -154,10 +165,12 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                       context,
                                     )!.pillForm_packSpecs,
                                     style:
-                                        Theme.of(context).textTheme.titleSmall,
+                                        Theme.of(context).textTheme.labelLarge,
                                   ),
                                 ],
                               ),
+                              if (_model.packSpecs.length > 1)
+                                _buildPackSpecsResult(context),
                               ..._model.packSpecs.mapIndexed((index, item) {
                                 final isFirst = index == 0;
                                 return Row(
@@ -180,10 +193,12 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                       child: TextFormField(
                                         enabled: !isFirst && !_isUpdate,
                                         decoration: InputDecoration(
-                                          labelText:
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.pillForm_qty,
+                                          label: RequiredLabel(
+                                            text:
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.pillForm_qty,
+                                          ),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -211,10 +226,12 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                       child: TextFormField(
                                         enabled: !_isUpdate,
                                         decoration: InputDecoration(
-                                          labelText:
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.pillForm_unit,
+                                          label: RequiredLabel(
+                                            text:
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.pillForm_unit,
+                                          ),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -250,7 +267,7 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                           _isUpdate
                                               ? null
                                               : isFirst
-                                              ? () => _addPackSpec()
+                                              ? () => _addPackSpec(context)
                                               : () => _removePackSpec(
                                                 context,
                                                 index,
@@ -301,10 +318,12 @@ class _PillFormScreenState extends State<PillFormScreen> {
                               Expanded(
                                 child: DropdownButtonFormField<String>(
                                   decoration: InputDecoration(
-                                    labelText:
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.pillForm_initUnit,
+                                    label: RequiredLabel(
+                                      text:
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.pillForm_initUnit,
+                                    ),
                                     filled: true,
                                     fillColor:
                                         Theme.of(
@@ -368,7 +387,7 @@ class _PillFormScreenState extends State<PillFormScreen> {
                           child: ListTile(
                             title: Text(
                               AppLocalizations.of(context)!.pillForm_image,
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: Theme.of(context).textTheme.labelLarge,
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -400,50 +419,16 @@ class _PillFormScreenState extends State<PillFormScreen> {
                           ),
                         ),
                       ),
-                      Consumer<ThemeProvider>(
-                        builder: (context, themeProvider, child) {
-                          return DropdownButtonFormField<Color>(
-                            value: _selectedColor,
-                            items:
-                                themeProvider
-                                    .getColorOptions(context)
-                                    .entries
-                                    .map((item) {
-                                      final value = item.value;
-                                      final label = item.key;
-                                      return DropdownMenuItem(
-                                        value: value,
-                                        child: Row(
-                                          spacing: 8,
-                                          children: [
-                                            Container(
-                                              width: 12,
-                                              height: 12,
-                                              decoration: BoxDecoration(
-                                                color: value,
-                                                shape: BoxShape.circle,
-                                              ),
-                                            ),
-                                            Text(label),
-                                          ],
-                                        ),
-                                      );
-                                    })
-                                    .toList(),
-                            onChanged:
-                                (value) =>
-                                    setState(() => _selectedColor = value),
-                            decoration: InputDecoration(
-                              labelText:
-                                  AppLocalizations.of(context)!.pillForm_color,
-                              filled: true,
-                              fillColor:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainerLow,
-                            ),
-                          );
-                        },
+                      ColorPicker(
+                        filled: true,
+                        fillColor:
+                            Theme.of(context).colorScheme.surfaceContainerLow,
+                        labelText: AppLocalizations.of(context)!.pillForm_color,
+                        initialValue: _selectedColor,
+                        onChanged:
+                            (v) => setState(() {
+                              _selectedColor = v;
+                            }),
                       ),
                     ],
                   ),
@@ -462,6 +447,34 @@ class _PillFormScreenState extends State<PillFormScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPackSpecsResult(BuildContext context) {
+    if (_model.packSpecs.length < 2) return SizedBox.shrink();
+    String text = '';
+    for (var i = 0; i < _model.packSpecs.length; i++) {
+      final spec = _model.packSpecs[i];
+      if (i == 0) {
+        text = '${spec.qty}${spec.unit} = ';
+      } else if (i == 1) {
+        text += '${spec.qty}${spec.unit}';
+      } else {
+        text += ' × ${spec.qty}${spec.unit}';
+      }
+    }
+    if (_model.packSpecs.length > 2) {
+      text +=
+          ' = ${_model.getTotalQtyMultiple(-1)}${_model.packSpecs.last.unit}';
+    }
+
+    final color = Theme.of(context).colorScheme.primary;
+    return Row(
+      spacing: 2,
+      children: [
+        // Icon(Icons.info_outlined, size: 14, color: color),
+        Text(text, style: TextStyle(color: color)),
+      ],
     );
   }
 

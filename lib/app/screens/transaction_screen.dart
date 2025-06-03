@@ -10,6 +10,7 @@ import '../providers/transaction_provider.dart';
 import '../utils/datetime.dart';
 import '../widgets/pill_card.dart';
 import '../widgets/quantity_input.dart';
+import '../widgets/required_label.dart';
 
 class TransactionScreen extends StatefulWidget {
   final PillModel initialData;
@@ -95,10 +96,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             },
                             child: InputDecorator(
                               decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.transactionForm_date,
+                                label: RequiredLabel(
+                                  text:
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.transactionForm_date,
+                                ),
                               ),
                               child: Text(getFormatDate(_model.startTime)),
                             ),
@@ -126,10 +129,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             },
                             child: InputDecorator(
                               decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.transactionForm_time,
+                                label: RequiredLabel(
+                                  text:
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.transactionForm_time,
+                                ),
                               ),
                               child: Text(getFormatTime(_startTime)),
                             ),
@@ -229,10 +234,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                             String
                                           >(
                                             decoration: InputDecoration(
-                                              labelText:
-                                                  AppLocalizations.of(
-                                                    context,
-                                                  )!.transactionForm_unit,
+                                              label: RequiredLabel(
+                                                text:
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.transactionForm_unit,
+                                              ),
                                             ),
                                             validator: (value) {
                                               if (value == null ||

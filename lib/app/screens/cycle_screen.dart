@@ -91,64 +91,49 @@ class _CycleScreenState extends State<CycleScreen> {
                           return Row(
                             children: [
                               Expanded(
-                                child: Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        SegmentedButton(
-                                          segments: [
-                                            ButtonSegment(
-                                              label: Text(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.medication,
-                                              ),
-                                              value: false,
-                                            ),
-                                            ButtonSegment(
-                                              label: Text(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.withdrawal,
-                                              ),
-                                              value: true,
-                                            ),
-                                          ],
-                                          selected: {item.isStop},
-                                          onSelectionChanged:
-                                              (v) => setState(
-                                                () => item.isStop = v.first,
-                                              ),
-                                        ),
-                                        SizedBox(
-                                          width: 128,
-                                          child: InkWell(
-                                            onTap:
-                                                () => _showCycleDialog(
-                                                  context,
-                                                  item,
+                                child: InkWell(
+                                  onTap: () => _showCycleDialog(context, item),
+                                  child: Card(
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          SegmentedButton(
+                                            segments: [
+                                              ButtonSegment(
+                                                label: Text(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.medication,
                                                 ),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  item.getCycleText(context),
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                  ),
+                                                value: false,
+                                              ),
+                                              ButtonSegment(
+                                                label: Text(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.withdrawal,
                                                 ),
-                                              ],
-                                            ),
+                                                value: true,
+                                              ),
+                                            ],
+                                            selected: {item.isStop},
+                                            onSelectionChanged:
+                                                (v) => setState(
+                                                  () => item.isStop = v.first,
+                                                ),
                                           ),
-                                        ),
-                                      ],
+                                          Text(
+                                            item.getCycleText(context),
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

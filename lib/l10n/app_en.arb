@@ -31,6 +31,8 @@
     "success_disable": "Disabled",
     "error_hasError": "Error: ",
     "error_noData": "No data",
+    "specDepthMax": "Maximum depth: {depth} levels",
+    "quantity": "Quantity",
     "quantityUnitWarning": "When setting the number of divisions, only the smallest unit (the last item) can be used.",
     "quantityAlertTitle": "Change quantity",
     "custom": "Custom",

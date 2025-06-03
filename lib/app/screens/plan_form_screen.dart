@@ -11,6 +11,7 @@ import '../providers/theme_provider.dart';
 import '../utils/datetime.dart';
 import '../widgets/list_wheel_picker.dart';
 import '../widgets/quantity_input.dart';
+import '../widgets/required_label.dart';
 import 'cycle_screen.dart';
 import 'reminder_screen.dart';
 import 'repeat_screen.dart';
@@ -28,8 +29,11 @@ class _PlanFormState extends State<PlanFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   List<PillModel> _pillList = [];
-  List<PillModel> _pills = [];
+  // List<PillModel> _pills = [];
   List<String> _units = [];
+
+  List<PillModel> get _pills =>
+      _pillList.length > 3 ? _pillList.sublist(0, 3) : _pillList;
 
   PlanModel _model = PlanModel(
     pillId: 0,
@@ -105,8 +109,9 @@ class _PlanFormState extends State<PlanFormScreen> {
                       const SizedBox(height: 8),
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.planForm_name,
+                          label: RequiredLabel(
+                            text: AppLocalizations.of(context)!.planForm_name,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -151,8 +156,12 @@ class _PlanFormState extends State<PlanFormScreen> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(context)!.planForm_unit,
+                                label: RequiredLabel(
+                                  text:
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.planForm_unit,
+                                ),
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -193,8 +202,8 @@ class _PlanFormState extends State<PlanFormScreen> {
                       _buildRepeatSection(),
                       const SizedBox(height: 8),
                       _buildTimeSection(),
-                      const SizedBox(height: 8),
-                      _buildReminderSection(),
+                      // const SizedBox(height: 8),
+                      // _buildReminderSection(),
                       const SizedBox(height: 8),
                       _buildCycleSection(),
                     ],
@@ -316,10 +325,65 @@ class _PlanFormState extends State<PlanFormScreen> {
                 ),
               ),
             ),
-            // TODO 更多药物选择列表
             if (_pillList.length > 3)
-              IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+              IconButton(
+                onPressed: () {
+                  _showPillBottomModal();
+                },
+                icon: Icon(Icons.more_vert),
+              ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showPillBottomModal() async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return Container(
+              padding: EdgeInsets.only(top: 16, bottom: 8),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children:
+                      _pillList.map((item) {
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              _reloadPill(item.id!);
+                              _reloadPillList(_pillList);
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Row(
+                              spacing: 8,
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: themeProvider.getColor(
+                                      item.themeValue,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Text(item.name),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -639,11 +703,20 @@ class _PlanFormState extends State<PlanFormScreen> {
     _model.quantity.unit = _units.last;
   }
 
+  void _reloadPillList(List<PillModel> list) {
+    if (_model.pillId == 0) return;
+    final index = list.indexWhere((p) => p.id == _model.pillId);
+    if (index == -1) return;
+    final item = list.removeAt(index);
+    list.insert(0, item);
+  }
+
   Future<void> _getPills() async {
     final list = await context.read<PillRepository>().getAllPills();
+    _reloadPillList(list);
     setState(() {
       _pillList = list;
-      _pills = list.length > 3 ? list.sublist(0, 3) : list;
+      // _pills = list.length > 3 ? list.sublist(0, 3) : list;
       int pillId = _model.pillId;
       if (_model.pillId == 0) pillId = list.first.id!;
       _reloadPill(pillId);

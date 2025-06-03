@@ -221,42 +221,47 @@ class _RepeatSettingsState extends State<RepeatScreen> {
   }
 
   Widget _buildWeekValuePicker() {
+    // NEXT 动态计算一行显示数量，优化极端小屏的体验
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      spacing: 4,
       children: List.generate(7, (index) {
         final value = index + 1;
         final label = getWeekdayDisplayName(context, value);
         final isSelected = _weekValues.contains(value);
-        return InkWell(
-          onTap:
-              () => setState(() {
-                if (isSelected) {
-                  _weekValues.remove(value);
-                } else {
-                  _weekValues.add(value);
-                }
-              }),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color:
-                  isSelected
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                label,
-                style: TextStyle(
+        return Expanded(
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: InkWell(
+              onTap:
+                  () => setState(() {
+                    if (isSelected) {
+                      _weekValues.remove(value);
+                    } else {
+                      _weekValues.add(value);
+                    }
+                  }),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                decoration: BoxDecoration(
                   color:
                       isSelected
-                          ? Theme.of(context).colorScheme.onPrimaryContainer
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color:
+                          isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -74,7 +74,6 @@ class _QuantityHistoryScreenState extends State<QuantityHistoryScreen> {
                             ),
                           ],
                         ),
-                        // NEXT 调整列表样式
                         children: [
                           if (transaction.remark != null &&
                               transaction.remark!.isNotEmpty) ...[
