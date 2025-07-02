@@ -64,6 +64,7 @@ class _ColorPickerState extends State<ColorPicker> {
                 labelText: widget.labelText,
                 filled: widget.filled,
                 fillColor: widget.fillColor,
+                suffixIcon: Icon(Icons.arrow_drop_down),
               ),
             ),
           ),

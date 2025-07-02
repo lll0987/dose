@@ -67,23 +67,8 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  Future<List<TransactionModel>> getDayTransactions(DateTime day) async {
-    final start = DateTime(day.year, day.month, day.day).toUtc();
-    final allTransactions =
-        await (select(transactions)..where(
-          (tbl) => tbl.startTime.isBetweenValues(
-            start,
-            start
-                .add(const Duration(days: 1))
-                .subtract(const Duration(seconds: 1)),
-          ),
-        )).get();
-    final List<TransactionModel> result = [];
-    for (var item in allTransactions) {
-      final list = await getAllQuantities(item.id);
-      result.add(TransactionModel.fromTransaction(item, list));
-    }
-    return result;
+  Future<int> count() {
+    return count();
   }
 
   Future<int> addTransaction(TransactionModel transaction) async {
@@ -138,6 +123,25 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     return result;
   }
 
+  Future<List<TransactionModel>> getTransactions(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final allTransactions =
+        await (select(transactions)..where(
+          (tbl) => tbl.startTime.isBetweenValues(
+            start.toUtc(),
+            end.toUtc().subtract(const Duration(seconds: 1)),
+          ),
+        )).get();
+    final List<TransactionModel> result = [];
+    for (var item in allTransactions) {
+      final list = await getAllQuantities(item.id);
+      result.add(TransactionModel.fromTransaction(item, list));
+    }
+    return result;
+  }
+
   Future<List<TransactionModel>> getTransactionHistoryByPill(int pillId) async {
     final allTransactions =
         await (select(transactions)
@@ -162,5 +166,17 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
         return e.toCompanion();
       }).toList(),
     );
+  }
+
+  Future<void> deleteTransactionFromPlan(int planId, DateTime date) async {
+    final lower = DateTime(date.year, date.month, date.day).toUtc();
+    final higher = lower
+        .add(const Duration(days: 1))
+        .subtract(const Duration(seconds: 1));
+    await (delete(transactions)..where(
+      (tbl) =>
+          tbl.planId.equals(planId) &
+          tbl.startTime.isBetweenValues(lower, higher),
+    )).go();
   }
 }

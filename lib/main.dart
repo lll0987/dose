@@ -10,12 +10,13 @@ import 'app/database/dao/transaction_dao.dart';
 import 'app/database/repository/pill_repository.dart';
 import 'app/database/repository/plan_repository.dart';
 import 'app/database/repository/transaction_repository.dart';
-import 'app/providers/datetime_provider.dart';
+import 'app/providers/daily_provider.dart';
 import 'app/providers/pill_provider.dart';
 import 'app/providers/plan_provider.dart';
 import 'app/providers/theme_provider.dart';
 import 'app/providers/transaction_provider.dart';
-import 'app/screens/home_screen.dart';
+import 'app/screens/daily_screen.dart';
+import 'app/screens/history_screen.dart';
 import 'app/screens/pill_screen.dart';
 import 'app/screens/plan_screen.dart';
 
@@ -35,13 +36,17 @@ void main() async {
   );
 
   final themeProvider = ThemeProvider();
-  final datetimeProvider = DatetimeProvider();
   final pillProvider = PillProvider(pillRepository);
   final planProvider = PlanProvider(planRepository);
+  final dailyProvider = DailyProvider(
+    transactionRepository,
+    planProvider,
+    pillProvider,
+  );
   final transactionProvider = TransactionProvider(
     transactionRepository,
     pillProvider,
-    datetimeProvider,
+    dailyProvider,
   );
 
   runApp(
@@ -55,7 +60,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => planProvider),
         ChangeNotifierProvider(create: (_) => transactionProvider),
         ChangeNotifierProvider(create: (_) => themeProvider),
-        ChangeNotifierProvider(create: (_) => datetimeProvider),
+        ChangeNotifierProvider(create: (_) => dailyProvider),
       ],
       child: const MyApp(),
     ),
@@ -81,8 +86,16 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
               seedColor: themeProvider.themeColor,
+              brightness: Brightness.light,
             ),
           ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: themeProvider.themeColor,
+              brightness: Brightness.dark,
+            ),
+          ),
+          themeMode: themeProvider.themeMode,
           home: const MainScreen(),
         );
       },
@@ -100,7 +113,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    const HomeScreen(),
+    const DailyScreen(),
+    const HistoryScreen(),
     const PlanScreen(),
     const PillScreen(),
   ];
@@ -115,10 +129,14 @@ class _MainScreenState extends State<MainScreen> {
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.home),
-            label: AppLocalizations.of(context)!.navHome,
+            label: AppLocalizations.of(context)!.navDaily,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.event_note),
+            icon: const Icon(Icons.calendar_month),
+            label: AppLocalizations.of(context)!.navHistory,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.dataset),
             label: AppLocalizations.of(context)!.navPlan,
           ),
           NavigationDestination(

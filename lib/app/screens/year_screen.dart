@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/daily_provider.dart';
 import '../providers/theme_provider.dart';
-import '../providers/transaction_provider.dart';
 import '../utils/datetime.dart';
 
 class YearScreen extends StatefulWidget {
@@ -19,16 +19,16 @@ class _YearScreenState extends State<YearScreen> {
   double _pointSize = 16;
   final double _pointSpacing = 4;
 
-  int _currentYear = DateTime.now().year; // 当前年份
+  late int _currentYear; // 当前年份
 
   void _loadData() {
-    context.read<TransactionProvider>().loadYearTransactions(_currentYear);
+    context.read<DailyProvider>().loadHistoryData(year: _currentYear);
   }
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _currentYear = context.read<DailyProvider>().year;
   }
 
   @override
@@ -40,12 +40,12 @@ class _YearScreenState extends State<YearScreen> {
     final locale = Localizations.localeOf(context).toString();
     final dateFormat = DateFormat.MMMM(locale);
 
-    return Consumer<TransactionProvider>(
+    return Consumer<DailyProvider>(
       builder: (context, provider, child) {
         return Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -156,7 +156,7 @@ class _YearScreenState extends State<YearScreen> {
                 mainAxisSpacing: 8.0,
                 mainAxisExtent: height,
               ),
-              itemCount: firstDayOfWeek + lastDayOfMonth.day,
+              itemCount: firstDayOfWeek + lastDayOfMonth.day - 1,
               itemBuilder: (context, index) {
                 if (index < firstDayOfWeek - 1) {
                   return SizedBox.shrink(); // 空占位

@@ -1,6 +1,6 @@
 name: dose_plus
 description: 'A new Flutter project.'
-version: 1.0.0+1
+version: 0.3.0+1
 
 environment:
     sdk: ^3.7.2

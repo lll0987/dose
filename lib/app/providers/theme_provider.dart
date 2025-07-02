@@ -26,7 +26,8 @@ class ThemeProvider with ChangeNotifier {
 
   Map<String, Color> getColorOptions(BuildContext context) {
     return {
-      AppLocalizations.of(context)!.colorOption_default: _color,
+      AppLocalizations.of(context)!.colorOption_default:
+          Colors.lightGreen.shade500,
       AppLocalizations.of(context)!.colorOption_lime: Colors.lime.shade500,
       AppLocalizations.of(context)!.colorOption_teal: Colors.teal.shade500,
       AppLocalizations.of(context)!.colorOption_blueGrey:
@@ -42,5 +43,14 @@ class ThemeProvider with ChangeNotifier {
       AppLocalizations.of(context)!.colorOption_blue: Colors.blue.shade500,
       AppLocalizations.of(context)!.colorOption_purple: Colors.purple.shade500,
     };
+  }
+
+  ThemeMode _themeMode = ThemeMode.system;
+
+  ThemeMode get themeMode => _themeMode;
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    notifyListeners();
   }
 }

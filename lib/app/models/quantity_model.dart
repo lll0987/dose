@@ -36,6 +36,17 @@ class FractionModel {
     numerator = num * d + n * den;
     denominator = den * d;
   }
+
+  void substract(FractionModel fraction) {
+    if (isEmpty && fraction.isEmpty) return;
+    int num = numerator ?? 0;
+    int den = denominator ?? 1;
+    int n = fraction.numerator ?? 0;
+    int d = fraction.denominator ?? 1;
+
+    numerator = num * d - n * den;
+    denominator = den * d;
+  }
 }
 
 class QuantityModel {
@@ -68,7 +79,33 @@ class QuantityModel {
     return FractionModel(qty * den + num, den);
   }
 
+  void substract(QuantityModel model) {
+    if (fraction.isEmpty && model.fraction.isEmpty) {
+      qty -= model.qty;
+      return;
+    }
+    final f = toFraction();
+    final fm = model.toFraction();
+    f.substract(fm);
+    final r = cancelling(f);
+    qty = r.qty;
+    fraction = r.fraction;
+  }
+
   static QuantityModel sumQuantities(List<QuantityModel> quantities) {
+    assert(
+      quantities.every(
+        (q) =>
+            q.qty >= 0 &&
+            (q.fraction.numerator == null
+                ? true
+                : q.fraction.numerator! >= 0) &&
+            (q.fraction.denominator == null
+                ? true
+                : q.fraction.denominator! >= 0),
+      ),
+    );
+
     final totalFraction = FractionModel(null, null);
 
     if (quantities.every((e) => e.fraction.isEmpty)) {
@@ -81,10 +118,14 @@ class QuantityModel {
       totalFraction.add(fraction);
     }
 
+    return cancelling(totalFraction);
+  }
+
+  static QuantityModel cancelling(FractionModel fraction) {
     // 约分
-    int gcdValue = gcd(totalFraction.numerator!, totalFraction.denominator!);
-    int numerator = totalFraction.numerator! ~/ gcdValue;
-    int denominator = totalFraction.denominator! ~/ gcdValue;
+    int gcdValue = gcd(fraction.numerator!, fraction.denominator!);
+    int numerator = fraction.numerator! ~/ gcdValue;
+    int denominator = fraction.denominator! ~/ gcdValue;
 
     int newQty = numerator ~/ denominator;
     int newNumerator = numerator % denominator;

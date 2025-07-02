@@ -1,5 +1,6 @@
 {
-    "navHome": "Today",
+    "navDaily": "Today",
+    "navHistory": "History",
     "navPlan": "Plan",
     "navPill": "Pill",
     "empty_pillList": "No pills yet, tap + to add one",
@@ -10,6 +11,7 @@
     "symbol_add": "Add",
     "symbol_substract": "Subtract",
     "delete": "Delete",
+    "close": "Close",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "submit": "Submit",
@@ -191,5 +193,15 @@
     "colorOption_blue": "Blue",
     "@colorOption_blue": {},
     "colorOption_purple": "Purple",
-    "@colorOption_purple": {}
+    "@colorOption_purple": {},
+    "statusOption_ignored": "Ignored",
+    "@statusOption_ignored": {},
+    "statusOption_missed": "Missed",
+    "@statusOption_missed": {},
+    "statusOption_supplemented": "Supplement",
+    "@statusOption_supplemented": {},
+    "statusOption_taken": "Taken",
+    "@statusOption_taken": {},
+    "statusOption_scheduled": "Scheduled",
+    "@statusOption_scheduled": {}
 }

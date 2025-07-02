@@ -51,6 +51,7 @@ class _PlanFormState extends State<PlanFormScreen> {
     cycles: [],
   );
 
+  // FIX 不知道怎么建出了没有开始时间的计划
   TimeOfDay _startTime = TimeOfDay(hour: 8, minute: 0);
 
   bool _isCycle = false;

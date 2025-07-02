@@ -129,6 +129,7 @@ class PlanGroupItem extends StatelessWidget {
             ],
           ),
           shape: Border(),
+          collapsedShape: Border(),
           initiallyExpanded: true,
           children: [
             ListView.separated(

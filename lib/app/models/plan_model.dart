@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -6,6 +7,8 @@ import 'package:intl/intl.dart';
 import '../database/app_database.dart';
 import '../utils/datetime.dart';
 import 'quantity_model.dart';
+
+enum PlanStatus { taken, ignored, supplemented, missed, scheduled }
 
 class PlanModel {
   int? id;
@@ -83,6 +86,83 @@ class PlanModel {
     this.reminderMethod,
     required this.cycles,
   });
+
+  bool _isStop(int totalDay) {
+    if (cycles.isEmpty) return false;
+    final days =
+        cycles.map((cycle) {
+          if (cycle.unit == DateUnit.day.toString()) return cycle.value;
+          if (cycle.unit == DateUnit.week.toString()) return cycle.value * 7;
+          if (cycle.unit == DateUnit.month.toString()) return cycle.value * 30;
+          if (cycle.unit == DateUnit.year.toString()) return cycle.value * 365;
+          return 0;
+        }).toList();
+
+    final cycleLength = days.fold(0, (sum, item) => sum + item);
+    int offset = totalDay % cycleLength;
+    for (int i = 0; i < days.length; i++) {
+      final value = days[i];
+      if (offset < value) {
+        return cycles[i].isStop;
+      }
+      offset -= value;
+    }
+    return false;
+  }
+
+  // 当日需要执行的计划
+  bool isActive(DateTime now) {
+    if (isEnabled == false) return false;
+    if (repeatValues.isEmpty) return false;
+    if (DateTime.parse(startDate).isAfter(now)) return false;
+    if (endDate.isNotEmpty) {
+      final end = DateTime.parse(endDate).add(Duration(days: 1));
+      if (now.isAfter(end)) return false;
+    }
+
+    final today = DateTime(now.year, now.month, now.day);
+    final start = DateTime.parse(startDate);
+    final totalDay = today.difference(start).inDays;
+
+    final isStop = _isStop(totalDay);
+    if (isStop) return false;
+
+    if (repeatUnit == DateUnit.day.toString()) {
+      final val = repeatValues[0];
+      if (val < 2) return true;
+      return totalDay % val == 0;
+    }
+
+    if (repeatUnit == DateUnit.week.toString()) {
+      final currentWeekday = now.weekday; // Monday = 1 ... Sunday = 7
+      return repeatValues.contains(currentWeekday);
+    }
+
+    if (repeatUnit == DateUnit.month.toString()) {
+      final currentDay = now.day;
+      final values = repeatValues;
+      if (values[0] == -1) {
+        final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
+        return currentDay == lastDayOfMonth;
+      }
+      return values.contains(currentDay);
+    }
+
+    if (repeatUnit == DateUnit.year.toString()) {
+      if (repeatValues.length != 2) return false;
+      final month = repeatValues[0];
+      final day = repeatValues[1];
+      return today.month == month && today.day == day;
+    }
+
+    return false;
+  }
+
+  PlanModel? equalsPlan(List<PlanModel> planList) {
+    return planList.firstWhereOrNull(
+      (m) => m.pillId == pillId && m.startTime == startTime,
+    );
+  }
 
   // 处理频率显示
   String getRepeatText(BuildContext context) {

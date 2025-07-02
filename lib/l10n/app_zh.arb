@@ -1,5 +1,6 @@
 {
-    "navHome": "今日",
+    "navDaily": "今日",
+    "navHistory": "历史",
     "navPlan": "计划",
     "navPill": "药物",
     "empty_pillList": "还没有药物，点击 + 添加一个吧！",
@@ -10,6 +11,7 @@
     "symbol_add": "增加",
     "symbol_substract": "减少",
     "delete": "删除",
+    "close": "关闭",
     "cancel": "取消",
     "confirm": "确认",
     "submit": "提交",
@@ -191,5 +193,15 @@
     "colorOption_blue": "蓝色",
     "@colorOption_blue": {},
     "colorOption_purple": "紫色",
-    "@colorOption_purple": {}
+    "@colorOption_purple": {},
+    "statusOption_ignored": "已忽略",
+    "@statusOption_ignored": {},
+    "statusOption_missed": "未用药",
+    "@statusOption_missed": {},
+    "statusOption_supplemented": "已补服",
+    "@statusOption_supplemented": {},
+    "statusOption_taken": "已用药",
+    "@statusOption_taken": {},
+    "statusOption_scheduled": "未开始",
+    "@statusOption_scheduled": {}
 }
