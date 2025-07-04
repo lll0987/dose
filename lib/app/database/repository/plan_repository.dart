@@ -19,15 +19,20 @@ class PlanRepository {
     });
   }
 
+  Future<List<PlanModel>> getAllRevisionPlans() {
+    return _planDao.getAllRevisionPlans();
+  }
+
   Future<int> addPlan(PlanModel plan) {
     return _db.transaction(() {
       return _planDao.addPlan(plan);
     });
   }
 
-  Future<bool> updatePlan(PlanModel plan) {
-    return _db.transaction(() {
-      return _planDao.updatePlan(plan);
+  Future<bool> updatePlan(PlanModel plan, bool isNew) {
+    // 提醒设置如果变更为不提醒，二次确认是否删除日历事件
+    return _db.transaction(() async {
+      return _planDao.updatePlan(plan, isNew);
     });
   }
 
@@ -40,15 +45,18 @@ class PlanRepository {
     });
   }
 
+  // NEXT 停用启用时设置生效时间
   Future<void> disablePlan(int id) {
+    final now = DateTime.now();
     return _db.transaction(() {
-      return _planDao.disablePlan(id);
+      return _planDao.disablePlan(id, now);
     });
   }
 
   Future<void> enablePlan(int id) {
+    final now = DateTime.now();
     return _db.transaction(() {
-      return _planDao.enablePlan(id);
+      return _planDao.enablePlan(id, now);
     });
   }
 

@@ -16,6 +16,8 @@ class TransactionModel {
 
   int? planId;
 
+  int? revisionId;
+
   DateTime? timestamp;
 
   String? remark;
@@ -33,6 +35,7 @@ class TransactionModel {
     this.isNegative = true,
     required this.pillId,
     this.planId,
+    this.revisionId,
     this.timestamp,
     this.remark,
     this.isCustom = false,
@@ -46,6 +49,7 @@ class TransactionModel {
       id: id!,
       pillId: pillId,
       planId: planId,
+      revisionId: revisionId,
       isCustom: isCustom,
       isNegative: isNegative,
       calcQty: calcQty,
@@ -61,6 +65,7 @@ class TransactionModel {
     return TransactionsCompanion(
       pillId: Value(pillId),
       planId: Value(planId),
+      revisionId: Value(revisionId),
       isCustom: Value(isCustom),
       isNegative: Value(isNegative),
       calcQty: Value(calcQty),
@@ -83,6 +88,7 @@ class TransactionModel {
       isNegative: transaction.isNegative,
       pillId: transaction.pillId,
       planId: transaction.planId,
+      revisionId: transaction.revisionId,
       timestamp: transaction.timestamp.toLocal(),
       remark: transaction.remark,
       startTime: transaction.startTime.toLocal(),

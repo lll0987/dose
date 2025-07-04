@@ -1108,6 +1108,17 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, Plan> {
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _revisionIdMeta = const VerificationMeta(
+    'revisionId',
+  );
+  @override
+  late final GeneratedColumn<int> revisionId = GeneratedColumn<int>(
+    'revision_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _pillIdMeta = const VerificationMeta('pillId');
   @override
   late final GeneratedColumn<int> pillId = GeneratedColumn<int>(
@@ -1132,6 +1143,1201 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, Plan> {
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("is_enabled" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _updateTimeMeta = const VerificationMeta(
+    'updateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updateTime = GeneratedColumn<DateTime>(
+    'update_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 255,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _qtyMeta = const VerificationMeta('qty');
+  @override
+  late final GeneratedColumn<int> qty = GeneratedColumn<int>(
+    'qty',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numeratorMeta = const VerificationMeta(
+    'numerator',
+  );
+  @override
+  late final GeneratedColumn<int> numerator = GeneratedColumn<int>(
+    'numerator',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _denominatorMeta = const VerificationMeta(
+    'denominator',
+  );
+  @override
+  late final GeneratedColumn<int> denominator = GeneratedColumn<int>(
+    'denominator',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
+    'end_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _repeatValuesMeta = const VerificationMeta(
+    'repeatValues',
+  );
+  @override
+  late final GeneratedColumn<String> repeatValues = GeneratedColumn<String>(
+    'repeat_values',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _repeatUnitMeta = const VerificationMeta(
+    'repeatUnit',
+  );
+  @override
+  late final GeneratedColumn<String> repeatUnit = GeneratedColumn<String>(
+    'repeat_unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startTimeMeta = const VerificationMeta(
+    'startTime',
+  );
+  @override
+  late final GeneratedColumn<String> startTime = GeneratedColumn<String>(
+    'start_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isExactTimeMeta = const VerificationMeta(
+    'isExactTime',
+  );
+  @override
+  late final GeneratedColumn<bool> isExactTime = GeneratedColumn<bool>(
+    'is_exact_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_exact_time" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _durationMeta = const VerificationMeta(
+    'duration',
+  );
+  @override
+  late final GeneratedColumn<int> duration = GeneratedColumn<int>(
+    'duration',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _durationUnitMeta = const VerificationMeta(
+    'durationUnit',
+  );
+  @override
+  late final GeneratedColumn<String> durationUnit = GeneratedColumn<String>(
+    'duration_unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reminderValueMeta = const VerificationMeta(
+    'reminderValue',
+  );
+  @override
+  late final GeneratedColumn<int> reminderValue = GeneratedColumn<int>(
+    'reminder_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reminderUnitMeta = const VerificationMeta(
+    'reminderUnit',
+  );
+  @override
+  late final GeneratedColumn<String> reminderUnit = GeneratedColumn<String>(
+    'reminder_unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reminderMethodMeta = const VerificationMeta(
+    'reminderMethod',
+  );
+  @override
+  late final GeneratedColumn<String> reminderMethod = GeneratedColumn<String>(
+    'reminder_method',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    revisionId,
+    pillId,
+    isEnabled,
+    updateTime,
+    name,
+    qty,
+    unit,
+    numerator,
+    denominator,
+    startDate,
+    endDate,
+    repeatValues,
+    repeatUnit,
+    startTime,
+    isExactTime,
+    duration,
+    durationUnit,
+    reminderValue,
+    reminderUnit,
+    reminderMethod,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'plans';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Plan> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('revision_id')) {
+      context.handle(
+        _revisionIdMeta,
+        revisionId.isAcceptableOrUnknown(data['revision_id']!, _revisionIdMeta),
+      );
+    }
+    if (data.containsKey('pill_id')) {
+      context.handle(
+        _pillIdMeta,
+        pillId.isAcceptableOrUnknown(data['pill_id']!, _pillIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pillIdMeta);
+    }
+    if (data.containsKey('is_enabled')) {
+      context.handle(
+        _isEnabledMeta,
+        isEnabled.isAcceptableOrUnknown(data['is_enabled']!, _isEnabledMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isEnabledMeta);
+    }
+    if (data.containsKey('update_time')) {
+      context.handle(
+        _updateTimeMeta,
+        updateTime.isAcceptableOrUnknown(data['update_time']!, _updateTimeMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('qty')) {
+      context.handle(
+        _qtyMeta,
+        qty.isAcceptableOrUnknown(data['qty']!, _qtyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_qtyMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('numerator')) {
+      context.handle(
+        _numeratorMeta,
+        numerator.isAcceptableOrUnknown(data['numerator']!, _numeratorMeta),
+      );
+    }
+    if (data.containsKey('denominator')) {
+      context.handle(
+        _denominatorMeta,
+        denominator.isAcceptableOrUnknown(
+          data['denominator']!,
+          _denominatorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endDateMeta);
+    }
+    if (data.containsKey('repeat_values')) {
+      context.handle(
+        _repeatValuesMeta,
+        repeatValues.isAcceptableOrUnknown(
+          data['repeat_values']!,
+          _repeatValuesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_repeatValuesMeta);
+    }
+    if (data.containsKey('repeat_unit')) {
+      context.handle(
+        _repeatUnitMeta,
+        repeatUnit.isAcceptableOrUnknown(data['repeat_unit']!, _repeatUnitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_repeatUnitMeta);
+    }
+    if (data.containsKey('start_time')) {
+      context.handle(
+        _startTimeMeta,
+        startTime.isAcceptableOrUnknown(data['start_time']!, _startTimeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startTimeMeta);
+    }
+    if (data.containsKey('is_exact_time')) {
+      context.handle(
+        _isExactTimeMeta,
+        isExactTime.isAcceptableOrUnknown(
+          data['is_exact_time']!,
+          _isExactTimeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_isExactTimeMeta);
+    }
+    if (data.containsKey('duration')) {
+      context.handle(
+        _durationMeta,
+        duration.isAcceptableOrUnknown(data['duration']!, _durationMeta),
+      );
+    }
+    if (data.containsKey('duration_unit')) {
+      context.handle(
+        _durationUnitMeta,
+        durationUnit.isAcceptableOrUnknown(
+          data['duration_unit']!,
+          _durationUnitMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reminder_value')) {
+      context.handle(
+        _reminderValueMeta,
+        reminderValue.isAcceptableOrUnknown(
+          data['reminder_value']!,
+          _reminderValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reminder_unit')) {
+      context.handle(
+        _reminderUnitMeta,
+        reminderUnit.isAcceptableOrUnknown(
+          data['reminder_unit']!,
+          _reminderUnitMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reminder_method')) {
+      context.handle(
+        _reminderMethodMeta,
+        reminderMethod.isAcceptableOrUnknown(
+          data['reminder_method']!,
+          _reminderMethodMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Plan map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Plan(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      revisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision_id'],
+      ),
+      pillId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}pill_id'],
+          )!,
+      isEnabled:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_enabled'],
+          )!,
+      updateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}update_time'],
+      ),
+      name:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
+          )!,
+      qty:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}qty'],
+          )!,
+      unit:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}unit'],
+          )!,
+      numerator: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numerator'],
+      ),
+      denominator: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}denominator'],
+      ),
+      startDate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}start_date'],
+          )!,
+      endDate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}end_date'],
+          )!,
+      repeatValues:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}repeat_values'],
+          )!,
+      repeatUnit:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}repeat_unit'],
+          )!,
+      startTime:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}start_time'],
+          )!,
+      isExactTime:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_exact_time'],
+          )!,
+      duration: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration'],
+      ),
+      durationUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}duration_unit'],
+      ),
+      reminderValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_value'],
+      ),
+      reminderUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reminder_unit'],
+      ),
+      reminderMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reminder_method'],
+      ),
+    );
+  }
+
+  @override
+  $PlansTable createAlias(String alias) {
+    return $PlansTable(attachedDatabase, alias);
+  }
+}
+
+class Plan extends DataClass implements Insertable<Plan> {
+  final int id;
+  final int? revisionId;
+  final int pillId;
+  final bool isEnabled;
+  final DateTime? updateTime;
+  final String name;
+  final int qty;
+  final String unit;
+  final int? numerator;
+  final int? denominator;
+  final String startDate;
+  final String endDate;
+  final String repeatValues;
+  final String repeatUnit;
+  final String startTime;
+  final bool isExactTime;
+  final int? duration;
+  final String? durationUnit;
+  final int? reminderValue;
+  final String? reminderUnit;
+  final String? reminderMethod;
+  const Plan({
+    required this.id,
+    this.revisionId,
+    required this.pillId,
+    required this.isEnabled,
+    this.updateTime,
+    required this.name,
+    required this.qty,
+    required this.unit,
+    this.numerator,
+    this.denominator,
+    required this.startDate,
+    required this.endDate,
+    required this.repeatValues,
+    required this.repeatUnit,
+    required this.startTime,
+    required this.isExactTime,
+    this.duration,
+    this.durationUnit,
+    this.reminderValue,
+    this.reminderUnit,
+    this.reminderMethod,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || revisionId != null) {
+      map['revision_id'] = Variable<int>(revisionId);
+    }
+    map['pill_id'] = Variable<int>(pillId);
+    map['is_enabled'] = Variable<bool>(isEnabled);
+    if (!nullToAbsent || updateTime != null) {
+      map['update_time'] = Variable<DateTime>(updateTime);
+    }
+    map['name'] = Variable<String>(name);
+    map['qty'] = Variable<int>(qty);
+    map['unit'] = Variable<String>(unit);
+    if (!nullToAbsent || numerator != null) {
+      map['numerator'] = Variable<int>(numerator);
+    }
+    if (!nullToAbsent || denominator != null) {
+      map['denominator'] = Variable<int>(denominator);
+    }
+    map['start_date'] = Variable<String>(startDate);
+    map['end_date'] = Variable<String>(endDate);
+    map['repeat_values'] = Variable<String>(repeatValues);
+    map['repeat_unit'] = Variable<String>(repeatUnit);
+    map['start_time'] = Variable<String>(startTime);
+    map['is_exact_time'] = Variable<bool>(isExactTime);
+    if (!nullToAbsent || duration != null) {
+      map['duration'] = Variable<int>(duration);
+    }
+    if (!nullToAbsent || durationUnit != null) {
+      map['duration_unit'] = Variable<String>(durationUnit);
+    }
+    if (!nullToAbsent || reminderValue != null) {
+      map['reminder_value'] = Variable<int>(reminderValue);
+    }
+    if (!nullToAbsent || reminderUnit != null) {
+      map['reminder_unit'] = Variable<String>(reminderUnit);
+    }
+    if (!nullToAbsent || reminderMethod != null) {
+      map['reminder_method'] = Variable<String>(reminderMethod);
+    }
+    return map;
+  }
+
+  PlansCompanion toCompanion(bool nullToAbsent) {
+    return PlansCompanion(
+      id: Value(id),
+      revisionId:
+          revisionId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(revisionId),
+      pillId: Value(pillId),
+      isEnabled: Value(isEnabled),
+      updateTime:
+          updateTime == null && nullToAbsent
+              ? const Value.absent()
+              : Value(updateTime),
+      name: Value(name),
+      qty: Value(qty),
+      unit: Value(unit),
+      numerator:
+          numerator == null && nullToAbsent
+              ? const Value.absent()
+              : Value(numerator),
+      denominator:
+          denominator == null && nullToAbsent
+              ? const Value.absent()
+              : Value(denominator),
+      startDate: Value(startDate),
+      endDate: Value(endDate),
+      repeatValues: Value(repeatValues),
+      repeatUnit: Value(repeatUnit),
+      startTime: Value(startTime),
+      isExactTime: Value(isExactTime),
+      duration:
+          duration == null && nullToAbsent
+              ? const Value.absent()
+              : Value(duration),
+      durationUnit:
+          durationUnit == null && nullToAbsent
+              ? const Value.absent()
+              : Value(durationUnit),
+      reminderValue:
+          reminderValue == null && nullToAbsent
+              ? const Value.absent()
+              : Value(reminderValue),
+      reminderUnit:
+          reminderUnit == null && nullToAbsent
+              ? const Value.absent()
+              : Value(reminderUnit),
+      reminderMethod:
+          reminderMethod == null && nullToAbsent
+              ? const Value.absent()
+              : Value(reminderMethod),
+    );
+  }
+
+  factory Plan.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Plan(
+      id: serializer.fromJson<int>(json['id']),
+      revisionId: serializer.fromJson<int?>(json['revisionId']),
+      pillId: serializer.fromJson<int>(json['pillId']),
+      isEnabled: serializer.fromJson<bool>(json['isEnabled']),
+      updateTime: serializer.fromJson<DateTime?>(json['updateTime']),
+      name: serializer.fromJson<String>(json['name']),
+      qty: serializer.fromJson<int>(json['qty']),
+      unit: serializer.fromJson<String>(json['unit']),
+      numerator: serializer.fromJson<int?>(json['numerator']),
+      denominator: serializer.fromJson<int?>(json['denominator']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      endDate: serializer.fromJson<String>(json['endDate']),
+      repeatValues: serializer.fromJson<String>(json['repeatValues']),
+      repeatUnit: serializer.fromJson<String>(json['repeatUnit']),
+      startTime: serializer.fromJson<String>(json['startTime']),
+      isExactTime: serializer.fromJson<bool>(json['isExactTime']),
+      duration: serializer.fromJson<int?>(json['duration']),
+      durationUnit: serializer.fromJson<String?>(json['durationUnit']),
+      reminderValue: serializer.fromJson<int?>(json['reminderValue']),
+      reminderUnit: serializer.fromJson<String?>(json['reminderUnit']),
+      reminderMethod: serializer.fromJson<String?>(json['reminderMethod']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'revisionId': serializer.toJson<int?>(revisionId),
+      'pillId': serializer.toJson<int>(pillId),
+      'isEnabled': serializer.toJson<bool>(isEnabled),
+      'updateTime': serializer.toJson<DateTime?>(updateTime),
+      'name': serializer.toJson<String>(name),
+      'qty': serializer.toJson<int>(qty),
+      'unit': serializer.toJson<String>(unit),
+      'numerator': serializer.toJson<int?>(numerator),
+      'denominator': serializer.toJson<int?>(denominator),
+      'startDate': serializer.toJson<String>(startDate),
+      'endDate': serializer.toJson<String>(endDate),
+      'repeatValues': serializer.toJson<String>(repeatValues),
+      'repeatUnit': serializer.toJson<String>(repeatUnit),
+      'startTime': serializer.toJson<String>(startTime),
+      'isExactTime': serializer.toJson<bool>(isExactTime),
+      'duration': serializer.toJson<int?>(duration),
+      'durationUnit': serializer.toJson<String?>(durationUnit),
+      'reminderValue': serializer.toJson<int?>(reminderValue),
+      'reminderUnit': serializer.toJson<String?>(reminderUnit),
+      'reminderMethod': serializer.toJson<String?>(reminderMethod),
+    };
+  }
+
+  Plan copyWith({
+    int? id,
+    Value<int?> revisionId = const Value.absent(),
+    int? pillId,
+    bool? isEnabled,
+    Value<DateTime?> updateTime = const Value.absent(),
+    String? name,
+    int? qty,
+    String? unit,
+    Value<int?> numerator = const Value.absent(),
+    Value<int?> denominator = const Value.absent(),
+    String? startDate,
+    String? endDate,
+    String? repeatValues,
+    String? repeatUnit,
+    String? startTime,
+    bool? isExactTime,
+    Value<int?> duration = const Value.absent(),
+    Value<String?> durationUnit = const Value.absent(),
+    Value<int?> reminderValue = const Value.absent(),
+    Value<String?> reminderUnit = const Value.absent(),
+    Value<String?> reminderMethod = const Value.absent(),
+  }) => Plan(
+    id: id ?? this.id,
+    revisionId: revisionId.present ? revisionId.value : this.revisionId,
+    pillId: pillId ?? this.pillId,
+    isEnabled: isEnabled ?? this.isEnabled,
+    updateTime: updateTime.present ? updateTime.value : this.updateTime,
+    name: name ?? this.name,
+    qty: qty ?? this.qty,
+    unit: unit ?? this.unit,
+    numerator: numerator.present ? numerator.value : this.numerator,
+    denominator: denominator.present ? denominator.value : this.denominator,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate ?? this.endDate,
+    repeatValues: repeatValues ?? this.repeatValues,
+    repeatUnit: repeatUnit ?? this.repeatUnit,
+    startTime: startTime ?? this.startTime,
+    isExactTime: isExactTime ?? this.isExactTime,
+    duration: duration.present ? duration.value : this.duration,
+    durationUnit: durationUnit.present ? durationUnit.value : this.durationUnit,
+    reminderValue:
+        reminderValue.present ? reminderValue.value : this.reminderValue,
+    reminderUnit: reminderUnit.present ? reminderUnit.value : this.reminderUnit,
+    reminderMethod:
+        reminderMethod.present ? reminderMethod.value : this.reminderMethod,
+  );
+  Plan copyWithCompanion(PlansCompanion data) {
+    return Plan(
+      id: data.id.present ? data.id.value : this.id,
+      revisionId:
+          data.revisionId.present ? data.revisionId.value : this.revisionId,
+      pillId: data.pillId.present ? data.pillId.value : this.pillId,
+      isEnabled: data.isEnabled.present ? data.isEnabled.value : this.isEnabled,
+      updateTime:
+          data.updateTime.present ? data.updateTime.value : this.updateTime,
+      name: data.name.present ? data.name.value : this.name,
+      qty: data.qty.present ? data.qty.value : this.qty,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      numerator: data.numerator.present ? data.numerator.value : this.numerator,
+      denominator:
+          data.denominator.present ? data.denominator.value : this.denominator,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      repeatValues:
+          data.repeatValues.present
+              ? data.repeatValues.value
+              : this.repeatValues,
+      repeatUnit:
+          data.repeatUnit.present ? data.repeatUnit.value : this.repeatUnit,
+      startTime: data.startTime.present ? data.startTime.value : this.startTime,
+      isExactTime:
+          data.isExactTime.present ? data.isExactTime.value : this.isExactTime,
+      duration: data.duration.present ? data.duration.value : this.duration,
+      durationUnit:
+          data.durationUnit.present
+              ? data.durationUnit.value
+              : this.durationUnit,
+      reminderValue:
+          data.reminderValue.present
+              ? data.reminderValue.value
+              : this.reminderValue,
+      reminderUnit:
+          data.reminderUnit.present
+              ? data.reminderUnit.value
+              : this.reminderUnit,
+      reminderMethod:
+          data.reminderMethod.present
+              ? data.reminderMethod.value
+              : this.reminderMethod,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Plan(')
+          ..write('id: $id, ')
+          ..write('revisionId: $revisionId, ')
+          ..write('pillId: $pillId, ')
+          ..write('isEnabled: $isEnabled, ')
+          ..write('updateTime: $updateTime, ')
+          ..write('name: $name, ')
+          ..write('qty: $qty, ')
+          ..write('unit: $unit, ')
+          ..write('numerator: $numerator, ')
+          ..write('denominator: $denominator, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('repeatValues: $repeatValues, ')
+          ..write('repeatUnit: $repeatUnit, ')
+          ..write('startTime: $startTime, ')
+          ..write('isExactTime: $isExactTime, ')
+          ..write('duration: $duration, ')
+          ..write('durationUnit: $durationUnit, ')
+          ..write('reminderValue: $reminderValue, ')
+          ..write('reminderUnit: $reminderUnit, ')
+          ..write('reminderMethod: $reminderMethod')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    revisionId,
+    pillId,
+    isEnabled,
+    updateTime,
+    name,
+    qty,
+    unit,
+    numerator,
+    denominator,
+    startDate,
+    endDate,
+    repeatValues,
+    repeatUnit,
+    startTime,
+    isExactTime,
+    duration,
+    durationUnit,
+    reminderValue,
+    reminderUnit,
+    reminderMethod,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Plan &&
+          other.id == this.id &&
+          other.revisionId == this.revisionId &&
+          other.pillId == this.pillId &&
+          other.isEnabled == this.isEnabled &&
+          other.updateTime == this.updateTime &&
+          other.name == this.name &&
+          other.qty == this.qty &&
+          other.unit == this.unit &&
+          other.numerator == this.numerator &&
+          other.denominator == this.denominator &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate &&
+          other.repeatValues == this.repeatValues &&
+          other.repeatUnit == this.repeatUnit &&
+          other.startTime == this.startTime &&
+          other.isExactTime == this.isExactTime &&
+          other.duration == this.duration &&
+          other.durationUnit == this.durationUnit &&
+          other.reminderValue == this.reminderValue &&
+          other.reminderUnit == this.reminderUnit &&
+          other.reminderMethod == this.reminderMethod);
+}
+
+class PlansCompanion extends UpdateCompanion<Plan> {
+  final Value<int> id;
+  final Value<int?> revisionId;
+  final Value<int> pillId;
+  final Value<bool> isEnabled;
+  final Value<DateTime?> updateTime;
+  final Value<String> name;
+  final Value<int> qty;
+  final Value<String> unit;
+  final Value<int?> numerator;
+  final Value<int?> denominator;
+  final Value<String> startDate;
+  final Value<String> endDate;
+  final Value<String> repeatValues;
+  final Value<String> repeatUnit;
+  final Value<String> startTime;
+  final Value<bool> isExactTime;
+  final Value<int?> duration;
+  final Value<String?> durationUnit;
+  final Value<int?> reminderValue;
+  final Value<String?> reminderUnit;
+  final Value<String?> reminderMethod;
+  const PlansCompanion({
+    this.id = const Value.absent(),
+    this.revisionId = const Value.absent(),
+    this.pillId = const Value.absent(),
+    this.isEnabled = const Value.absent(),
+    this.updateTime = const Value.absent(),
+    this.name = const Value.absent(),
+    this.qty = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.numerator = const Value.absent(),
+    this.denominator = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.repeatValues = const Value.absent(),
+    this.repeatUnit = const Value.absent(),
+    this.startTime = const Value.absent(),
+    this.isExactTime = const Value.absent(),
+    this.duration = const Value.absent(),
+    this.durationUnit = const Value.absent(),
+    this.reminderValue = const Value.absent(),
+    this.reminderUnit = const Value.absent(),
+    this.reminderMethod = const Value.absent(),
+  });
+  PlansCompanion.insert({
+    this.id = const Value.absent(),
+    this.revisionId = const Value.absent(),
+    required int pillId,
+    required bool isEnabled,
+    this.updateTime = const Value.absent(),
+    required String name,
+    required int qty,
+    required String unit,
+    this.numerator = const Value.absent(),
+    this.denominator = const Value.absent(),
+    required String startDate,
+    required String endDate,
+    required String repeatValues,
+    required String repeatUnit,
+    required String startTime,
+    required bool isExactTime,
+    this.duration = const Value.absent(),
+    this.durationUnit = const Value.absent(),
+    this.reminderValue = const Value.absent(),
+    this.reminderUnit = const Value.absent(),
+    this.reminderMethod = const Value.absent(),
+  }) : pillId = Value(pillId),
+       isEnabled = Value(isEnabled),
+       name = Value(name),
+       qty = Value(qty),
+       unit = Value(unit),
+       startDate = Value(startDate),
+       endDate = Value(endDate),
+       repeatValues = Value(repeatValues),
+       repeatUnit = Value(repeatUnit),
+       startTime = Value(startTime),
+       isExactTime = Value(isExactTime);
+  static Insertable<Plan> custom({
+    Expression<int>? id,
+    Expression<int>? revisionId,
+    Expression<int>? pillId,
+    Expression<bool>? isEnabled,
+    Expression<DateTime>? updateTime,
+    Expression<String>? name,
+    Expression<int>? qty,
+    Expression<String>? unit,
+    Expression<int>? numerator,
+    Expression<int>? denominator,
+    Expression<String>? startDate,
+    Expression<String>? endDate,
+    Expression<String>? repeatValues,
+    Expression<String>? repeatUnit,
+    Expression<String>? startTime,
+    Expression<bool>? isExactTime,
+    Expression<int>? duration,
+    Expression<String>? durationUnit,
+    Expression<int>? reminderValue,
+    Expression<String>? reminderUnit,
+    Expression<String>? reminderMethod,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (revisionId != null) 'revision_id': revisionId,
+      if (pillId != null) 'pill_id': pillId,
+      if (isEnabled != null) 'is_enabled': isEnabled,
+      if (updateTime != null) 'update_time': updateTime,
+      if (name != null) 'name': name,
+      if (qty != null) 'qty': qty,
+      if (unit != null) 'unit': unit,
+      if (numerator != null) 'numerator': numerator,
+      if (denominator != null) 'denominator': denominator,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (repeatValues != null) 'repeat_values': repeatValues,
+      if (repeatUnit != null) 'repeat_unit': repeatUnit,
+      if (startTime != null) 'start_time': startTime,
+      if (isExactTime != null) 'is_exact_time': isExactTime,
+      if (duration != null) 'duration': duration,
+      if (durationUnit != null) 'duration_unit': durationUnit,
+      if (reminderValue != null) 'reminder_value': reminderValue,
+      if (reminderUnit != null) 'reminder_unit': reminderUnit,
+      if (reminderMethod != null) 'reminder_method': reminderMethod,
+    });
+  }
+
+  PlansCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? revisionId,
+    Value<int>? pillId,
+    Value<bool>? isEnabled,
+    Value<DateTime?>? updateTime,
+    Value<String>? name,
+    Value<int>? qty,
+    Value<String>? unit,
+    Value<int?>? numerator,
+    Value<int?>? denominator,
+    Value<String>? startDate,
+    Value<String>? endDate,
+    Value<String>? repeatValues,
+    Value<String>? repeatUnit,
+    Value<String>? startTime,
+    Value<bool>? isExactTime,
+    Value<int?>? duration,
+    Value<String?>? durationUnit,
+    Value<int?>? reminderValue,
+    Value<String?>? reminderUnit,
+    Value<String?>? reminderMethod,
+  }) {
+    return PlansCompanion(
+      id: id ?? this.id,
+      revisionId: revisionId ?? this.revisionId,
+      pillId: pillId ?? this.pillId,
+      isEnabled: isEnabled ?? this.isEnabled,
+      updateTime: updateTime ?? this.updateTime,
+      name: name ?? this.name,
+      qty: qty ?? this.qty,
+      unit: unit ?? this.unit,
+      numerator: numerator ?? this.numerator,
+      denominator: denominator ?? this.denominator,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      repeatValues: repeatValues ?? this.repeatValues,
+      repeatUnit: repeatUnit ?? this.repeatUnit,
+      startTime: startTime ?? this.startTime,
+      isExactTime: isExactTime ?? this.isExactTime,
+      duration: duration ?? this.duration,
+      durationUnit: durationUnit ?? this.durationUnit,
+      reminderValue: reminderValue ?? this.reminderValue,
+      reminderUnit: reminderUnit ?? this.reminderUnit,
+      reminderMethod: reminderMethod ?? this.reminderMethod,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (revisionId.present) {
+      map['revision_id'] = Variable<int>(revisionId.value);
+    }
+    if (pillId.present) {
+      map['pill_id'] = Variable<int>(pillId.value);
+    }
+    if (isEnabled.present) {
+      map['is_enabled'] = Variable<bool>(isEnabled.value);
+    }
+    if (updateTime.present) {
+      map['update_time'] = Variable<DateTime>(updateTime.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (qty.present) {
+      map['qty'] = Variable<int>(qty.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (numerator.present) {
+      map['numerator'] = Variable<int>(numerator.value);
+    }
+    if (denominator.present) {
+      map['denominator'] = Variable<int>(denominator.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<String>(endDate.value);
+    }
+    if (repeatValues.present) {
+      map['repeat_values'] = Variable<String>(repeatValues.value);
+    }
+    if (repeatUnit.present) {
+      map['repeat_unit'] = Variable<String>(repeatUnit.value);
+    }
+    if (startTime.present) {
+      map['start_time'] = Variable<String>(startTime.value);
+    }
+    if (isExactTime.present) {
+      map['is_exact_time'] = Variable<bool>(isExactTime.value);
+    }
+    if (duration.present) {
+      map['duration'] = Variable<int>(duration.value);
+    }
+    if (durationUnit.present) {
+      map['duration_unit'] = Variable<String>(durationUnit.value);
+    }
+    if (reminderValue.present) {
+      map['reminder_value'] = Variable<int>(reminderValue.value);
+    }
+    if (reminderUnit.present) {
+      map['reminder_unit'] = Variable<String>(reminderUnit.value);
+    }
+    if (reminderMethod.present) {
+      map['reminder_method'] = Variable<String>(reminderMethod.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlansCompanion(')
+          ..write('id: $id, ')
+          ..write('revisionId: $revisionId, ')
+          ..write('pillId: $pillId, ')
+          ..write('isEnabled: $isEnabled, ')
+          ..write('updateTime: $updateTime, ')
+          ..write('name: $name, ')
+          ..write('qty: $qty, ')
+          ..write('unit: $unit, ')
+          ..write('numerator: $numerator, ')
+          ..write('denominator: $denominator, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('repeatValues: $repeatValues, ')
+          ..write('repeatUnit: $repeatUnit, ')
+          ..write('startTime: $startTime, ')
+          ..write('isExactTime: $isExactTime, ')
+          ..write('duration: $duration, ')
+          ..write('durationUnit: $durationUnit, ')
+          ..write('reminderValue: $reminderValue, ')
+          ..write('reminderUnit: $reminderUnit, ')
+          ..write('reminderMethod: $reminderMethod')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RevisionsTable extends Revisions
+    with TableInfo<$RevisionsTable, Revision> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RevisionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
+  @override
+  late final GeneratedColumn<int> planId = GeneratedColumn<int>(
+    'plan_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES plans (id)',
+    ),
+  );
+  static const VerificationMeta _pillIdMeta = const VerificationMeta('pillId');
+  @override
+  late final GeneratedColumn<int> pillId = GeneratedColumn<int>(
+    'pill_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pills (id)',
     ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -1318,8 +2524,8 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, Plan> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    planId,
     pillId,
-    isEnabled,
     name,
     qty,
     unit,
@@ -1341,16 +2547,24 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, Plan> {
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'plans';
+  static const String $name = 'revisions';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Plan> instance, {
+    Insertable<Revision> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('plan_id')) {
+      context.handle(
+        _planIdMeta,
+        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_planIdMeta);
     }
     if (data.containsKey('pill_id')) {
       context.handle(
@@ -1359,14 +2573,6 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, Plan> {
       );
     } else if (isInserting) {
       context.missing(_pillIdMeta);
-    }
-    if (data.containsKey('is_enabled')) {
-      context.handle(
-        _isEnabledMeta,
-        isEnabled.isAcceptableOrUnknown(data['is_enabled']!, _isEnabledMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_isEnabledMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -1509,23 +2715,23 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, Plan> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Plan map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Revision map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Plan(
+    return Revision(
       id:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
             data['${effectivePrefix}id'],
           )!,
+      planId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}plan_id'],
+          )!,
       pillId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
             data['${effectivePrefix}pill_id'],
-          )!,
-      isEnabled:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_enabled'],
           )!,
       name:
           attachedDatabase.typeMapping.read(
@@ -1604,15 +2810,15 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, Plan> {
   }
 
   @override
-  $PlansTable createAlias(String alias) {
-    return $PlansTable(attachedDatabase, alias);
+  $RevisionsTable createAlias(String alias) {
+    return $RevisionsTable(attachedDatabase, alias);
   }
 }
 
-class Plan extends DataClass implements Insertable<Plan> {
+class Revision extends DataClass implements Insertable<Revision> {
   final int id;
+  final int planId;
   final int pillId;
-  final bool isEnabled;
   final String name;
   final int qty;
   final String unit;
@@ -1629,10 +2835,10 @@ class Plan extends DataClass implements Insertable<Plan> {
   final int? reminderValue;
   final String? reminderUnit;
   final String? reminderMethod;
-  const Plan({
+  const Revision({
     required this.id,
+    required this.planId,
     required this.pillId,
-    required this.isEnabled,
     required this.name,
     required this.qty,
     required this.unit,
@@ -1654,8 +2860,8 @@ class Plan extends DataClass implements Insertable<Plan> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['plan_id'] = Variable<int>(planId);
     map['pill_id'] = Variable<int>(pillId);
-    map['is_enabled'] = Variable<bool>(isEnabled);
     map['name'] = Variable<String>(name);
     map['qty'] = Variable<int>(qty);
     map['unit'] = Variable<String>(unit);
@@ -1689,11 +2895,11 @@ class Plan extends DataClass implements Insertable<Plan> {
     return map;
   }
 
-  PlansCompanion toCompanion(bool nullToAbsent) {
-    return PlansCompanion(
+  RevisionsCompanion toCompanion(bool nullToAbsent) {
+    return RevisionsCompanion(
       id: Value(id),
+      planId: Value(planId),
       pillId: Value(pillId),
-      isEnabled: Value(isEnabled),
       name: Value(name),
       qty: Value(qty),
       unit: Value(unit),
@@ -1734,15 +2940,15 @@ class Plan extends DataClass implements Insertable<Plan> {
     );
   }
 
-  factory Plan.fromJson(
+  factory Revision.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Plan(
+    return Revision(
       id: serializer.fromJson<int>(json['id']),
+      planId: serializer.fromJson<int>(json['planId']),
       pillId: serializer.fromJson<int>(json['pillId']),
-      isEnabled: serializer.fromJson<bool>(json['isEnabled']),
       name: serializer.fromJson<String>(json['name']),
       qty: serializer.fromJson<int>(json['qty']),
       unit: serializer.fromJson<String>(json['unit']),
@@ -1766,8 +2972,8 @@ class Plan extends DataClass implements Insertable<Plan> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'planId': serializer.toJson<int>(planId),
       'pillId': serializer.toJson<int>(pillId),
-      'isEnabled': serializer.toJson<bool>(isEnabled),
       'name': serializer.toJson<String>(name),
       'qty': serializer.toJson<int>(qty),
       'unit': serializer.toJson<String>(unit),
@@ -1787,10 +2993,10 @@ class Plan extends DataClass implements Insertable<Plan> {
     };
   }
 
-  Plan copyWith({
+  Revision copyWith({
     int? id,
+    int? planId,
     int? pillId,
-    bool? isEnabled,
     String? name,
     int? qty,
     String? unit,
@@ -1807,10 +3013,10 @@ class Plan extends DataClass implements Insertable<Plan> {
     Value<int?> reminderValue = const Value.absent(),
     Value<String?> reminderUnit = const Value.absent(),
     Value<String?> reminderMethod = const Value.absent(),
-  }) => Plan(
+  }) => Revision(
     id: id ?? this.id,
+    planId: planId ?? this.planId,
     pillId: pillId ?? this.pillId,
-    isEnabled: isEnabled ?? this.isEnabled,
     name: name ?? this.name,
     qty: qty ?? this.qty,
     unit: unit ?? this.unit,
@@ -1830,11 +3036,11 @@ class Plan extends DataClass implements Insertable<Plan> {
     reminderMethod:
         reminderMethod.present ? reminderMethod.value : this.reminderMethod,
   );
-  Plan copyWithCompanion(PlansCompanion data) {
-    return Plan(
+  Revision copyWithCompanion(RevisionsCompanion data) {
+    return Revision(
       id: data.id.present ? data.id.value : this.id,
+      planId: data.planId.present ? data.planId.value : this.planId,
       pillId: data.pillId.present ? data.pillId.value : this.pillId,
-      isEnabled: data.isEnabled.present ? data.isEnabled.value : this.isEnabled,
       name: data.name.present ? data.name.value : this.name,
       qty: data.qty.present ? data.qty.value : this.qty,
       unit: data.unit.present ? data.unit.value : this.unit,
@@ -1874,10 +3080,10 @@ class Plan extends DataClass implements Insertable<Plan> {
 
   @override
   String toString() {
-    return (StringBuffer('Plan(')
+    return (StringBuffer('Revision(')
           ..write('id: $id, ')
+          ..write('planId: $planId, ')
           ..write('pillId: $pillId, ')
-          ..write('isEnabled: $isEnabled, ')
           ..write('name: $name, ')
           ..write('qty: $qty, ')
           ..write('unit: $unit, ')
@@ -1901,8 +3107,8 @@ class Plan extends DataClass implements Insertable<Plan> {
   @override
   int get hashCode => Object.hash(
     id,
+    planId,
     pillId,
-    isEnabled,
     name,
     qty,
     unit,
@@ -1923,10 +3129,10 @@ class Plan extends DataClass implements Insertable<Plan> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Plan &&
+      (other is Revision &&
           other.id == this.id &&
+          other.planId == this.planId &&
           other.pillId == this.pillId &&
-          other.isEnabled == this.isEnabled &&
           other.name == this.name &&
           other.qty == this.qty &&
           other.unit == this.unit &&
@@ -1945,10 +3151,10 @@ class Plan extends DataClass implements Insertable<Plan> {
           other.reminderMethod == this.reminderMethod);
 }
 
-class PlansCompanion extends UpdateCompanion<Plan> {
+class RevisionsCompanion extends UpdateCompanion<Revision> {
   final Value<int> id;
+  final Value<int> planId;
   final Value<int> pillId;
-  final Value<bool> isEnabled;
   final Value<String> name;
   final Value<int> qty;
   final Value<String> unit;
@@ -1965,10 +3171,10 @@ class PlansCompanion extends UpdateCompanion<Plan> {
   final Value<int?> reminderValue;
   final Value<String?> reminderUnit;
   final Value<String?> reminderMethod;
-  const PlansCompanion({
+  const RevisionsCompanion({
     this.id = const Value.absent(),
+    this.planId = const Value.absent(),
     this.pillId = const Value.absent(),
-    this.isEnabled = const Value.absent(),
     this.name = const Value.absent(),
     this.qty = const Value.absent(),
     this.unit = const Value.absent(),
@@ -1986,10 +3192,10 @@ class PlansCompanion extends UpdateCompanion<Plan> {
     this.reminderUnit = const Value.absent(),
     this.reminderMethod = const Value.absent(),
   });
-  PlansCompanion.insert({
+  RevisionsCompanion.insert({
     this.id = const Value.absent(),
+    required int planId,
     required int pillId,
-    required bool isEnabled,
     required String name,
     required int qty,
     required String unit,
@@ -2006,8 +3212,8 @@ class PlansCompanion extends UpdateCompanion<Plan> {
     this.reminderValue = const Value.absent(),
     this.reminderUnit = const Value.absent(),
     this.reminderMethod = const Value.absent(),
-  }) : pillId = Value(pillId),
-       isEnabled = Value(isEnabled),
+  }) : planId = Value(planId),
+       pillId = Value(pillId),
        name = Value(name),
        qty = Value(qty),
        unit = Value(unit),
@@ -2017,10 +3223,10 @@ class PlansCompanion extends UpdateCompanion<Plan> {
        repeatUnit = Value(repeatUnit),
        startTime = Value(startTime),
        isExactTime = Value(isExactTime);
-  static Insertable<Plan> custom({
+  static Insertable<Revision> custom({
     Expression<int>? id,
+    Expression<int>? planId,
     Expression<int>? pillId,
-    Expression<bool>? isEnabled,
     Expression<String>? name,
     Expression<int>? qty,
     Expression<String>? unit,
@@ -2040,8 +3246,8 @@ class PlansCompanion extends UpdateCompanion<Plan> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (planId != null) 'plan_id': planId,
       if (pillId != null) 'pill_id': pillId,
-      if (isEnabled != null) 'is_enabled': isEnabled,
       if (name != null) 'name': name,
       if (qty != null) 'qty': qty,
       if (unit != null) 'unit': unit,
@@ -2061,10 +3267,10 @@ class PlansCompanion extends UpdateCompanion<Plan> {
     });
   }
 
-  PlansCompanion copyWith({
+  RevisionsCompanion copyWith({
     Value<int>? id,
+    Value<int>? planId,
     Value<int>? pillId,
-    Value<bool>? isEnabled,
     Value<String>? name,
     Value<int>? qty,
     Value<String>? unit,
@@ -2082,10 +3288,10 @@ class PlansCompanion extends UpdateCompanion<Plan> {
     Value<String?>? reminderUnit,
     Value<String?>? reminderMethod,
   }) {
-    return PlansCompanion(
+    return RevisionsCompanion(
       id: id ?? this.id,
+      planId: planId ?? this.planId,
       pillId: pillId ?? this.pillId,
-      isEnabled: isEnabled ?? this.isEnabled,
       name: name ?? this.name,
       qty: qty ?? this.qty,
       unit: unit ?? this.unit,
@@ -2111,11 +3317,11 @@ class PlansCompanion extends UpdateCompanion<Plan> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
+    if (planId.present) {
+      map['plan_id'] = Variable<int>(planId.value);
+    }
     if (pillId.present) {
       map['pill_id'] = Variable<int>(pillId.value);
-    }
-    if (isEnabled.present) {
-      map['is_enabled'] = Variable<bool>(isEnabled.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -2170,10 +3376,10 @@ class PlansCompanion extends UpdateCompanion<Plan> {
 
   @override
   String toString() {
-    return (StringBuffer('PlansCompanion(')
+    return (StringBuffer('RevisionsCompanion(')
           ..write('id: $id, ')
+          ..write('planId: $planId, ')
           ..write('pillId: $pillId, ')
-          ..write('isEnabled: $isEnabled, ')
           ..write('name: $name, ')
           ..write('qty: $qty, ')
           ..write('unit: $unit, ')
@@ -2211,6 +3417,20 @@ class $CyclesTable extends Cycles with TableInfo<$CyclesTable, Cycle> {
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _revisionIdMeta = const VerificationMeta(
+    'revisionId',
+  );
+  @override
+  late final GeneratedColumn<int> revisionId = GeneratedColumn<int>(
+    'revision_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES revisions (id)',
     ),
   );
   static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
@@ -2273,6 +3493,7 @@ class $CyclesTable extends Cycles with TableInfo<$CyclesTable, Cycle> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    revisionId,
     planId,
     value,
     unit,
@@ -2293,6 +3514,12 @@ class $CyclesTable extends Cycles with TableInfo<$CyclesTable, Cycle> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('revision_id')) {
+      context.handle(
+        _revisionIdMeta,
+        revisionId.isAcceptableOrUnknown(data['revision_id']!, _revisionIdMeta),
+      );
     }
     if (data.containsKey('plan_id')) {
       context.handle(
@@ -2348,6 +3575,10 @@ class $CyclesTable extends Cycles with TableInfo<$CyclesTable, Cycle> {
             DriftSqlType.int,
             data['${effectivePrefix}id'],
           )!,
+      revisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision_id'],
+      ),
       planId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -2384,6 +3615,7 @@ class $CyclesTable extends Cycles with TableInfo<$CyclesTable, Cycle> {
 
 class Cycle extends DataClass implements Insertable<Cycle> {
   final int id;
+  final int? revisionId;
   final int planId;
   final int value;
   final String unit;
@@ -2391,6 +3623,7 @@ class Cycle extends DataClass implements Insertable<Cycle> {
   final int orderIndex;
   const Cycle({
     required this.id,
+    this.revisionId,
     required this.planId,
     required this.value,
     required this.unit,
@@ -2401,6 +3634,9 @@ class Cycle extends DataClass implements Insertable<Cycle> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || revisionId != null) {
+      map['revision_id'] = Variable<int>(revisionId);
+    }
     map['plan_id'] = Variable<int>(planId);
     map['value'] = Variable<int>(value);
     map['unit'] = Variable<String>(unit);
@@ -2412,6 +3648,10 @@ class Cycle extends DataClass implements Insertable<Cycle> {
   CyclesCompanion toCompanion(bool nullToAbsent) {
     return CyclesCompanion(
       id: Value(id),
+      revisionId:
+          revisionId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(revisionId),
       planId: Value(planId),
       value: Value(value),
       unit: Value(unit),
@@ -2427,6 +3667,7 @@ class Cycle extends DataClass implements Insertable<Cycle> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Cycle(
       id: serializer.fromJson<int>(json['id']),
+      revisionId: serializer.fromJson<int?>(json['revisionId']),
       planId: serializer.fromJson<int>(json['planId']),
       value: serializer.fromJson<int>(json['value']),
       unit: serializer.fromJson<String>(json['unit']),
@@ -2439,6 +3680,7 @@ class Cycle extends DataClass implements Insertable<Cycle> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'revisionId': serializer.toJson<int?>(revisionId),
       'planId': serializer.toJson<int>(planId),
       'value': serializer.toJson<int>(value),
       'unit': serializer.toJson<String>(unit),
@@ -2449,6 +3691,7 @@ class Cycle extends DataClass implements Insertable<Cycle> {
 
   Cycle copyWith({
     int? id,
+    Value<int?> revisionId = const Value.absent(),
     int? planId,
     int? value,
     String? unit,
@@ -2456,6 +3699,7 @@ class Cycle extends DataClass implements Insertable<Cycle> {
     int? orderIndex,
   }) => Cycle(
     id: id ?? this.id,
+    revisionId: revisionId.present ? revisionId.value : this.revisionId,
     planId: planId ?? this.planId,
     value: value ?? this.value,
     unit: unit ?? this.unit,
@@ -2465,6 +3709,8 @@ class Cycle extends DataClass implements Insertable<Cycle> {
   Cycle copyWithCompanion(CyclesCompanion data) {
     return Cycle(
       id: data.id.present ? data.id.value : this.id,
+      revisionId:
+          data.revisionId.present ? data.revisionId.value : this.revisionId,
       planId: data.planId.present ? data.planId.value : this.planId,
       value: data.value.present ? data.value.value : this.value,
       unit: data.unit.present ? data.unit.value : this.unit,
@@ -2478,6 +3724,7 @@ class Cycle extends DataClass implements Insertable<Cycle> {
   String toString() {
     return (StringBuffer('Cycle(')
           ..write('id: $id, ')
+          ..write('revisionId: $revisionId, ')
           ..write('planId: $planId, ')
           ..write('value: $value, ')
           ..write('unit: $unit, ')
@@ -2488,12 +3735,14 @@ class Cycle extends DataClass implements Insertable<Cycle> {
   }
 
   @override
-  int get hashCode => Object.hash(id, planId, value, unit, isStop, orderIndex);
+  int get hashCode =>
+      Object.hash(id, revisionId, planId, value, unit, isStop, orderIndex);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Cycle &&
           other.id == this.id &&
+          other.revisionId == this.revisionId &&
           other.planId == this.planId &&
           other.value == this.value &&
           other.unit == this.unit &&
@@ -2503,6 +3752,7 @@ class Cycle extends DataClass implements Insertable<Cycle> {
 
 class CyclesCompanion extends UpdateCompanion<Cycle> {
   final Value<int> id;
+  final Value<int?> revisionId;
   final Value<int> planId;
   final Value<int> value;
   final Value<String> unit;
@@ -2510,6 +3760,7 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
   final Value<int> orderIndex;
   const CyclesCompanion({
     this.id = const Value.absent(),
+    this.revisionId = const Value.absent(),
     this.planId = const Value.absent(),
     this.value = const Value.absent(),
     this.unit = const Value.absent(),
@@ -2518,6 +3769,7 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
   });
   CyclesCompanion.insert({
     this.id = const Value.absent(),
+    this.revisionId = const Value.absent(),
     required int planId,
     required int value,
     required String unit,
@@ -2530,6 +3782,7 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
        orderIndex = Value(orderIndex);
   static Insertable<Cycle> custom({
     Expression<int>? id,
+    Expression<int>? revisionId,
     Expression<int>? planId,
     Expression<int>? value,
     Expression<String>? unit,
@@ -2538,6 +3791,7 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (revisionId != null) 'revision_id': revisionId,
       if (planId != null) 'plan_id': planId,
       if (value != null) 'value': value,
       if (unit != null) 'unit': unit,
@@ -2548,6 +3802,7 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
 
   CyclesCompanion copyWith({
     Value<int>? id,
+    Value<int?>? revisionId,
     Value<int>? planId,
     Value<int>? value,
     Value<String>? unit,
@@ -2556,6 +3811,7 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
   }) {
     return CyclesCompanion(
       id: id ?? this.id,
+      revisionId: revisionId ?? this.revisionId,
       planId: planId ?? this.planId,
       value: value ?? this.value,
       unit: unit ?? this.unit,
@@ -2569,6 +3825,9 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (revisionId.present) {
+      map['revision_id'] = Variable<int>(revisionId.value);
     }
     if (planId.present) {
       map['plan_id'] = Variable<int>(planId.value);
@@ -2592,6 +3851,7 @@ class CyclesCompanion extends UpdateCompanion<Cycle> {
   String toString() {
     return (StringBuffer('CyclesCompanion(')
           ..write('id: $id, ')
+          ..write('revisionId: $revisionId, ')
           ..write('planId: $planId, ')
           ..write('value: $value, ')
           ..write('unit: $unit, ')
@@ -2621,16 +3881,18 @@ class $TransactionsTable extends Transactions
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _pillIdMeta = const VerificationMeta('pillId');
+  static const VerificationMeta _revisionIdMeta = const VerificationMeta(
+    'revisionId',
+  );
   @override
-  late final GeneratedColumn<int> pillId = GeneratedColumn<int>(
-    'pill_id',
+  late final GeneratedColumn<int> revisionId = GeneratedColumn<int>(
+    'revision_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES pills (id)',
+      'REFERENCES revisions (id)',
     ),
   );
   static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
@@ -2643,6 +3905,18 @@ class $TransactionsTable extends Transactions
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES plans (id)',
+    ),
+  );
+  static const VerificationMeta _pillIdMeta = const VerificationMeta('pillId');
+  @override
+  late final GeneratedColumn<int> pillId = GeneratedColumn<int>(
+    'pill_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pills (id)',
     ),
   );
   static const VerificationMeta _calcQtyMeta = const VerificationMeta(
@@ -2730,8 +4004,9 @@ class $TransactionsTable extends Transactions
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    pillId,
+    revisionId,
     planId,
+    pillId,
     calcQty,
     isNegative,
     timestamp,
@@ -2755,6 +4030,18 @@ class $TransactionsTable extends Transactions
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
+    if (data.containsKey('revision_id')) {
+      context.handle(
+        _revisionIdMeta,
+        revisionId.isAcceptableOrUnknown(data['revision_id']!, _revisionIdMeta),
+      );
+    }
+    if (data.containsKey('plan_id')) {
+      context.handle(
+        _planIdMeta,
+        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
+      );
+    }
     if (data.containsKey('pill_id')) {
       context.handle(
         _pillIdMeta,
@@ -2762,12 +4049,6 @@ class $TransactionsTable extends Transactions
       );
     } else if (isInserting) {
       context.missing(_pillIdMeta);
-    }
-    if (data.containsKey('plan_id')) {
-      context.handle(
-        _planIdMeta,
-        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
-      );
     }
     if (data.containsKey('calc_qty')) {
       context.handle(
@@ -2833,15 +4114,19 @@ class $TransactionsTable extends Transactions
             DriftSqlType.int,
             data['${effectivePrefix}id'],
           )!,
+      revisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision_id'],
+      ),
+      planId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}plan_id'],
+      ),
       pillId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
             data['${effectivePrefix}pill_id'],
           )!,
-      planId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}plan_id'],
-      ),
       calcQty:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -2886,8 +4171,9 @@ class $TransactionsTable extends Transactions
 
 class Transaction extends DataClass implements Insertable<Transaction> {
   final int id;
-  final int pillId;
+  final int? revisionId;
   final int? planId;
+  final int pillId;
   final String calcQty;
   final bool isNegative;
   final DateTime timestamp;
@@ -2897,8 +4183,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final DateTime? endTime;
   const Transaction({
     required this.id,
-    required this.pillId,
+    this.revisionId,
     this.planId,
+    required this.pillId,
     required this.calcQty,
     required this.isNegative,
     required this.timestamp,
@@ -2911,10 +4198,13 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['pill_id'] = Variable<int>(pillId);
+    if (!nullToAbsent || revisionId != null) {
+      map['revision_id'] = Variable<int>(revisionId);
+    }
     if (!nullToAbsent || planId != null) {
       map['plan_id'] = Variable<int>(planId);
     }
+    map['pill_id'] = Variable<int>(pillId);
     map['calc_qty'] = Variable<String>(calcQty);
     map['is_negative'] = Variable<bool>(isNegative);
     map['timestamp'] = Variable<DateTime>(timestamp);
@@ -2932,9 +4222,13 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   TransactionsCompanion toCompanion(bool nullToAbsent) {
     return TransactionsCompanion(
       id: Value(id),
-      pillId: Value(pillId),
+      revisionId:
+          revisionId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(revisionId),
       planId:
           planId == null && nullToAbsent ? const Value.absent() : Value(planId),
+      pillId: Value(pillId),
       calcQty: Value(calcQty),
       isNegative: Value(isNegative),
       timestamp: Value(timestamp),
@@ -2956,8 +4250,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Transaction(
       id: serializer.fromJson<int>(json['id']),
-      pillId: serializer.fromJson<int>(json['pillId']),
+      revisionId: serializer.fromJson<int?>(json['revisionId']),
       planId: serializer.fromJson<int?>(json['planId']),
+      pillId: serializer.fromJson<int>(json['pillId']),
       calcQty: serializer.fromJson<String>(json['calcQty']),
       isNegative: serializer.fromJson<bool>(json['isNegative']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
@@ -2972,8 +4267,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'pillId': serializer.toJson<int>(pillId),
+      'revisionId': serializer.toJson<int?>(revisionId),
       'planId': serializer.toJson<int?>(planId),
+      'pillId': serializer.toJson<int>(pillId),
       'calcQty': serializer.toJson<String>(calcQty),
       'isNegative': serializer.toJson<bool>(isNegative),
       'timestamp': serializer.toJson<DateTime>(timestamp),
@@ -2986,8 +4282,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
 
   Transaction copyWith({
     int? id,
-    int? pillId,
+    Value<int?> revisionId = const Value.absent(),
     Value<int?> planId = const Value.absent(),
+    int? pillId,
     String? calcQty,
     bool? isNegative,
     DateTime? timestamp,
@@ -2997,8 +4294,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     Value<DateTime?> endTime = const Value.absent(),
   }) => Transaction(
     id: id ?? this.id,
-    pillId: pillId ?? this.pillId,
+    revisionId: revisionId.present ? revisionId.value : this.revisionId,
     planId: planId.present ? planId.value : this.planId,
+    pillId: pillId ?? this.pillId,
     calcQty: calcQty ?? this.calcQty,
     isNegative: isNegative ?? this.isNegative,
     timestamp: timestamp ?? this.timestamp,
@@ -3010,8 +4308,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   Transaction copyWithCompanion(TransactionsCompanion data) {
     return Transaction(
       id: data.id.present ? data.id.value : this.id,
-      pillId: data.pillId.present ? data.pillId.value : this.pillId,
+      revisionId:
+          data.revisionId.present ? data.revisionId.value : this.revisionId,
       planId: data.planId.present ? data.planId.value : this.planId,
+      pillId: data.pillId.present ? data.pillId.value : this.pillId,
       calcQty: data.calcQty.present ? data.calcQty.value : this.calcQty,
       isNegative:
           data.isNegative.present ? data.isNegative.value : this.isNegative,
@@ -3027,8 +4327,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   String toString() {
     return (StringBuffer('Transaction(')
           ..write('id: $id, ')
-          ..write('pillId: $pillId, ')
+          ..write('revisionId: $revisionId, ')
           ..write('planId: $planId, ')
+          ..write('pillId: $pillId, ')
           ..write('calcQty: $calcQty, ')
           ..write('isNegative: $isNegative, ')
           ..write('timestamp: $timestamp, ')
@@ -3043,8 +4344,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   @override
   int get hashCode => Object.hash(
     id,
-    pillId,
+    revisionId,
     planId,
+    pillId,
     calcQty,
     isNegative,
     timestamp,
@@ -3058,8 +4360,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       identical(this, other) ||
       (other is Transaction &&
           other.id == this.id &&
-          other.pillId == this.pillId &&
+          other.revisionId == this.revisionId &&
           other.planId == this.planId &&
+          other.pillId == this.pillId &&
           other.calcQty == this.calcQty &&
           other.isNegative == this.isNegative &&
           other.timestamp == this.timestamp &&
@@ -3071,8 +4374,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
 
 class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> id;
-  final Value<int> pillId;
+  final Value<int?> revisionId;
   final Value<int?> planId;
+  final Value<int> pillId;
   final Value<String> calcQty;
   final Value<bool> isNegative;
   final Value<DateTime> timestamp;
@@ -3082,8 +4386,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<DateTime?> endTime;
   const TransactionsCompanion({
     this.id = const Value.absent(),
-    this.pillId = const Value.absent(),
+    this.revisionId = const Value.absent(),
     this.planId = const Value.absent(),
+    this.pillId = const Value.absent(),
     this.calcQty = const Value.absent(),
     this.isNegative = const Value.absent(),
     this.timestamp = const Value.absent(),
@@ -3094,8 +4399,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   });
   TransactionsCompanion.insert({
     this.id = const Value.absent(),
-    required int pillId,
+    this.revisionId = const Value.absent(),
     this.planId = const Value.absent(),
+    required int pillId,
     this.calcQty = const Value.absent(),
     required bool isNegative,
     required DateTime timestamp,
@@ -3110,8 +4416,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
        startTime = Value(startTime);
   static Insertable<Transaction> custom({
     Expression<int>? id,
-    Expression<int>? pillId,
+    Expression<int>? revisionId,
     Expression<int>? planId,
+    Expression<int>? pillId,
     Expression<String>? calcQty,
     Expression<bool>? isNegative,
     Expression<DateTime>? timestamp,
@@ -3122,8 +4429,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (pillId != null) 'pill_id': pillId,
+      if (revisionId != null) 'revision_id': revisionId,
       if (planId != null) 'plan_id': planId,
+      if (pillId != null) 'pill_id': pillId,
       if (calcQty != null) 'calc_qty': calcQty,
       if (isNegative != null) 'is_negative': isNegative,
       if (timestamp != null) 'timestamp': timestamp,
@@ -3136,8 +4444,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
 
   TransactionsCompanion copyWith({
     Value<int>? id,
-    Value<int>? pillId,
+    Value<int?>? revisionId,
     Value<int?>? planId,
+    Value<int>? pillId,
     Value<String>? calcQty,
     Value<bool>? isNegative,
     Value<DateTime>? timestamp,
@@ -3148,8 +4457,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   }) {
     return TransactionsCompanion(
       id: id ?? this.id,
-      pillId: pillId ?? this.pillId,
+      revisionId: revisionId ?? this.revisionId,
       planId: planId ?? this.planId,
+      pillId: pillId ?? this.pillId,
       calcQty: calcQty ?? this.calcQty,
       isNegative: isNegative ?? this.isNegative,
       timestamp: timestamp ?? this.timestamp,
@@ -3166,11 +4476,14 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (pillId.present) {
-      map['pill_id'] = Variable<int>(pillId.value);
+    if (revisionId.present) {
+      map['revision_id'] = Variable<int>(revisionId.value);
     }
     if (planId.present) {
       map['plan_id'] = Variable<int>(planId.value);
+    }
+    if (pillId.present) {
+      map['pill_id'] = Variable<int>(pillId.value);
     }
     if (calcQty.present) {
       map['calc_qty'] = Variable<String>(calcQty.value);
@@ -3200,8 +4513,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   String toString() {
     return (StringBuffer('TransactionsCompanion(')
           ..write('id: $id, ')
-          ..write('pillId: $pillId, ')
+          ..write('revisionId: $revisionId, ')
           ..write('planId: $planId, ')
+          ..write('pillId: $pillId, ')
           ..write('calcQty: $calcQty, ')
           ..write('isNegative: $isNegative, ')
           ..write('timestamp: $timestamp, ')
@@ -3641,6 +4955,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PillsTable pills = $PillsTable(this);
   late final $SpecsTable specs = $SpecsTable(this);
   late final $PlansTable plans = $PlansTable(this);
+  late final $RevisionsTable revisions = $RevisionsTable(this);
   late final $CyclesTable cycles = $CyclesTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $QuantitiesTable quantities = $QuantitiesTable(this);
@@ -3657,6 +4972,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     pills,
     specs,
     plans,
+    revisions,
     cycles,
     transactions,
     quantities,
@@ -3731,6 +5047,24 @@ final class $$PillsTableReferences
     ).filter((f) => f.pillId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_plansRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$RevisionsTable, List<Revision>>
+  _revisionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.revisions,
+    aliasName: $_aliasNameGenerator(db.pills.id, db.revisions.pillId),
+  );
+
+  $$RevisionsTableProcessedTableManager get revisionsRefs {
+    final manager = $$RevisionsTableTableManager(
+      $_db,
+      $_db.revisions,
+    ).filter((f) => f.pillId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_revisionsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -3864,6 +5198,31 @@ class $$PillsTableFilterComposer extends Composer<_$AppDatabase, $PillsTable> {
           }) => $$PlansTableFilterComposer(
             $db: $db,
             $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> revisionsRefs(
+    Expression<bool> Function($$RevisionsTableFilterComposer f) f,
+  ) {
+    final $$RevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.pillId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.revisions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4078,6 +5437,31 @@ class $$PillsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> revisionsRefs<T extends Object>(
+    Expression<T> Function($$RevisionsTableAnnotationComposer a) f,
+  ) {
+    final $$RevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.pillId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
   ) {
@@ -4120,6 +5504,7 @@ class $$PillsTableTableManager
           PrefetchHooks Function({
             bool specsRefs,
             bool plansRefs,
+            bool revisionsRefs,
             bool transactionsRefs,
           })
         > {
@@ -4203,6 +5588,7 @@ class $$PillsTableTableManager
           prefetchHooksCallback: ({
             specsRefs = false,
             plansRefs = false,
+            revisionsRefs = false,
             transactionsRefs = false,
           }) {
             return PrefetchHooks(
@@ -4210,6 +5596,7 @@ class $$PillsTableTableManager
               explicitlyWatchedTables: [
                 if (specsRefs) db.specs,
                 if (plansRefs) db.plans,
+                if (revisionsRefs) db.revisions,
                 if (transactionsRefs) db.transactions,
               ],
               addJoins: null,
@@ -4238,6 +5625,23 @@ class $$PillsTableTableManager
                       managerFromTypedResult:
                           (p0) =>
                               $$PillsTableReferences(db, table, p0).plansRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) =>
+                              referencedItems.where((e) => e.pillId == item.id),
+                      typedResults: items,
+                    ),
+                  if (revisionsRefs)
+                    await $_getPrefetchedData<Pill, $PillsTable, Revision>(
+                      currentTable: table,
+                      referencedTable: $$PillsTableReferences
+                          ._revisionsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$PillsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).revisionsRefs,
                       referencedItemsForCurrentItem:
                           (item, referencedItems) =>
                               referencedItems.where((e) => e.pillId == item.id),
@@ -4283,6 +5687,7 @@ typedef $$PillsTableProcessedTableManager =
       PrefetchHooks Function({
         bool specsRefs,
         bool plansRefs,
+        bool revisionsRefs,
         bool transactionsRefs,
       })
     >;
@@ -4601,8 +6006,10 @@ typedef $$SpecsTableProcessedTableManager =
 typedef $$PlansTableCreateCompanionBuilder =
     PlansCompanion Function({
       Value<int> id,
+      Value<int?> revisionId,
       required int pillId,
       required bool isEnabled,
+      Value<DateTime?> updateTime,
       required String name,
       required int qty,
       required String unit,
@@ -4623,8 +6030,10 @@ typedef $$PlansTableCreateCompanionBuilder =
 typedef $$PlansTableUpdateCompanionBuilder =
     PlansCompanion Function({
       Value<int> id,
+      Value<int?> revisionId,
       Value<int> pillId,
       Value<bool> isEnabled,
+      Value<DateTime?> updateTime,
       Value<String> name,
       Value<int> qty,
       Value<String> unit,
@@ -4661,6 +6070,24 @@ final class $$PlansTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$RevisionsTable, List<Revision>>
+  _revisionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.revisions,
+    aliasName: $_aliasNameGenerator(db.plans.id, db.revisions.planId),
+  );
+
+  $$RevisionsTableProcessedTableManager get revisionsRefs {
+    final manager = $$RevisionsTableTableManager(
+      $_db,
+      $_db.revisions,
+    ).filter((f) => f.planId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_revisionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -4715,8 +6142,18 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get revisionId => $composableBuilder(
+    column: $table.revisionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get isEnabled => $composableBuilder(
     column: $table.isEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4823,6 +6260,31 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
     return composer;
   }
 
+  Expression<bool> revisionsRefs(
+    Expression<bool> Function($$RevisionsTableFilterComposer f) f,
+  ) {
+    final $$RevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.planId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<bool> cyclesRefs(
     Expression<bool> Function($$CyclesTableFilterComposer f) f,
   ) {
@@ -4888,8 +6350,18 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get revisionId => $composableBuilder(
+    column: $table.revisionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isEnabled => $composableBuilder(
     column: $table.isEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5009,8 +6481,18 @@ class $$PlansTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<int> get revisionId => $composableBuilder(
+    column: $table.revisionId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get isEnabled =>
       $composableBuilder(column: $table.isEnabled, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -5099,6 +6581,31 @@ class $$PlansTableAnnotationComposer
     return composer;
   }
 
+  Expression<T> revisionsRefs<T extends Object>(
+    Expression<T> Function($$RevisionsTableAnnotationComposer a) f,
+  ) {
+    final $$RevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.planId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> cyclesRefs<T extends Object>(
     Expression<T> Function($$CyclesTableAnnotationComposer a) f,
   ) {
@@ -5165,6 +6672,7 @@ class $$PlansTableTableManager
           Plan,
           PrefetchHooks Function({
             bool pillId,
+            bool revisionsRefs,
             bool cyclesRefs,
             bool transactionsRefs,
           })
@@ -5183,8 +6691,10 @@ class $$PlansTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> revisionId = const Value.absent(),
                 Value<int> pillId = const Value.absent(),
                 Value<bool> isEnabled = const Value.absent(),
+                Value<DateTime?> updateTime = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int> qty = const Value.absent(),
                 Value<String> unit = const Value.absent(),
@@ -5203,8 +6713,10 @@ class $$PlansTableTableManager
                 Value<String?> reminderMethod = const Value.absent(),
               }) => PlansCompanion(
                 id: id,
+                revisionId: revisionId,
                 pillId: pillId,
                 isEnabled: isEnabled,
+                updateTime: updateTime,
                 name: name,
                 qty: qty,
                 unit: unit,
@@ -5225,8 +6737,10 @@ class $$PlansTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> revisionId = const Value.absent(),
                 required int pillId,
                 required bool isEnabled,
+                Value<DateTime?> updateTime = const Value.absent(),
                 required String name,
                 required int qty,
                 required String unit,
@@ -5245,8 +6759,10 @@ class $$PlansTableTableManager
                 Value<String?> reminderMethod = const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
+                revisionId: revisionId,
                 pillId: pillId,
                 isEnabled: isEnabled,
+                updateTime: updateTime,
                 name: name,
                 qty: qty,
                 unit: unit,
@@ -5276,12 +6792,14 @@ class $$PlansTableTableManager
                       .toList(),
           prefetchHooksCallback: ({
             pillId = false,
+            revisionsRefs = false,
             cyclesRefs = false,
             transactionsRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
+                if (revisionsRefs) db.revisions,
                 if (cyclesRefs) db.cycles,
                 if (transactionsRefs) db.transactions,
               ],
@@ -5317,6 +6835,23 @@ class $$PlansTableTableManager
               },
               getPrefetchedDataCallback: (items) async {
                 return [
+                  if (revisionsRefs)
+                    await $_getPrefetchedData<Plan, $PlansTable, Revision>(
+                      currentTable: table,
+                      referencedTable: $$PlansTableReferences
+                          ._revisionsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$PlansTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).revisionsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) =>
+                              referencedItems.where((e) => e.planId == item.id),
+                      typedResults: items,
+                    ),
                   if (cyclesRefs)
                     await $_getPrefetchedData<Plan, $PlansTable, Cycle>(
                       currentTable: table,
@@ -5370,6 +6905,886 @@ typedef $$PlansTableProcessedTableManager =
       Plan,
       PrefetchHooks Function({
         bool pillId,
+        bool revisionsRefs,
+        bool cyclesRefs,
+        bool transactionsRefs,
+      })
+    >;
+typedef $$RevisionsTableCreateCompanionBuilder =
+    RevisionsCompanion Function({
+      Value<int> id,
+      required int planId,
+      required int pillId,
+      required String name,
+      required int qty,
+      required String unit,
+      Value<int?> numerator,
+      Value<int?> denominator,
+      required String startDate,
+      required String endDate,
+      required String repeatValues,
+      required String repeatUnit,
+      required String startTime,
+      required bool isExactTime,
+      Value<int?> duration,
+      Value<String?> durationUnit,
+      Value<int?> reminderValue,
+      Value<String?> reminderUnit,
+      Value<String?> reminderMethod,
+    });
+typedef $$RevisionsTableUpdateCompanionBuilder =
+    RevisionsCompanion Function({
+      Value<int> id,
+      Value<int> planId,
+      Value<int> pillId,
+      Value<String> name,
+      Value<int> qty,
+      Value<String> unit,
+      Value<int?> numerator,
+      Value<int?> denominator,
+      Value<String> startDate,
+      Value<String> endDate,
+      Value<String> repeatValues,
+      Value<String> repeatUnit,
+      Value<String> startTime,
+      Value<bool> isExactTime,
+      Value<int?> duration,
+      Value<String?> durationUnit,
+      Value<int?> reminderValue,
+      Value<String?> reminderUnit,
+      Value<String?> reminderMethod,
+    });
+
+final class $$RevisionsTableReferences
+    extends BaseReferences<_$AppDatabase, $RevisionsTable, Revision> {
+  $$RevisionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PlansTable _planIdTable(_$AppDatabase db) => db.plans.createAlias(
+    $_aliasNameGenerator(db.revisions.planId, db.plans.id),
+  );
+
+  $$PlansTableProcessedTableManager get planId {
+    final $_column = $_itemColumn<int>('plan_id')!;
+
+    final manager = $$PlansTableTableManager(
+      $_db,
+      $_db.plans,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_planIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PillsTable _pillIdTable(_$AppDatabase db) => db.pills.createAlias(
+    $_aliasNameGenerator(db.revisions.pillId, db.pills.id),
+  );
+
+  $$PillsTableProcessedTableManager get pillId {
+    final $_column = $_itemColumn<int>('pill_id')!;
+
+    final manager = $$PillsTableTableManager(
+      $_db,
+      $_db.pills,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pillIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$CyclesTable, List<Cycle>> _cyclesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.cycles,
+    aliasName: $_aliasNameGenerator(db.revisions.id, db.cycles.revisionId),
+  );
+
+  $$CyclesTableProcessedTableManager get cyclesRefs {
+    final manager = $$CyclesTableTableManager(
+      $_db,
+      $_db.cycles,
+    ).filter((f) => f.revisionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_cyclesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
+  _transactionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.transactions,
+    aliasName: $_aliasNameGenerator(
+      db.revisions.id,
+      db.transactions.revisionId,
+    ),
+  );
+
+  $$TransactionsTableProcessedTableManager get transactionsRefs {
+    final manager = $$TransactionsTableTableManager(
+      $_db,
+      $_db.transactions,
+    ).filter((f) => f.revisionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$RevisionsTableFilterComposer
+    extends Composer<_$AppDatabase, $RevisionsTable> {
+  $$RevisionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numerator => $composableBuilder(
+    column: $table.numerator,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get denominator => $composableBuilder(
+    column: $table.denominator,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get repeatValues => $composableBuilder(
+    column: $table.repeatValues,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get repeatUnit => $composableBuilder(
+    column: $table.repeatUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isExactTime => $composableBuilder(
+    column: $table.isExactTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get duration => $composableBuilder(
+    column: $table.duration,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get durationUnit => $composableBuilder(
+    column: $table.durationUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reminderValue => $composableBuilder(
+    column: $table.reminderValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reminderUnit => $composableBuilder(
+    column: $table.reminderUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reminderMethod => $composableBuilder(
+    column: $table.reminderMethod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PlansTableFilterComposer get planId {
+    final $$PlansTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.plans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlansTableFilterComposer(
+            $db: $db,
+            $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PillsTableFilterComposer get pillId {
+    final $$PillsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pillId,
+      referencedTable: $db.pills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PillsTableFilterComposer(
+            $db: $db,
+            $table: $db.pills,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> cyclesRefs(
+    Expression<bool> Function($$CyclesTableFilterComposer f) f,
+  ) {
+    final $$CyclesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cycles,
+      getReferencedColumn: (t) => t.revisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CyclesTableFilterComposer(
+            $db: $db,
+            $table: $db.cycles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> transactionsRefs(
+    Expression<bool> Function($$TransactionsTableFilterComposer f) f,
+  ) {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.revisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableFilterComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RevisionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RevisionsTable> {
+  $$RevisionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get numerator => $composableBuilder(
+    column: $table.numerator,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get denominator => $composableBuilder(
+    column: $table.denominator,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get repeatValues => $composableBuilder(
+    column: $table.repeatValues,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get repeatUnit => $composableBuilder(
+    column: $table.repeatUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isExactTime => $composableBuilder(
+    column: $table.isExactTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get duration => $composableBuilder(
+    column: $table.duration,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get durationUnit => $composableBuilder(
+    column: $table.durationUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reminderValue => $composableBuilder(
+    column: $table.reminderValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reminderUnit => $composableBuilder(
+    column: $table.reminderUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reminderMethod => $composableBuilder(
+    column: $table.reminderMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PlansTableOrderingComposer get planId {
+    final $$PlansTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.plans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlansTableOrderingComposer(
+            $db: $db,
+            $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PillsTableOrderingComposer get pillId {
+    final $$PillsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pillId,
+      referencedTable: $db.pills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PillsTableOrderingComposer(
+            $db: $db,
+            $table: $db.pills,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RevisionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RevisionsTable> {
+  $$RevisionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get qty =>
+      $composableBuilder(column: $table.qty, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<int> get numerator =>
+      $composableBuilder(column: $table.numerator, builder: (column) => column);
+
+  GeneratedColumn<int> get denominator => $composableBuilder(
+    column: $table.denominator,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<String> get repeatValues => $composableBuilder(
+    column: $table.repeatValues,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get repeatUnit => $composableBuilder(
+    column: $table.repeatUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startTime =>
+      $composableBuilder(column: $table.startTime, builder: (column) => column);
+
+  GeneratedColumn<bool> get isExactTime => $composableBuilder(
+    column: $table.isExactTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get duration =>
+      $composableBuilder(column: $table.duration, builder: (column) => column);
+
+  GeneratedColumn<String> get durationUnit => $composableBuilder(
+    column: $table.durationUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reminderValue => $composableBuilder(
+    column: $table.reminderValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reminderUnit => $composableBuilder(
+    column: $table.reminderUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reminderMethod => $composableBuilder(
+    column: $table.reminderMethod,
+    builder: (column) => column,
+  );
+
+  $$PlansTableAnnotationComposer get planId {
+    final $$PlansTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.plans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlansTableAnnotationComposer(
+            $db: $db,
+            $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PillsTableAnnotationComposer get pillId {
+    final $$PillsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pillId,
+      referencedTable: $db.pills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PillsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pills,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> cyclesRefs<T extends Object>(
+    Expression<T> Function($$CyclesTableAnnotationComposer a) f,
+  ) {
+    final $$CyclesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cycles,
+      getReferencedColumn: (t) => t.revisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CyclesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cycles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> transactionsRefs<T extends Object>(
+    Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
+  ) {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.revisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RevisionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RevisionsTable,
+          Revision,
+          $$RevisionsTableFilterComposer,
+          $$RevisionsTableOrderingComposer,
+          $$RevisionsTableAnnotationComposer,
+          $$RevisionsTableCreateCompanionBuilder,
+          $$RevisionsTableUpdateCompanionBuilder,
+          (Revision, $$RevisionsTableReferences),
+          Revision,
+          PrefetchHooks Function({
+            bool planId,
+            bool pillId,
+            bool cyclesRefs,
+            bool transactionsRefs,
+          })
+        > {
+  $$RevisionsTableTableManager(_$AppDatabase db, $RevisionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$RevisionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$RevisionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$RevisionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> planId = const Value.absent(),
+                Value<int> pillId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> qty = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<int?> numerator = const Value.absent(),
+                Value<int?> denominator = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<String> endDate = const Value.absent(),
+                Value<String> repeatValues = const Value.absent(),
+                Value<String> repeatUnit = const Value.absent(),
+                Value<String> startTime = const Value.absent(),
+                Value<bool> isExactTime = const Value.absent(),
+                Value<int?> duration = const Value.absent(),
+                Value<String?> durationUnit = const Value.absent(),
+                Value<int?> reminderValue = const Value.absent(),
+                Value<String?> reminderUnit = const Value.absent(),
+                Value<String?> reminderMethod = const Value.absent(),
+              }) => RevisionsCompanion(
+                id: id,
+                planId: planId,
+                pillId: pillId,
+                name: name,
+                qty: qty,
+                unit: unit,
+                numerator: numerator,
+                denominator: denominator,
+                startDate: startDate,
+                endDate: endDate,
+                repeatValues: repeatValues,
+                repeatUnit: repeatUnit,
+                startTime: startTime,
+                isExactTime: isExactTime,
+                duration: duration,
+                durationUnit: durationUnit,
+                reminderValue: reminderValue,
+                reminderUnit: reminderUnit,
+                reminderMethod: reminderMethod,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int planId,
+                required int pillId,
+                required String name,
+                required int qty,
+                required String unit,
+                Value<int?> numerator = const Value.absent(),
+                Value<int?> denominator = const Value.absent(),
+                required String startDate,
+                required String endDate,
+                required String repeatValues,
+                required String repeatUnit,
+                required String startTime,
+                required bool isExactTime,
+                Value<int?> duration = const Value.absent(),
+                Value<String?> durationUnit = const Value.absent(),
+                Value<int?> reminderValue = const Value.absent(),
+                Value<String?> reminderUnit = const Value.absent(),
+                Value<String?> reminderMethod = const Value.absent(),
+              }) => RevisionsCompanion.insert(
+                id: id,
+                planId: planId,
+                pillId: pillId,
+                name: name,
+                qty: qty,
+                unit: unit,
+                numerator: numerator,
+                denominator: denominator,
+                startDate: startDate,
+                endDate: endDate,
+                repeatValues: repeatValues,
+                repeatUnit: repeatUnit,
+                startTime: startTime,
+                isExactTime: isExactTime,
+                duration: duration,
+                durationUnit: durationUnit,
+                reminderValue: reminderValue,
+                reminderUnit: reminderUnit,
+                reminderMethod: reminderMethod,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$RevisionsTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({
+            planId = false,
+            pillId = false,
+            cyclesRefs = false,
+            transactionsRefs = false,
+          }) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (cyclesRefs) db.cycles,
+                if (transactionsRefs) db.transactions,
+              ],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (planId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.planId,
+                            referencedTable: $$RevisionsTableReferences
+                                ._planIdTable(db),
+                            referencedColumn:
+                                $$RevisionsTableReferences._planIdTable(db).id,
+                          )
+                          as T;
+                }
+                if (pillId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.pillId,
+                            referencedTable: $$RevisionsTableReferences
+                                ._pillIdTable(db),
+                            referencedColumn:
+                                $$RevisionsTableReferences._pillIdTable(db).id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (cyclesRefs)
+                    await $_getPrefetchedData<Revision, $RevisionsTable, Cycle>(
+                      currentTable: table,
+                      referencedTable: $$RevisionsTableReferences
+                          ._cyclesRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$RevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cyclesRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.revisionId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                  if (transactionsRefs)
+                    await $_getPrefetchedData<
+                      Revision,
+                      $RevisionsTable,
+                      Transaction
+                    >(
+                      currentTable: table,
+                      referencedTable: $$RevisionsTableReferences
+                          ._transactionsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$RevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).transactionsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.revisionId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$RevisionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RevisionsTable,
+      Revision,
+      $$RevisionsTableFilterComposer,
+      $$RevisionsTableOrderingComposer,
+      $$RevisionsTableAnnotationComposer,
+      $$RevisionsTableCreateCompanionBuilder,
+      $$RevisionsTableUpdateCompanionBuilder,
+      (Revision, $$RevisionsTableReferences),
+      Revision,
+      PrefetchHooks Function({
+        bool planId,
+        bool pillId,
         bool cyclesRefs,
         bool transactionsRefs,
       })
@@ -5377,6 +7792,7 @@ typedef $$PlansTableProcessedTableManager =
 typedef $$CyclesTableCreateCompanionBuilder =
     CyclesCompanion Function({
       Value<int> id,
+      Value<int?> revisionId,
       required int planId,
       required int value,
       required String unit,
@@ -5386,6 +7802,7 @@ typedef $$CyclesTableCreateCompanionBuilder =
 typedef $$CyclesTableUpdateCompanionBuilder =
     CyclesCompanion Function({
       Value<int> id,
+      Value<int?> revisionId,
       Value<int> planId,
       Value<int> value,
       Value<String> unit,
@@ -5396,6 +7813,23 @@ typedef $$CyclesTableUpdateCompanionBuilder =
 final class $$CyclesTableReferences
     extends BaseReferences<_$AppDatabase, $CyclesTable, Cycle> {
   $$CyclesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $RevisionsTable _revisionIdTable(_$AppDatabase db) => db.revisions
+      .createAlias($_aliasNameGenerator(db.cycles.revisionId, db.revisions.id));
+
+  $$RevisionsTableProcessedTableManager? get revisionId {
+    final $_column = $_itemColumn<int>('revision_id');
+    if ($_column == null) return null;
+    final manager = $$RevisionsTableTableManager(
+      $_db,
+      $_db.revisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_revisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 
   static $PlansTable _planIdTable(_$AppDatabase db) =>
       db.plans.createAlias($_aliasNameGenerator(db.cycles.planId, db.plans.id));
@@ -5448,6 +7882,29 @@ class $$CyclesTableFilterComposer
     column: $table.orderIndex,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$RevisionsTableFilterComposer get revisionId {
+    final $$RevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$PlansTableFilterComposer get planId {
     final $$PlansTableFilterComposer composer = $composerBuilder(
@@ -5507,6 +7964,29 @@ class $$CyclesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  $$RevisionsTableOrderingComposer get revisionId {
+    final $$RevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   $$PlansTableOrderingComposer get planId {
     final $$PlansTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5557,6 +8037,29 @@ class $$CyclesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  $$RevisionsTableAnnotationComposer get revisionId {
+    final $$RevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   $$PlansTableAnnotationComposer get planId {
     final $$PlansTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -5594,7 +8097,7 @@ class $$CyclesTableTableManager
           $$CyclesTableUpdateCompanionBuilder,
           (Cycle, $$CyclesTableReferences),
           Cycle,
-          PrefetchHooks Function({bool planId})
+          PrefetchHooks Function({bool revisionId, bool planId})
         > {
   $$CyclesTableTableManager(_$AppDatabase db, $CyclesTable table)
     : super(
@@ -5610,6 +8113,7 @@ class $$CyclesTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> revisionId = const Value.absent(),
                 Value<int> planId = const Value.absent(),
                 Value<int> value = const Value.absent(),
                 Value<String> unit = const Value.absent(),
@@ -5617,6 +8121,7 @@ class $$CyclesTableTableManager
                 Value<int> orderIndex = const Value.absent(),
               }) => CyclesCompanion(
                 id: id,
+                revisionId: revisionId,
                 planId: planId,
                 value: value,
                 unit: unit,
@@ -5626,6 +8131,7 @@ class $$CyclesTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> revisionId = const Value.absent(),
                 required int planId,
                 required int value,
                 required String unit,
@@ -5633,6 +8139,7 @@ class $$CyclesTableTableManager
                 required int orderIndex,
               }) => CyclesCompanion.insert(
                 id: id,
+                revisionId: revisionId,
                 planId: planId,
                 value: value,
                 unit: unit,
@@ -5649,7 +8156,7 @@ class $$CyclesTableTableManager
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: ({planId = false}) {
+          prefetchHooksCallback: ({revisionId = false, planId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -5668,6 +8175,18 @@ class $$CyclesTableTableManager
                   dynamic
                 >
               >(state) {
+                if (revisionId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.revisionId,
+                            referencedTable: $$CyclesTableReferences
+                                ._revisionIdTable(db),
+                            referencedColumn:
+                                $$CyclesTableReferences._revisionIdTable(db).id,
+                          )
+                          as T;
+                }
                 if (planId) {
                   state =
                       state.withJoin(
@@ -5704,13 +8223,14 @@ typedef $$CyclesTableProcessedTableManager =
       $$CyclesTableUpdateCompanionBuilder,
       (Cycle, $$CyclesTableReferences),
       Cycle,
-      PrefetchHooks Function({bool planId})
+      PrefetchHooks Function({bool revisionId, bool planId})
     >;
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
       Value<int> id,
-      required int pillId,
+      Value<int?> revisionId,
       Value<int?> planId,
+      required int pillId,
       Value<String> calcQty,
       required bool isNegative,
       required DateTime timestamp,
@@ -5722,8 +8242,9 @@ typedef $$TransactionsTableCreateCompanionBuilder =
 typedef $$TransactionsTableUpdateCompanionBuilder =
     TransactionsCompanion Function({
       Value<int> id,
-      Value<int> pillId,
+      Value<int?> revisionId,
       Value<int?> planId,
+      Value<int> pillId,
       Value<String> calcQty,
       Value<bool> isNegative,
       Value<DateTime> timestamp,
@@ -5737,18 +8258,19 @@ final class $$TransactionsTableReferences
     extends BaseReferences<_$AppDatabase, $TransactionsTable, Transaction> {
   $$TransactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $PillsTable _pillIdTable(_$AppDatabase db) => db.pills.createAlias(
-    $_aliasNameGenerator(db.transactions.pillId, db.pills.id),
-  );
+  static $RevisionsTable _revisionIdTable(_$AppDatabase db) =>
+      db.revisions.createAlias(
+        $_aliasNameGenerator(db.transactions.revisionId, db.revisions.id),
+      );
 
-  $$PillsTableProcessedTableManager get pillId {
-    final $_column = $_itemColumn<int>('pill_id')!;
-
-    final manager = $$PillsTableTableManager(
+  $$RevisionsTableProcessedTableManager? get revisionId {
+    final $_column = $_itemColumn<int>('revision_id');
+    if ($_column == null) return null;
+    final manager = $$RevisionsTableTableManager(
       $_db,
-      $_db.pills,
+      $_db.revisions,
     ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_pillIdTable($_db));
+    final item = $_typedResult.readTableOrNull(_revisionIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -5767,6 +8289,24 @@ final class $$TransactionsTableReferences
       $_db.plans,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_planIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PillsTable _pillIdTable(_$AppDatabase db) => db.pills.createAlias(
+    $_aliasNameGenerator(db.transactions.pillId, db.pills.id),
+  );
+
+  $$PillsTableProcessedTableManager get pillId {
+    final $_column = $_itemColumn<int>('pill_id')!;
+
+    final manager = $$PillsTableTableManager(
+      $_db,
+      $_db.pills,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pillIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -5844,20 +8384,20 @@ class $$TransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$PillsTableFilterComposer get pillId {
-    final $$PillsTableFilterComposer composer = $composerBuilder(
+  $$RevisionsTableFilterComposer get revisionId {
+    final $$RevisionsTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.pillId,
-      referencedTable: $db.pills,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$PillsTableFilterComposer(
+          }) => $$RevisionsTableFilterComposer(
             $db: $db,
-            $table: $db.pills,
+            $table: $db.revisions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5881,6 +8421,29 @@ class $$TransactionsTableFilterComposer
           }) => $$PlansTableFilterComposer(
             $db: $db,
             $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PillsTableFilterComposer get pillId {
+    final $$PillsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pillId,
+      referencedTable: $db.pills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PillsTableFilterComposer(
+            $db: $db,
+            $table: $db.pills,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5965,20 +8528,20 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$PillsTableOrderingComposer get pillId {
-    final $$PillsTableOrderingComposer composer = $composerBuilder(
+  $$RevisionsTableOrderingComposer get revisionId {
+    final $$RevisionsTableOrderingComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.pillId,
-      referencedTable: $db.pills,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$PillsTableOrderingComposer(
+          }) => $$RevisionsTableOrderingComposer(
             $db: $db,
-            $table: $db.pills,
+            $table: $db.revisions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -6002,6 +8565,29 @@ class $$TransactionsTableOrderingComposer
           }) => $$PlansTableOrderingComposer(
             $db: $db,
             $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PillsTableOrderingComposer get pillId {
+    final $$PillsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pillId,
+      referencedTable: $db.pills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PillsTableOrderingComposer(
+            $db: $db,
+            $table: $db.pills,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -6047,20 +8633,20 @@ class $$TransactionsTableAnnotationComposer
   GeneratedColumn<DateTime> get endTime =>
       $composableBuilder(column: $table.endTime, builder: (column) => column);
 
-  $$PillsTableAnnotationComposer get pillId {
-    final $$PillsTableAnnotationComposer composer = $composerBuilder(
+  $$RevisionsTableAnnotationComposer get revisionId {
+    final $$RevisionsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.pillId,
-      referencedTable: $db.pills,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$PillsTableAnnotationComposer(
+          }) => $$RevisionsTableAnnotationComposer(
             $db: $db,
-            $table: $db.pills,
+            $table: $db.revisions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -6084,6 +8670,29 @@ class $$TransactionsTableAnnotationComposer
           }) => $$PlansTableAnnotationComposer(
             $db: $db,
             $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PillsTableAnnotationComposer get pillId {
+    final $$PillsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pillId,
+      referencedTable: $db.pills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PillsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pills,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -6133,8 +8742,9 @@ class $$TransactionsTableTableManager
           (Transaction, $$TransactionsTableReferences),
           Transaction,
           PrefetchHooks Function({
-            bool pillId,
+            bool revisionId,
             bool planId,
+            bool pillId,
             bool quantitiesRefs,
           })
         > {
@@ -6153,8 +8763,9 @@ class $$TransactionsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> pillId = const Value.absent(),
+                Value<int?> revisionId = const Value.absent(),
                 Value<int?> planId = const Value.absent(),
+                Value<int> pillId = const Value.absent(),
                 Value<String> calcQty = const Value.absent(),
                 Value<bool> isNegative = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
@@ -6164,8 +8775,9 @@ class $$TransactionsTableTableManager
                 Value<DateTime?> endTime = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
-                pillId: pillId,
+                revisionId: revisionId,
                 planId: planId,
+                pillId: pillId,
                 calcQty: calcQty,
                 isNegative: isNegative,
                 timestamp: timestamp,
@@ -6177,8 +8789,9 @@ class $$TransactionsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required int pillId,
+                Value<int?> revisionId = const Value.absent(),
                 Value<int?> planId = const Value.absent(),
+                required int pillId,
                 Value<String> calcQty = const Value.absent(),
                 required bool isNegative,
                 required DateTime timestamp,
@@ -6188,8 +8801,9 @@ class $$TransactionsTableTableManager
                 Value<DateTime?> endTime = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 id: id,
-                pillId: pillId,
+                revisionId: revisionId,
                 planId: planId,
+                pillId: pillId,
                 calcQty: calcQty,
                 isNegative: isNegative,
                 timestamp: timestamp,
@@ -6209,8 +8823,9 @@ class $$TransactionsTableTableManager
                       )
                       .toList(),
           prefetchHooksCallback: ({
-            pillId = false,
+            revisionId = false,
             planId = false,
+            pillId = false,
             quantitiesRefs = false,
           }) {
             return PrefetchHooks(
@@ -6231,16 +8846,16 @@ class $$TransactionsTableTableManager
                   dynamic
                 >
               >(state) {
-                if (pillId) {
+                if (revisionId) {
                   state =
                       state.withJoin(
                             currentTable: table,
-                            currentColumn: table.pillId,
+                            currentColumn: table.revisionId,
                             referencedTable: $$TransactionsTableReferences
-                                ._pillIdTable(db),
+                                ._revisionIdTable(db),
                             referencedColumn:
                                 $$TransactionsTableReferences
-                                    ._pillIdTable(db)
+                                    ._revisionIdTable(db)
                                     .id,
                           )
                           as T;
@@ -6255,6 +8870,20 @@ class $$TransactionsTableTableManager
                             referencedColumn:
                                 $$TransactionsTableReferences
                                     ._planIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+                if (pillId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.pillId,
+                            referencedTable: $$TransactionsTableReferences
+                                ._pillIdTable(db),
+                            referencedColumn:
+                                $$TransactionsTableReferences
+                                    ._pillIdTable(db)
                                     .id,
                           )
                           as T;
@@ -6306,7 +8935,12 @@ typedef $$TransactionsTableProcessedTableManager =
       $$TransactionsTableUpdateCompanionBuilder,
       (Transaction, $$TransactionsTableReferences),
       Transaction,
-      PrefetchHooks Function({bool pillId, bool planId, bool quantitiesRefs})
+      PrefetchHooks Function({
+        bool revisionId,
+        bool planId,
+        bool pillId,
+        bool quantitiesRefs,
+      })
     >;
 typedef $$QuantitiesTableCreateCompanionBuilder =
     QuantitiesCompanion Function({
@@ -6654,6 +9288,8 @@ class $AppDatabaseManager {
       $$SpecsTableTableManager(_db, _db.specs);
   $$PlansTableTableManager get plans =>
       $$PlansTableTableManager(_db, _db.plans);
+  $$RevisionsTableTableManager get revisions =>
+      $$RevisionsTableTableManager(_db, _db.revisions);
   $$CyclesTableTableManager get cycles =>
       $$CyclesTableTableManager(_db, _db.cycles);
   $$TransactionsTableTableManager get transactions =>

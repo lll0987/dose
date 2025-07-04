@@ -3,11 +3,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../database/repository/pill_repository.dart';
+import '../database/repository/transaction_repository.dart';
 import '../models/pill_model.dart';
 import '../models/plan_model.dart';
 import '../models/quantity_model.dart';
 import '../providers/plan_provider.dart';
 import '../providers/theme_provider.dart';
+import '../service/loading_service.dart';
 import '../utils/datetime.dart';
 import '../widgets/list_wheel_picker.dart';
 import '../widgets/quantity_input.dart';
@@ -51,7 +53,6 @@ class _PlanFormState extends State<PlanFormScreen> {
     cycles: [],
   );
 
-  // FIX 不知道怎么建出了没有开始时间的计划
   TimeOfDay _startTime = TimeOfDay(hour: 8, minute: 0);
 
   bool _isCycle = false;
@@ -64,25 +65,40 @@ class _PlanFormState extends State<PlanFormScreen> {
   bool _unitDisabled = false;
   String? _unitHintText;
 
+  // NEXT 向前补充计划历史
+  DateTime? _transactionDate;
+  bool _isNew = false;
+
+  final Map<String, String?> _errorText = {
+    'startTime': null,
+    'startDate': null,
+    'endDate': null,
+    'duration': null,
+    'cycle': null,
+  };
+
+  // NEXT 实现同步系统后再放开提醒功能
+  final bool _isReminder = false;
+  final bool _isReminderMethod = false;
+
   @override
   void initState() {
     super.initState();
     _model.startTime = getFormatTime(_startTime);
     if (widget.plan != null) {
       final times = widget.plan!.startTime.split(':');
-      setState(() {
-        _isUpdate = true;
-        _model = widget.plan!;
-        _startTime = TimeOfDay(
-          hour: int.parse(times[0]),
-          minute: int.parse(times[1]),
-        );
-        _isCycle = _model.cycles.isNotEmpty;
-        if (_model.duration != null) _durationValue = _model.duration!;
-        if (_model.durationUnit != null) _durationUnit = _model.durationUnit!;
-      });
+      _isUpdate = widget.plan!.id != null;
+      _model = widget.plan!.copyWith();
+      _startTime = TimeOfDay(
+        hour: int.parse(times[0]),
+        minute: int.parse(times[1]),
+      );
+      _isCycle = _model.cycles.isNotEmpty;
+      if (_model.duration != null) _durationValue = _model.duration!;
+      if (_model.durationUnit != null) _durationUnit = _model.durationUnit!;
     }
     _getPills();
+    _getTransactions();
   }
 
   @override
@@ -203,8 +219,8 @@ class _PlanFormState extends State<PlanFormScreen> {
                       _buildRepeatSection(),
                       const SizedBox(height: 8),
                       _buildTimeSection(),
-                      // const SizedBox(height: 8),
-                      // _buildReminderSection(),
+                      if (_isReminder) const SizedBox(height: 8),
+                      if (_isReminder) _buildReminderSection(),
                       const SizedBox(height: 8),
                       _buildCycleSection(),
                     ],
@@ -390,18 +406,41 @@ class _PlanFormState extends State<PlanFormScreen> {
     );
   }
 
-  Widget _buildListTile(String title, String trailing, void Function()? onTap) {
-    return ListTile(
-      title: Text(title),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(trailing, style: TextStyle(fontSize: 16)),
-          const SizedBox(width: 4),
-          Icon(Icons.arrow_forward_ios, size: 14),
-        ],
-      ),
-      onTap: onTap,
+  Widget _buildListTile({
+    required String title,
+    required String trailing,
+    String? subtitle,
+    void Function()? onTap,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          title: Text(title),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(trailing, style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 4),
+              Icon(Icons.arrow_forward_ios, size: 14),
+            ],
+          ),
+          onTap: onTap,
+        ),
+        if (subtitle != null)
+          Row(
+            children: [
+              SizedBox(width: 16),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+      ],
     );
   }
 
@@ -410,9 +449,10 @@ class _PlanFormState extends State<PlanFormScreen> {
       child: Column(
         children: [
           _buildListTile(
-            AppLocalizations.of(context)!.planForm_startTime,
-            _model.startTime,
-            () async {
+            title: AppLocalizations.of(context)!.planForm_startTime,
+            trailing: _model.startTime,
+            subtitle: _errorText['startTime'],
+            onTap: () async {
               final newTime = await showTimePicker(
                 context: context,
                 initialTime: _startTime,
@@ -435,9 +475,10 @@ class _PlanFormState extends State<PlanFormScreen> {
           ),
           if (_model.isExactTime)
             _buildListTile(
-              AppLocalizations.of(context)!.planForm_duration,
-              _model.getDurationText(context),
-              () async {
+              title: AppLocalizations.of(context)!.planForm_duration,
+              trailing: _model.getDurationText(context),
+              subtitle: _errorText['duration'],
+              onTap: () async {
                 _durationValue = _model.duration ?? 1;
                 _durationUnit = _model.durationUnit ?? 'hour';
                 final result = await showDialog<bool>(
@@ -530,18 +571,24 @@ class _PlanFormState extends State<PlanFormScreen> {
       child: Column(
         children: [
           _buildListTile(
-            AppLocalizations.of(context)!.repeatSetting,
-            _model.getRepeatText(context),
-            _toRepeatScreen,
+            title: AppLocalizations.of(context)!.repeatSetting,
+            trailing: _model.getRepeatText(context),
+            onTap: () => _toRepeatScreen(),
           ),
           _buildListTile(
-            AppLocalizations.of(context)!.planForm_startDate,
-            _model.startDate,
-            () async {
+            title: AppLocalizations.of(context)!.planForm_startDate,
+            trailing: _model.startDate,
+            subtitle: _errorText['startDate'],
+            onTap: () async {
+              DateTime initialDate = DateTime.parse(_model.startDate);
+              if (_transactionDate != null &&
+                  initialDate.isBefore(_transactionDate!)) {
+                initialDate = _transactionDate!;
+              }
               final newDate = await showDatePicker(
                 context: context,
-                initialDate: DateTime.parse(_model.startDate),
-                firstDate: DateTime(2000),
+                initialDate: initialDate,
+                firstDate: _transactionDate ?? DateTime(2000),
                 lastDate: DateTime(2100),
               );
               if (newDate != null) {
@@ -552,9 +599,10 @@ class _PlanFormState extends State<PlanFormScreen> {
             },
           ),
           _buildListTile(
-            AppLocalizations.of(context)!.planForm_endDate,
-            _model.endDate,
-            () async {
+            title: AppLocalizations.of(context)!.planForm_endDate,
+            trailing: _model.endDate,
+            subtitle: _errorText['endDate'],
+            onTap: () async {
               final newDate = await showDatePicker(
                 context: context,
                 initialDate:
@@ -595,9 +643,9 @@ class _PlanFormState extends State<PlanFormScreen> {
       child: Column(
         children: [
           _buildListTile(
-            AppLocalizations.of(context)!.reminderSetting,
-            _model.getReminderText(context),
-            _toReminderScreen,
+            title: AppLocalizations.of(context)!.reminderSetting,
+            trailing: _model.getReminderText(context),
+            onTap: () => _toReminderScreen(),
           ),
           if (_model.reminderValue != null)
             ListTile(
@@ -607,24 +655,30 @@ class _PlanFormState extends State<PlanFormScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Radio(
+                  Radio<String>(
                     value: 'notify',
                     groupValue: _model.reminderMethod,
-                    onChanged: (v) {
-                      setState(() => _model.reminderMethod = v!);
-                    },
+                    onChanged:
+                        _isReminderMethod
+                            ? (v) {
+                              setState(() => _model.reminderMethod = v!);
+                            }
+                            : null,
                   ),
                   Text(
                     AppLocalizations.of(context)!.reminderMethod_notify,
                     style: TextStyle(fontSize: 14),
                   ),
                   const SizedBox(width: 16),
-                  Radio(
+                  Radio<String>(
                     value: 'clock',
                     groupValue: _model.reminderMethod,
-                    onChanged: (v) {
-                      setState(() => _model.reminderMethod = v!);
-                    },
+                    onChanged:
+                        _isReminderMethod
+                            ? (v) {
+                              setState(() => _model.reminderMethod = v!);
+                            }
+                            : null,
                   ),
                   Text(
                     AppLocalizations.of(context)!.reminderMethod_clock,
@@ -673,17 +727,21 @@ class _PlanFormState extends State<PlanFormScreen> {
                   _model.cycles.isEmpty
                       ? [
                         _buildListTile(
-                          AppLocalizations.of(context)!.noInterruptionNeeded,
-                          '',
-                          () => _toCycleScreen(),
+                          title:
+                              AppLocalizations.of(
+                                context,
+                              )!.noInterruptionNeeded,
+                          subtitle: _errorText['cycle'],
+                          trailing: '',
+                          onTap: () => _toCycleScreen(),
                         ),
                       ]
                       : _model.cycles
                           .map(
                             (cycle) => _buildListTile(
-                              cycle.getNameText(context),
-                              cycle.getCycleText(context),
-                              () => _toCycleScreen(),
+                              title: cycle.getNameText(context),
+                              trailing: cycle.getCycleText(context),
+                              onTap: () => _toCycleScreen(),
                             ),
                           )
                           .toList(),
@@ -724,26 +782,103 @@ class _PlanFormState extends State<PlanFormScreen> {
     });
   }
 
-  void _onSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _getTransactions() async {
+    if (_model.id == null) return;
+    final transaction = await context
+        .read<TransactionRepository>()
+        .getLastTransactionByPlan(_model.id!);
+    _isNew = transaction != null && transaction.revisionId == _model.revisionId;
+    final date = _isNew ? transaction?.startTime : null;
+    setState(() {
+      _transactionDate = date?.copyWith(hour: 24, minute: 0, second: 0);
+    });
+  }
+
+  bool _validate() {
+    bool isValid = _formKey.currentState!.validate();
+
+    // 开始时间不能空
     if (_model.startTime.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.validToken_planStartTime_required,
-          ),
-          duration: Duration(seconds: 1),
-        ),
-      );
-      return;
+      isValid = false;
+      setState(() {
+        _errorText['startTime'] =
+            AppLocalizations.of(context)!.validToken_planStartTime_required;
+      });
+    } else {
+      setState(() {
+        _errorText['startTime'] = null;
+      });
     }
+
+    // 新版本需要新的开始日期
+    if (_isUpdate && _isNew && _model.startDate == widget.plan!.startDate) {
+      isValid = false;
+      setState(() {
+        _errorText['startDate'] =
+            AppLocalizations.of(context)!.validToken_planStartDate_new;
+      });
+    } else {
+      setState(() {
+        _errorText['startDate'] = null;
+      });
+    }
+
+    // 结束日期不能早于开始日期
+    if (_model.endDate.isNotEmpty &&
+        DateTime.parse(
+          _model.startDate,
+        ).isAfter(DateTime.parse(_model.endDate))) {
+      isValid = false;
+      setState(() {
+        _errorText['endDate'] =
+            AppLocalizations.of(context)!.validToken_planEndDate_afterStart;
+      });
+    } else {
+      setState(() {
+        _errorText['endDate'] = null;
+      });
+    }
+
+    // 药效时长不能空
+    if (_model.isExactTime && _model.duration == null) {
+      isValid = false;
+      setState(() {
+        _errorText['duration'] =
+            AppLocalizations.of(context)!.validToken_planDuration_required;
+      });
+    } else {
+      setState(() {
+        _errorText['duration'] = null;
+      });
+    }
+
+    // 周期性停药设置不能为空
+    if (_isCycle && _model.cycles.isEmpty) {
+      isValid = false;
+      setState(() {
+        _errorText['cycle'] =
+            AppLocalizations.of(context)!.validToken_planCycles_required;
+      });
+    } else {
+      setState(() {
+        _errorText['cycle'] = null;
+      });
+    }
+
+    return isValid;
+  }
+
+  void _onSubmit() async {
+    if (!_validate()) return;
+    loadingService.show();
     if (!_isCycle) _model.cycles = [];
     final provider = context.read<PlanProvider>();
     if (_isUpdate) {
-      await provider.updatePlan(_model);
+      await provider.updatePlan(_model, _isNew);
     } else {
       await provider.addPlan(_model);
     }
+    loadingService.hide();
     Navigator.of(context).pop();
   }
 }

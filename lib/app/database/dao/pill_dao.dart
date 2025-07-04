@@ -52,7 +52,7 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
     return select(pills).get();
   }
 
-  Future<int> add1(Insertable<Pill> entity) {
+  Future<int> _add1(Insertable<Pill> entity) {
     return into(pills).insert(entity);
   }
 
@@ -95,7 +95,7 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
     pill.quantity.fraction.numerator = pill.initialQuantity.fraction.numerator;
     pill.quantity.fraction.denominator =
         pill.initialQuantity.fraction.denominator;
-    final id = await add1(pill.toCompanion());
+    final id = await _add1(pill.toCompanion());
     await insertSpecs(id, pill.packSpecs);
     return Result.success(id);
   }

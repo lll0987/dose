@@ -12,7 +12,9 @@ import '../models/transaction_model.dart';
 import '../providers/daily_provider.dart';
 import '../providers/pill_provider.dart';
 import '../providers/plan_provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../service/loading_service.dart';
 import '../widgets/pill_image.dart';
 
 class DailyScreen extends StatefulWidget {
@@ -34,8 +36,15 @@ class _DailyScreenState extends State<DailyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer3<DailyProvider, PillProvider, PlanProvider>(
-        builder: (context, dailyProvider, pillProvider, planProvider, child) {
+      body: Consumer4<DailyProvider, PillProvider, PlanProvider, ThemeProvider>(
+        builder: (
+          context,
+          dailyProvider,
+          pillProvider,
+          planProvider,
+          themeProvider,
+          child,
+        ) {
           if (planProvider.allPlans.isEmpty) {
             return Center(
               child: Text(AppLocalizations.of(context)!.empty_todayPlanList),
@@ -62,7 +71,10 @@ class _DailyScreenState extends State<DailyScreen> {
                   padding: EdgeInsets.all(16),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryFixed,
+                      color:
+                          themeProvider.isDarkMode(context)
+                              ? Theme.of(context).colorScheme.onSecondary
+                              : Theme.of(context).colorScheme.secondaryFixed,
                       border: Border.all(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -73,7 +85,10 @@ class _DailyScreenState extends State<DailyScreen> {
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(AppLocalizations.of(context)!.missedPlanTitle),
+                          Text(
+                            AppLocalizations.of(context)!.missedPlanTitle,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
                           Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: 8,
@@ -87,7 +102,8 @@ class _DailyScreenState extends State<DailyScreen> {
                               '$missedCount',
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onError,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
                               ),
                             ),
                           ),
@@ -100,8 +116,12 @@ class _DailyScreenState extends State<DailyScreen> {
                             itemCount: missedCount,
                             itemBuilder: (content, index) {
                               final item = dailyProvider.missedItems[index];
+                              final dailyPlans =
+                                  dailyProvider.dailyItems
+                                      .map((e) => e.plan)
+                                      .toList();
                               final todayPlan = item.plan.equalsPlan(
-                                dailyProvider.dailyPlans,
+                                dailyPlans,
                               );
                               return _buildMissedItem(
                                 context: content,
@@ -124,20 +144,20 @@ class _DailyScreenState extends State<DailyScreen> {
                   itemCount: todayCount,
                   itemBuilder: (context, index) {
                     final item = dailyProvider.dailyItems[index];
-                    // 忽略重复的开始时间
-                    if (index > 0 &&
-                        dailyProvider.dailyItems[index - 1].startTime ==
-                            item.plan.startTime) {
-                      item.plan.startTime = '';
-                    }
-                    final missedPlan = item.plan.equalsPlan(
-                      dailyProvider.missedPlans,
-                    );
+                    final prev =
+                        index > 0 ? dailyProvider.dailyItems[index - 1] : null;
+                    final startTime =
+                        prev?.plan.startTime == item.plan.startTime
+                            ? ''
+                            : item.plan.startTime;
+                    final missedPlans =
+                        dailyProvider.missedItems.map((e) => e.plan).toList();
+                    final missedPlan = item.plan.equalsPlan(missedPlans);
                     return _buildItem(
                       context: context,
+                      startTime: startTime,
                       item: item,
                       pill: pillProvider.pillMap[item.plan.pillId]!,
-                      isLast: index == todayCount - 1,
                       missedPlan: missedPlan,
                     );
                   },
@@ -152,16 +172,17 @@ class _DailyScreenState extends State<DailyScreen> {
 
   Widget _buildItem({
     required BuildContext context,
+    required String startTime,
     required PlanItem item,
     required PillModel pill,
     PlanModel? missedPlan,
-    bool isLast = false,
   }) {
     final disabled = item.status != PlanStatus.missed;
     final isDone = item.status == PlanStatus.taken;
-    final isChild = item.plan.startTime.isEmpty;
-    final qtyText =
-        '${item.plan.quantity.displayText}${item.plan.quantity.unit}';
+    final title =
+        '${item.plan.quantity.displayText}${item.plan.quantity.unit}, ${pill.name}';
+    final timeText = '${item.startTime} - ${item.endTime}';
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Row(
@@ -170,42 +191,33 @@ class _DailyScreenState extends State<DailyScreen> {
           SizedBox(
             width: 40,
             child: Padding(
-              padding: EdgeInsets.only(top: 6),
-              child: Text(
-                item.plan.startTime,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondaryFixed,
-                ),
-              ),
+              padding: EdgeInsets.only(top: 22),
+              child: Text(startTime),
             ),
           ),
           SizedBox(width: 6),
           Stack(
             alignment: Alignment.topCenter,
-            // fit: StackFit.expand,
             children: [
               Container(
                 width: 2,
-                height: isLast ? 104 : 120,
+                height: 140,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryFixed,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 12),
+                padding: EdgeInsets.only(top: 28),
                 child: Container(
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color:
-                        isChild
-                            ? Colors.transparent
-                            : Theme.of(context).colorScheme.secondaryFixed,
+                    color: Theme.of(context).canvasColor,
                     border: Border.all(
                       color:
-                          isChild
+                          startTime.isEmpty
                               ? Colors.transparent
-                              : Theme.of(context).colorScheme.onSecondaryFixed,
+                              : Theme.of(context).colorScheme.primary,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -217,79 +229,80 @@ class _DailyScreenState extends State<DailyScreen> {
           SizedBox(width: 12),
           Expanded(
             child: Card(
-              margin: EdgeInsets.zero,
+              elevation: 0,
+              margin: EdgeInsets.only(top: 16),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.all(8),
                 child: Column(
                   children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
+                    if (disabled && isDone && item.plan.isExactTime)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            item.plan.name,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          if (disabled && isDone && item.plan.isExactTime)
-                            Expanded(
-                              child: Text(
-                                '${item.startTime} - ${item.endTime}',
-                                textAlign: TextAlign.end,
-                              ),
+                          Tooltip(
+                            message: timeText,
+                            child: Text(
+                              timeText,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
+                          ),
                         ],
+                      ),
+                    Card(
+                      elevation: 1,
+                      child: ListTile(
+                        title: Tooltip(
+                          message: title,
+                          child: Text(
+                            title,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        subtitle: Tooltip(
+                          message: item.plan.name,
+                          child: Text(
+                            item.plan.name,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        leading: PillImage(pill: pill),
                       ),
                     ),
-                    ListTile(
-                      title: Tooltip(
-                        message: pill.name,
-                        child: Text(
-                          pill.name,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      subtitle: Tooltip(
-                        message: qtyText,
-                        child: Text(
-                          qtyText,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      leading: PillImage(pill: pill),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextButton(
-                            onPressed:
-                                disabled
-                                    ? null
-                                    : () => _onSubmit(
-                                      now: DateTime.now(),
-                                      plan: item.plan,
-                                    ),
-                            child: Text(
-                              isDone
-                                  ? ''
-                                  : disabled
-                                  ? AppLocalizations.of(context)!.ignored
-                                  : AppLocalizations.of(context)!.ignore,
-                            ),
+                    SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed:
+                              disabled
+                                  ? null
+                                  : () => _onSubmit(
+                                    now: DateTime.now(),
+                                    plan: item.plan,
+                                  ),
+                          child: Text(
+                            isDone
+                                ? ''
+                                : disabled
+                                ? AppLocalizations.of(context)!.ignored
+                                : AppLocalizations.of(context)!.ignore,
                           ),
-                          FilledButton(
-                            onPressed:
-                                disabled
-                                    ? null
-                                    : () => _onPressed(item.plan, missedPlan),
-                            child: Text(
-                              isDone
-                                  ? AppLocalizations.of(context)!.taken
-                                  : AppLocalizations.of(context)!.take,
-                            ),
+                        ),
+                        FilledButton(
+                          onPressed:
+                              disabled
+                                  ? null
+                                  : () => _onPressed(item.plan, missedPlan),
+                          child: Text(
+                            isDone
+                                ? AppLocalizations.of(context)!.taken
+                                : AppLocalizations.of(context)!.take,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -310,14 +323,20 @@ class _DailyScreenState extends State<DailyScreen> {
     required DateTime missedDate,
   }) {
     final title = [
-      item.plan.startTime,
       '${item.plan.quantity.displayText}${item.plan.quantity.unit}',
       pill.name,
     ].join(', ');
+    final subTitle = [item.plan.startTime, item.plan.name].join(', ');
 
     return ListTile(
-      title: Tooltip(message: title, child: Text(title)),
-      subtitle: Text(item.plan.name),
+      title: Tooltip(
+        message: title,
+        child: Text(title, overflow: TextOverflow.ellipsis, maxLines: 1),
+      ),
+      subtitle: Tooltip(
+        message: subTitle,
+        child: Text(subTitle, overflow: TextOverflow.ellipsis, maxLines: 1),
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -349,7 +368,12 @@ class _DailyScreenState extends State<DailyScreen> {
                           onTap: () async {
                             int? hour, minute;
                             if (item.plan.isExactTime) {
-                              (hour, minute) = await _showExactTimePicker();
+                              final result = await _showExactTimePicker();
+                              if (result == null) {
+                                Navigator.of(context).pop();
+                                return;
+                              }
+                              (hour, minute) = result;
                             }
                             _onSubmit(
                               now: missedDate,
@@ -399,8 +423,7 @@ class _DailyScreenState extends State<DailyScreen> {
     );
   }
 
-  Future<(int?, int?)> _showExactTimePicker() async {
-    int? hour, minute;
+  Future<(int, int)?> _showExactTimePicker() async {
     final now = DateTime.now();
     final newTime = await showTimePicker(
       context: context,
@@ -408,10 +431,9 @@ class _DailyScreenState extends State<DailyScreen> {
       initialEntryMode: TimePickerEntryMode.input,
     );
     if (newTime != null) {
-      hour = newTime.hour;
-      minute = newTime.minute;
+      return (newTime.hour, newTime.minute);
     }
-    return (hour, minute);
+    return null;
   }
 
   void _onPressed(PlanModel plan, PlanModel? missedPlan) async {
@@ -419,7 +441,9 @@ class _DailyScreenState extends State<DailyScreen> {
     List<QuantityModel> quantities = [plan.quantity];
 
     if (plan.isExactTime) {
-      (hour, minute) = await _showExactTimePicker();
+      final result = await _showExactTimePicker();
+      if (result == null) return;
+      (hour, minute) = result;
     } else if (missedPlan != null) {
       final result = await showDialog<bool>(
         context: context,
@@ -459,6 +483,7 @@ class _DailyScreenState extends State<DailyScreen> {
     int? hour,
     int? minute,
   }) async {
+    loadingService.show();
     final time = plan.startTime.split(':');
     final startTime = DateTime(
       now.year,
@@ -474,14 +499,16 @@ class _DailyScreenState extends State<DailyScreen> {
             : startTime.add(Duration(hours: plan.duration!));
     await context.read<TransactionProvider>().addTransaction(
       TransactionModel(
-        pillId: plan.pillId,
         planId: plan.id,
+        revisionId: plan.revisionId,
+        pillId: plan.pillId,
         quantities: quantities ?? [],
         startTime: startTime,
         endTime: endTime,
         isNegative: true,
       ),
     );
+    loadingService.hide();
   }
 }
 

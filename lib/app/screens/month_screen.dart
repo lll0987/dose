@@ -7,10 +7,12 @@ import 'package:provider/provider.dart';
 
 import '../models/pill_model.dart';
 import '../models/plan_model.dart';
+import '../models/transaction_model.dart';
 import '../providers/daily_provider.dart';
 import '../providers/pill_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../service/loading_service.dart';
 import '../utils/datetime.dart';
 
 class MonthScreen extends StatefulWidget {
@@ -26,11 +28,17 @@ class _MonthScreenState extends State<StatefulWidget> {
 
   late Map<PlanStatus, StatusColor> _statusOptions;
 
-  void _loadData() {
-    context.read<DailyProvider>().loadHistoryData(
+  Future<void> _loadHistoryData() async {
+    await context.read<DailyProvider>().loadHistoryData(
       year: _currentYear,
       month: _currentMonth,
     );
+  }
+
+  void _loadData() async {
+    loadingService.show();
+    await _loadHistoryData();
+    loadingService.hide();
   }
 
   @override
@@ -39,7 +47,7 @@ class _MonthScreenState extends State<StatefulWidget> {
     final now = DateTime.now();
     _currentYear = now.year;
     _currentMonth = now.month;
-    _loadData();
+    _loadHistoryData();
   }
 
   @override
@@ -222,7 +230,7 @@ class _MonthScreenState extends State<StatefulWidget> {
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               borderRadius: BorderRadius.circular(4.0),
             ),
@@ -395,7 +403,8 @@ class _MonthScreenState extends State<StatefulWidget> {
                                       ),
                                     if (item.status == PlanStatus.missed)
                                       ElevatedButton(
-                                        onPressed: null,
+                                        onPressed:
+                                            () => _onAdd(date, item.plan),
                                         child: Text(
                                           AppLocalizations.of(context)!.take,
                                         ),
@@ -423,12 +432,52 @@ class _MonthScreenState extends State<StatefulWidget> {
   }
 
   Future<void> _onDelete(DateTime date, PlanModel plan) async {
+    loadingService.show();
     await context.read<TransactionProvider>().deleteTransactionFromPlan(
       plan.id!,
       date,
     );
+    loadingService.hide();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.success_delete)),
+    );
+  }
+
+  Future<void> _onAdd(DateTime date, PlanModel plan) async {
+    final [h, m] = plan.startTime.split(':');
+    int hour = int.parse(h);
+    int minute = int.parse(m);
+    if (plan.isExactTime) {
+      final newTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay(hour: hour, minute: minute),
+        initialEntryMode: TimePickerEntryMode.input,
+      );
+      if (newTime == null) return;
+      hour = newTime.hour;
+      minute = newTime.minute;
+    }
+    loadingService.show();
+    final startTime = DateTime(date.year, date.month, date.day, hour, minute);
+    // MEMO 药效时长不仅有小时单位时需要调整
+    final endTime =
+        plan.isExactTime
+            ? startTime.add(Duration(hours: plan.duration!))
+            : null;
+    await context.read<TransactionProvider>().addTransaction(
+      TransactionModel(
+        planId: plan.id,
+        revisionId: plan.revisionId,
+        pillId: plan.pillId,
+        quantities: [plan.quantity],
+        startTime: startTime,
+        endTime: endTime,
+        isNegative: true,
+      ),
+    );
+    loadingService.hide();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.success_save)),
     );
   }
 }

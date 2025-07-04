@@ -12,6 +12,7 @@ import '../models/pill_model.dart';
 import '../models/quantity_model.dart';
 import '../providers/pill_provider.dart';
 import '../providers/theme_provider.dart';
+import '../service/loading_service.dart';
 import '../widgets/color_picker.dart';
 import '../widgets/pill_image.dart';
 import '../widgets/quantity_input.dart';
@@ -95,16 +96,14 @@ class _PillFormScreenState extends State<PillFormScreen> {
   void initState() {
     super.initState();
     if (widget.pill != null) {
-      setState(() {
-        _isUpdate = true;
-        _model = widget.pill!;
-        _reloadUnits();
-        _selectedUnit = widget.pill!.initialQuantity.unit;
-        _selectedPreUnit = widget.pill!.preferredUnit;
-        if (widget.pill!.themeValue != null) {
-          _selectedColor = Color(widget.pill!.themeValue!);
-        }
-      });
+      _isUpdate = true;
+      _model = widget.pill!.copyWith();
+      _reloadUnits();
+      _selectedUnit = widget.pill!.initialQuantity.unit;
+      _selectedPreUnit = widget.pill!.preferredUnit;
+      if (widget.pill!.themeValue != null) {
+        _selectedColor = Color(widget.pill!.themeValue!);
+      }
     }
   }
 
@@ -405,9 +404,9 @@ class _PillFormScreenState extends State<PillFormScreen> {
                                     onTap: () => _showBottomModal(context),
                                   ),
                                   IconButton(
-                                    onPressed: () {
-                                      setState(() async {
-                                        await File(_model.imagePath!).delete();
+                                    onPressed: () async {
+                                      await File(_model.imagePath!).delete();
+                                      setState(() {
                                         _model.imagePath = '';
                                       });
                                     },
@@ -508,7 +507,8 @@ class _PillFormScreenState extends State<PillFormScreen> {
         );
       },
     );
-    final XFile? pickedFile = await _pickImage(result!);
+    if (result == null) return;
+    final XFile? pickedFile = await _pickImage(result);
     if (pickedFile == null) return;
 
     final File originalFile = File(pickedFile.path);
@@ -541,12 +541,14 @@ class _PillFormScreenState extends State<PillFormScreen> {
 
   void _onSubmit(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
+    loadingService.show();
     _model.initialQuantity.unit = _selectedUnit!;
     _model.themeValue = _selectedColor?.toARGB32();
     _model.preferredUnit = _selectedPreUnit;
     final provider = context.read<PillProvider>();
     if (_isUpdate) {
       await provider.updatePill(_model);
+      loadingService.hide();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.success_update),
@@ -556,6 +558,7 @@ class _PillFormScreenState extends State<PillFormScreen> {
       Navigator.of(context).pop();
     } else {
       final result = await provider.addPill(_model);
+      loadingService.hide();
       if (result.isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

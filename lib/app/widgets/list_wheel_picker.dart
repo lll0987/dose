@@ -1,5 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/theme_provider.dart';
 
 class WheelOption {
   dynamic value;
@@ -69,44 +71,62 @@ class _ListWheelPickerState extends State<ListWheelPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return ListWheelScrollView.useDelegate(
-      controller: _internalController,
-      itemExtent: 40,
-      diameterRatio: 1.5,
-      physics: const FixedExtentScrollPhysics(),
-      onSelectedItemChanged: (index) {
-        setState(() {
-          _selectedIndex = index;
-        });
-        if (widget.options != null) {
-          widget.onChanged(widget.options![index].value);
-        } else {
-          widget.onChanged(widget.min! + index);
-        }
+    return Consumer<ThemeProvider>(
+      builder: (context, provider, child) {
+        final options =
+            provider.isDarkMode(context)
+                ? {
+                  0: Colors.white,
+                  1: Colors.white38,
+                  2: Colors.white24,
+                  3: Colors.white10,
+                }
+                : {
+                  0: Colors.black87,
+                  1: Colors.black38,
+                  2: Colors.black26,
+                  3: Colors.black12,
+                };
+        return ListWheelScrollView.useDelegate(
+          controller: _internalController,
+          itemExtent: 40,
+          diameterRatio: 1.5,
+          physics: const FixedExtentScrollPhysics(),
+          onSelectedItemChanged: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+            if (widget.options != null) {
+              widget.onChanged(widget.options![index].value);
+            } else {
+              widget.onChanged(widget.min! + index);
+            }
+          },
+          childDelegate: ListWheelChildBuilderDelegate(
+            childCount:
+                widget.options?.length ?? (widget.max! - widget.min! + 1),
+            builder: (context, index) {
+              final value = widget.options?[index].value ?? widget.min! + index;
+              final label = widget.options?[index].label ?? value.toString();
+
+              // 计算透明度
+              int distance = (_selectedIndex - index).abs();
+              if (distance > 3) distance = 3;
+
+              return Center(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: widget.fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: options[distance],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
       },
-      childDelegate: ListWheelChildBuilderDelegate(
-        childCount: widget.options?.length ?? (widget.max! - widget.min! + 1),
-        builder: (context, index) {
-          final value = widget.options?[index].value ?? widget.min! + index;
-          final label = widget.options?[index].label ?? value.toString();
-
-          // 计算透明度
-          int distance = (_selectedIndex - index).abs();
-          if (distance > 3) distance = 3;
-          final double opacity = distance == 0 ? 1 : 1 / pow(2, distance + 1);
-
-          return Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: widget.fontSize,
-                fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(33, 33, 33, opacity),
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

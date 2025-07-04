@@ -6,7 +6,9 @@ import '../database/repository/plan_repository.dart';
 import '../models/plan_model.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../service/loading_service.dart';
 import '../utils/datetime.dart';
+import '../widgets/required_label.dart';
 
 class IgnoreScreen extends StatefulWidget {
   const IgnoreScreen({super.key});
@@ -23,6 +25,8 @@ class _IgnoreScreenState extends State<StatefulWidget> {
 
   late Future<List<PlanItemModel>> _futureList;
   List<PlanItemModel> _planList = [];
+
+  bool _isValidate = true;
 
   @override
   void initState() {
@@ -63,6 +67,9 @@ class _IgnoreScreenState extends State<StatefulWidget> {
                           ),
                         );
                       }
+                      if (_selectedPlan == null && _planList.length == 1) {
+                        _selectedPlan = _planList.first.id;
+                      }
                       return SizedBox(
                         width: double.infinity,
                         child: Form(
@@ -72,6 +79,15 @@ class _IgnoreScreenState extends State<StatefulWidget> {
                             children: [
                               // 选择一个计划
                               DropdownButtonFormField<int>(
+                                value: _selectedPlan,
+                                validator: (value) {
+                                  if (value == null) {
+                                    return AppLocalizations.of(
+                                      context,
+                                    )!.validToken_ignorePlan_required;
+                                  }
+                                  return null;
+                                },
                                 items:
                                     _planList
                                         .map(
@@ -86,18 +102,32 @@ class _IgnoreScreenState extends State<StatefulWidget> {
                                       _selectedPlan = value;
                                     }),
                                 decoration: InputDecoration(
-                                  labelText:
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.ignoreForm_plan,
+                                  label: RequiredLabel(
+                                    text:
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.ignoreForm_plan,
+                                  ),
                                 ),
                               ),
                               SizedBox(height: 16),
                               // 添加一组日期
-                              Text(
-                                AppLocalizations.of(context)!.ignoreForm_dates,
-                                style: Theme.of(context).textTheme.labelLarge,
+                              RequiredLabel(
+                                text:
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.ignoreForm_dates,
                               ),
+                              if (!_isValidate)
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.validToken_ignoreDates_required,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               SizedBox(height: 4),
                               Wrap(
                                 spacing: 8,
@@ -160,17 +190,11 @@ class _IgnoreScreenState extends State<StatefulWidget> {
 
   void _onPressed() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_dateList.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.validToken_ignoreDates_required,
-          ),
-          duration: Duration(seconds: 1),
-        ),
-      );
-      return;
-    }
+    setState(() {
+      _isValidate = _dateList.isNotEmpty;
+    });
+    if (!_isValidate) return;
+    loadingService.show();
 
     final plan = _planList.firstWhere((element) => element.id == _selectedPlan);
     final time = plan.startTime.split(':');
@@ -191,6 +215,7 @@ class _IgnoreScreenState extends State<StatefulWidget> {
       }).toList(),
     );
 
+    loadingService.hide();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.success_save),

@@ -65,4 +65,8 @@ class TransactionRepository {
   Future<void> deleteTransactionFromPlan(int planId, DateTime date) {
     return _transactionDao.deleteTransactionFromPlan(planId, date);
   }
+
+  Future<Transaction?> getLastTransactionByPlan(int planId) {
+    return _transactionDao.getLastTransactionByPlan(planId);
+  }
 }

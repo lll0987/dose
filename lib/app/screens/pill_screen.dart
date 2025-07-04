@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/pill_provider.dart';
+import '../service/loading_service.dart';
 import '../widgets/pill_card.dart';
 import 'pill_form_screen.dart';
 import 'quantity_history_screen.dart';
@@ -55,24 +56,7 @@ class _PillScreenState extends State<PillScreen> {
                         builder: (_) => PillFormScreen(pill: pill),
                       ),
                     ),
-                trailing: PopupMenuButton(
-                  onSelected: (value) {
-                    if (value == "delete") {
-                      _onDelete(context, pill.id!);
-                    }
-                  },
-                  itemBuilder:
-                      (context) => [
-                        PopupMenuItem(
-                          value: "delete",
-                          child: Text(
-                            AppLocalizations.of(context)!.pill_delete,
-                          ),
-                        ),
-                      ],
-                ),
                 child: Row(
-                  spacing: 4,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
@@ -101,6 +85,22 @@ class _PillScreenState extends State<PillScreen> {
                         AppLocalizations.of(context)!.pill_transaction,
                       ),
                     ),
+                    PopupMenuButton(
+                      onSelected: (value) {
+                        if (value == "delete") {
+                          _onDelete(context, pill.id!);
+                        }
+                      },
+                      itemBuilder:
+                          (context) => [
+                            PopupMenuItem(
+                              value: "delete",
+                              child: Text(
+                                AppLocalizations.of(context)!.pill_delete,
+                              ),
+                            ),
+                          ],
+                    ),
                   ],
                 ),
               );
@@ -121,11 +121,13 @@ class _PillScreenState extends State<PillScreen> {
   }
 
   _onDelete(BuildContext context, int id) async {
+    loadingService.show();
     final result = await context.read<PillProvider>().deletePill(id);
     final message =
         result.isSuccess
             ? AppLocalizations.of(context)!.success_delete
             : result.error!;
+    loadingService.hide();
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));

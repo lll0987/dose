@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/daily_provider.dart';
 import '../providers/theme_provider.dart';
+import '../service/loading_service.dart';
 import '../utils/datetime.dart';
 
 class YearScreen extends StatefulWidget {
@@ -21,8 +22,10 @@ class _YearScreenState extends State<YearScreen> {
 
   late int _currentYear; // 当前年份
 
-  void _loadData() {
-    context.read<DailyProvider>().loadHistoryData(year: _currentYear);
+  void _loadData() async {
+    loadingService.show();
+    await context.read<DailyProvider>().loadHistoryData(year: _currentYear);
+    loadingService.hide();
   }
 
   @override

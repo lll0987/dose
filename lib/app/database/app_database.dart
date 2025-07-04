@@ -9,26 +9,34 @@ import 'tables/cycles.dart';
 import 'tables/pills.dart';
 import 'tables/plans.dart';
 import 'tables/quantities.dart';
+import 'tables/revisions.dart';
 import 'tables/specs.dart';
 import 'tables/transactions.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Pills, Specs, Plans, Cycles, Transactions, Quantities],
+  tables: [Pills, Specs, Plans, Cycles, Transactions, Quantities, Revisions],
   daos: [PillDao, PlanDao, TransactionDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
         await migrator.addColumn(transactions, transactions.calcQty);
+      }
+      if (from < 3) {
+        await migrator.addColumn(plans, plans.updateTime);
+        await migrator.createTable(revisions);
+        await migrator.addColumn(plans, plans.revisionId);
+        await migrator.addColumn(cycles, cycles.revisionId);
+        await migrator.addColumn(transactions, transactions.revisionId);
       }
     },
   );

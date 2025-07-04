@@ -22,8 +22,13 @@ class PlanProvider with ChangeNotifier {
     return result;
   }
 
+  List<PlanModel> _allRevisionPlans = [];
+
+  List<PlanModel> get allRevisionPlans => _allRevisionPlans;
+
   Future<void> loadPlans() async {
     _allPlans = await _planRepository.getAllPlans();
+    _allRevisionPlans = await _planRepository.getAllRevisionPlans();
     notifyListeners();
   }
 
@@ -37,8 +42,8 @@ class PlanProvider with ChangeNotifier {
     await loadPlans(); // 重新加载数据
   }
 
-  Future<void> updatePlan(PlanModel plan) async {
-    await _planRepository.updatePlan(plan);
+  Future<void> updatePlan(PlanModel plan, bool isNew) async {
+    await _planRepository.updatePlan(plan, isNew);
     await loadPlans();
   }
 

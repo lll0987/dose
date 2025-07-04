@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+final defaultColor = Colors.lightGreen.shade500;
+
 class ThemeProvider with ChangeNotifier {
-  Color _color = Colors.lightGreen.shade500;
+  Color _color = defaultColor;
 
   Color get themeColor => _color;
 
@@ -26,8 +28,7 @@ class ThemeProvider with ChangeNotifier {
 
   Map<String, Color> getColorOptions(BuildContext context) {
     return {
-      AppLocalizations.of(context)!.colorOption_default:
-          Colors.lightGreen.shade500,
+      AppLocalizations.of(context)!.colorOption_default: defaultColor,
       AppLocalizations.of(context)!.colorOption_lime: Colors.lime.shade500,
       AppLocalizations.of(context)!.colorOption_teal: Colors.teal.shade500,
       AppLocalizations.of(context)!.colorOption_blueGrey:
@@ -52,5 +53,11 @@ class ThemeProvider with ChangeNotifier {
   void setThemeMode(ThemeMode mode) {
     _themeMode = mode;
     notifyListeners();
+  }
+
+  bool isDarkMode(BuildContext context) {
+    if (_themeMode == ThemeMode.light) return false;
+    if (_themeMode == ThemeMode.dark) return true;
+    return Theme.of(context).brightness == Brightness.dark;
   }
 }

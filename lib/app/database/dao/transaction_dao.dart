@@ -49,7 +49,7 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     return select(transactions).get();
   }
 
-  Future<int> add1(Insertable<Transaction> entity) {
+  Future<int> _add1(Insertable<Transaction> entity) {
     return into(transactions).insert(entity);
   }
 
@@ -61,7 +61,7 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     return (delete(transactions)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Future<void> addAll(List<Insertable<Transaction>> entities) {
+  Future<void> _addAll(List<Insertable<Transaction>> entities) {
     return batch((b) {
       b.insertAll(transactions, entities);
     });
@@ -73,16 +73,20 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> addTransaction(TransactionModel transaction) async {
     transaction.timestamp = DateTime.now();
-    final id = await add1(transaction.toCompanion());
+    final id = await _add1(transaction.toCompanion());
     await insertQuantities(id, transaction.quantities);
     return id;
   }
 
   // 根据计划id获取是否有记录
   Future<bool> hasTransactionByPlan(int planId) async {
-    final result =
+    final list =
         await (select(transactions)
-          ..where((tbl) => tbl.planId.equals(planId))).getSingleOrNull();
+          ..where((tbl) => tbl.planId.equals(planId))).get();
+    final ids = list.map((e) => e.id).toList();
+    final result =
+        await (select(quantities)
+          ..where((tbl) => tbl.transactionId.isIn(ids))).getSingleOrNull();
     return result != null;
   }
 
@@ -160,7 +164,7 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   Future<void> addTransactions(List<TransactionModel> transactions) {
     assert(transactions.every((e) => e.quantities.isEmpty));
     final timestamp = DateTime.now();
-    return addAll(
+    return _addAll(
       transactions.map((e) {
         e.timestamp = timestamp;
         return e.toCompanion();
@@ -178,5 +182,18 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
           tbl.planId.equals(planId) &
           tbl.startTime.isBetweenValues(lower, higher),
     )).go();
+  }
+
+  Future<Transaction?> getLastTransactionByPlan(int planId) async {
+    return (select(transactions)
+          ..where((tbl) => tbl.planId.equals(planId))
+          ..orderBy([
+            (tbl) => OrderingTerm(
+              expression: tbl.startTime,
+              mode: OrderingMode.desc,
+            ),
+          ])
+          ..limit(1))
+        .getSingleOrNull();
   }
 }

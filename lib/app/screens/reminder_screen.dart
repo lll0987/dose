@@ -20,6 +20,9 @@ class _ReminderSettingsState extends State<ReminderScreen> {
 
   String _selectedMethod = 'notify';
 
+  // NEXT 等待日历同步插件支持修改提醒方式
+  final bool _isReminderMethod = false;
+
   @override
   Widget build(BuildContext context) {
     final reminderOptions = {
@@ -118,12 +121,15 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Radio(
+                              Radio<String>(
                                 value: 'notify',
                                 groupValue: _selectedMethod,
-                                onChanged: (v) {
-                                  setState(() => _selectedMethod = v!);
-                                },
+                                onChanged:
+                                    _isReminderMethod
+                                        ? (v) {
+                                          setState(() => _selectedMethod = v!);
+                                        }
+                                        : null,
                               ),
                               Text(
                                 AppLocalizations.of(
@@ -132,12 +138,15 @@ class _ReminderSettingsState extends State<ReminderScreen> {
                                 style: TextStyle(fontSize: 14),
                               ),
                               const SizedBox(width: 16),
-                              Radio(
+                              Radio<String>(
                                 value: 'clock',
                                 groupValue: _selectedMethod,
-                                onChanged: (v) {
-                                  setState(() => _selectedMethod = v!);
-                                },
+                                onChanged:
+                                    _isReminderMethod
+                                        ? (v) {
+                                          setState(() => _selectedMethod = v!);
+                                        }
+                                        : null,
                               ),
                               Text(
                                 AppLocalizations.of(

@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/plan_model.dart';
 import '../providers/plan_provider.dart';
+import '../screens/plan_form_screen.dart';
 
 class PlanCard extends StatelessWidget {
   final PlanModel plan;
@@ -99,22 +100,24 @@ class PlanCard extends StatelessWidget {
                       if (value == "delete") {
                         _onDelete(context, plan.id!);
                       }
+                      if (value == "copy") {
+                        _onCopy(context, plan);
+                      }
                     },
                     itemBuilder:
                         (context) => [
-                          plan.isEnabled
-                              ? PopupMenuItem(
-                                value: "stop",
-                                child: Text(
-                                  AppLocalizations.of(context)!.disable,
-                                ),
-                              )
-                              : PopupMenuItem(
-                                value: "start",
-                                child: Text(
-                                  AppLocalizations.of(context)!.enable,
-                                ),
-                              ),
+                          PopupMenuItem(
+                            value: "copy",
+                            child: Text(AppLocalizations.of(context)!.copyAdd),
+                          ),
+                          PopupMenuItem(
+                            value: plan.isEnabled ? "stop" : "start",
+                            child: Text(
+                              plan.isEnabled
+                                  ? AppLocalizations.of(context)!.disable
+                                  : AppLocalizations.of(context)!.enable,
+                            ),
+                          ),
                           PopupMenuItem(
                             value: "delete",
                             child: Text(AppLocalizations.of(context)!.delete),
@@ -202,6 +205,15 @@ class PlanCard extends StatelessWidget {
     await context.read<PlanProvider>().enablePlan(id);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.success_enable)),
+    );
+  }
+
+  _onCopy(BuildContext context, PlanModel plan) {
+    final p = plan.copyWith();
+    p.id = null;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PlanFormScreen(plan: p)),
     );
   }
 }

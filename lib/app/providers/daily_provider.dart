@@ -62,9 +62,9 @@ class DailyProvider with ChangeNotifier {
       _today.add(const Duration(days: 1)).subtract(const Duration(seconds: 1));
 
   List<PlanModel> get dailyPlans =>
-      _getDailyPlans(_planProvider.allPlans, _today);
+      _getDailyPlans(_planProvider.allRevisionPlans, _today);
   List<PlanModel> get missedPlans =>
-      _getDailyPlans(_planProvider.allPlans, yesterday);
+      _getDailyPlans(_planProvider.allRevisionPlans, yesterday);
 
   List<TransactionModel> _dailyTransactions = [];
   Future<void> loadDailyTransactions() async {
@@ -155,11 +155,14 @@ class DailyProvider with ChangeNotifier {
   int get _monthDayCount => DateTime(_year, _month + 1, 0).day;
   Map<int, List<PlanModel>> get _monthPlans {
     Map<int, List<PlanModel>> result = {
-      0: _getDailyPlans(_planProvider.allPlans, DateTime(_year, _month + 1, 1)),
+      0: _getDailyPlans(
+        _planProvider.allRevisionPlans,
+        DateTime(_year, _month + 1, 1),
+      ),
     };
     for (var i = 1; i <= _monthDayCount; i++) {
       final day = DateTime(_year, _month, i);
-      result[i] = _getDailyPlans(_planProvider.allPlans, day);
+      result[i] = _getDailyPlans(_planProvider.allRevisionPlans, day);
     }
     return result;
   }
@@ -301,14 +304,14 @@ PlanStatus getPlanStatus({
   List<PlanModel>? planList,
   List<TransactionModel>? allTransactions,
 }) {
-  if (today.isBefore(now)) {
-    return PlanStatus.scheduled;
-  }
   if (transactions.any((t) => t.quantities.isNotEmpty)) {
     return PlanStatus.taken;
   }
   if (transactions.isNotEmpty) {
     return PlanStatus.ignored;
+  }
+  if (today.isBefore(now)) {
+    return PlanStatus.scheduled;
   }
   if (planList == null || allTransactions == null) {
     return PlanStatus.missed;

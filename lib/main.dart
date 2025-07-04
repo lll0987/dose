@@ -19,6 +19,8 @@ import 'app/screens/daily_screen.dart';
 import 'app/screens/history_screen.dart';
 import 'app/screens/pill_screen.dart';
 import 'app/screens/plan_screen.dart';
+import 'app/service/loading_service.dart';
+import 'app/widgets/loading_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,6 +89,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(
               seedColor: themeProvider.themeColor,
               brightness: Brightness.light,
+              // dynamicSchemeVariant: DynamicSchemeVariant.rainbow,
             ),
           ),
           darkTheme: ThemeData(
@@ -96,9 +99,24 @@ class MyApp extends StatelessWidget {
             ),
           ),
           themeMode: themeProvider.themeMode,
-          home: const MainScreen(),
+          home: const App(),
         );
       },
+    );
+  }
+}
+
+class App extends StatelessWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: loadingService.isLoading,
+      builder: (context, isLoading, child) {
+        return LoadingOverlay(isLoading: isLoading, child: child!);
+      },
+      child: const MainScreen(),
     );
   }
 }

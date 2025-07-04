@@ -1,13 +1,12 @@
 import 'package:drift/drift.dart';
 
 import 'pills.dart';
+import 'plans.dart';
 
-class Plans extends Table {
+class Revisions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get revisionId => integer().nullable()();
+  IntColumn get planId => integer().references(Plans, #id)();
   IntColumn get pillId => integer().references(Pills, #id)();
-  BoolColumn get isEnabled => boolean()();
-  DateTimeColumn get updateTime => dateTime().nullable()();
   TextColumn get name => text().withLength(min: 1, max: 255)();
   IntColumn get qty => integer()();
   TextColumn get unit => text().withLength(min: 1, max: 50)();

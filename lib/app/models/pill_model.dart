@@ -127,6 +127,28 @@ class PillModel {
       packSpecs: packSpecs,
     );
   }
+
+  PillModel copyWith({
+    int? id,
+    String? name,
+    String? imagePath,
+    QuantityModel? initialQuantity,
+    QuantityModel? quantity,
+    String? preferredUnit,
+    int? themeValue,
+    List<SpecModel>? packSpecs,
+  }) {
+    return PillModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      imagePath: imagePath ?? this.imagePath,
+      initialQuantity: initialQuantity ?? this.initialQuantity,
+      quantity: quantity ?? this.quantity,
+      preferredUnit: preferredUnit ?? this.preferredUnit,
+      themeValue: themeValue ?? this.themeValue,
+      packSpecs: packSpecs ?? this.packSpecs,
+    );
+  }
 }
 
 class SpecModel {

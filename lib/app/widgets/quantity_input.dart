@@ -64,7 +64,7 @@ class _QuantityInputState extends State<QuantityInput> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _showEditDialog,
+      onTap: widget.enabled ? _showEditDialog : null,
       child: AbsorbPointer(
         child: TextFormField(
           enabled: widget.enabled,
@@ -182,13 +182,16 @@ class _QuantityInputDialogState extends State<QuantityInputDialog> {
                           iconSize: 24,
                         ),
                         icon: Icon(Icons.remove),
-                        onPressed: () {
-                          setState(() {
-                            if (_integer > 0) _integer--;
-                            _integerController.text =
-                                _integer.toString(); // 同步控制器
-                          });
-                        },
+                        onPressed:
+                            _integer <= 0
+                                ? null
+                                : () {
+                                  setState(() {
+                                    if (_integer > 0) _integer--;
+                                    _integerController.text =
+                                        _integer.toString(); // 同步控制器
+                                  });
+                                },
                       ),
                       Expanded(
                         child: TextFormField(

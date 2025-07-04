@@ -149,4 +149,27 @@ class QuantityModel {
     }
     return a.abs();
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is QuantityModel) {
+      return qty == other.qty &&
+          fraction == other.fraction &&
+          unit == other.unit;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode => Object.hash(qty, fraction, unit);
+
+  QuantityModel copyWith({int? qty, String? unit, FractionModel? fraction}) {
+    return QuantityModel(
+      qty: qty ?? this.qty,
+      unit: unit ?? this.unit,
+      fraction:
+          fraction ??
+          FractionModel(this.fraction.numerator, this.fraction.denominator),
+    );
+  }
 }

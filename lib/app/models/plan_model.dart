@@ -19,6 +19,8 @@ class PlanModel {
   // 是否启用
   bool isEnabled;
 
+  DateTime? updateTime;
+
   // 计划名称
   String name;
 
@@ -67,10 +69,14 @@ class PlanModel {
   // 周期设置
   List<CycleModel> cycles;
 
+  int? revisionId;
+
   PlanModel({
     this.id,
+    this.revisionId,
     required this.pillId,
     this.isEnabled = true,
+    this.updateTime,
     required this.name,
     required this.quantity,
     required this.startDate,
@@ -112,11 +118,16 @@ class PlanModel {
 
   // 当日需要执行的计划
   bool isActive(DateTime now) {
-    if (isEnabled == false) return false;
+    if (isEnabled == false &&
+        (updateTime == null ? true : now.isAfter(updateTime!))) {
+      return false;
+    }
     if (repeatValues.isEmpty) return false;
     if (DateTime.parse(startDate).isAfter(now)) return false;
     if (endDate.isNotEmpty) {
-      final end = DateTime.parse(endDate).add(Duration(days: 1));
+      final end = DateTime.parse(
+        endDate,
+      ).add(Duration(hours: 23, minutes: 59, seconds: 59));
       if (now.isAfter(end)) return false;
     }
 
@@ -263,8 +274,10 @@ class PlanModel {
     if (id == null) return null;
     return Plan(
       id: id!,
+      revisionId: revisionId,
       pillId: pillId,
       isEnabled: isEnabled,
+      updateTime: updateTime?.toUtc(),
       name: name,
       qty: quantity.qty,
       unit: quantity.unit!,
@@ -286,8 +299,10 @@ class PlanModel {
 
   PlansCompanion toCompanion() {
     return PlansCompanion(
+      revisionId: Value(revisionId),
       pillId: Value(pillId),
       isEnabled: Value(isEnabled),
+      updateTime: Value(updateTime?.toUtc()),
       name: Value(name),
       qty: Value(quantity.qty),
       unit: Value(quantity.unit!),
@@ -307,32 +322,158 @@ class PlanModel {
     );
   }
 
-  static PlanModel fromPlan(Plan plan, List<CycleModel> cycles) {
-    return PlanModel(
-      id: plan.id,
-      pillId: plan.pillId,
-      isEnabled: plan.isEnabled,
-      name: plan.name,
-      quantity: QuantityModel(
-        qty: plan.qty,
-        unit: plan.unit,
-        fraction: FractionModel(plan.numerator, plan.denominator),
-      ),
-      startDate: plan.startDate,
-      endDate: plan.endDate,
-      repeatValues:
-          plan.repeatValues.split(',').map((s) => int.parse(s)).toList(),
-      repeatUnit: plan.repeatUnit,
-      startTime: plan.startTime,
-      isExactTime: plan.isExactTime,
-      duration: plan.duration,
-      durationUnit: plan.durationUnit,
-      reminderValue: plan.reminderValue,
-      reminderUnit: plan.reminderUnit,
-      reminderMethod: plan.reminderMethod,
-      cycles: cycles,
+  RevisionsCompanion toRevision({int? planId}) {
+    planId ??= id;
+    return RevisionsCompanion(
+      planId: Value(planId!),
+      pillId: Value(pillId),
+      name: Value(name),
+      qty: Value(quantity.qty),
+      unit: Value(quantity.unit!),
+      numerator: Value(quantity.fraction.numerator),
+      denominator: Value(quantity.fraction.denominator),
+      startDate: Value(startDate),
+      endDate: Value(endDate),
+      repeatValues: Value(repeatValues.join(',')),
+      repeatUnit: Value(repeatUnit),
+      startTime: Value(startTime),
+      isExactTime: Value(isExactTime),
+      duration: Value(duration),
+      durationUnit: Value(durationUnit),
+      reminderValue: Value(reminderValue),
+      reminderUnit: Value(reminderUnit),
+      reminderMethod: Value(reminderMethod),
     );
   }
+
+  PlanModel copyWith({
+    int? id,
+    int? revisionId,
+    int? pillId,
+    bool? isEnabled,
+    DateTime? updateTime,
+    String? name,
+    QuantityModel? quantity,
+    String? startDate,
+    String? endDate,
+    List<int>? repeatValues,
+    String? repeatUnit,
+    String? startTime,
+    bool? isExactTime,
+    int? duration,
+    String? durationUnit,
+    int? reminderValue,
+    String? reminderUnit,
+    String? reminderMethod,
+    List<CycleModel>? cycles,
+  }) {
+    return PlanModel(
+      id: id ?? this.id,
+      revisionId: revisionId ?? this.revisionId,
+      pillId: pillId ?? this.pillId,
+      isEnabled: isEnabled ?? this.isEnabled,
+      updateTime: updateTime ?? this.updateTime,
+      name: name ?? this.name,
+      quantity: quantity ?? this.quantity.copyWith(),
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      repeatValues: repeatValues ?? this.repeatValues,
+      repeatUnit: repeatUnit ?? this.repeatUnit,
+      startTime: startTime ?? this.startTime,
+      isExactTime: isExactTime ?? this.isExactTime,
+      duration: duration ?? this.duration,
+      durationUnit: durationUnit ?? this.durationUnit,
+      reminderValue: reminderValue ?? this.reminderValue,
+      reminderUnit: reminderUnit ?? this.reminderUnit,
+      reminderMethod: reminderMethod ?? this.reminderMethod,
+      cycles: cycles ?? this.cycles,
+    );
+  }
+}
+
+PlanModel fromPlanToModel(Plan plan, List<CycleModel> cycles) {
+  return PlanModel(
+    id: plan.id,
+    revisionId: plan.revisionId,
+    pillId: plan.pillId,
+    isEnabled: plan.isEnabled,
+    updateTime: plan.updateTime?.toLocal(),
+    name: plan.name,
+    quantity: QuantityModel(
+      qty: plan.qty,
+      unit: plan.unit,
+      fraction: FractionModel(plan.numerator, plan.denominator),
+    ),
+    startDate: plan.startDate,
+    endDate: plan.endDate,
+    repeatValues:
+        plan.repeatValues.split(',').map((s) => int.parse(s)).toList(),
+    repeatUnit: plan.repeatUnit,
+    startTime: plan.startTime,
+    isExactTime: plan.isExactTime,
+    duration: plan.duration,
+    durationUnit: plan.durationUnit,
+    reminderValue: plan.reminderValue,
+    reminderUnit: plan.reminderUnit,
+    reminderMethod: plan.reminderMethod,
+    cycles: cycles,
+  );
+}
+
+PlanModel fromRevisionToPlan(
+  Revision revision,
+  Plan plan,
+  List<CycleModel> cycles,
+) {
+  return PlanModel(
+    id: revision.planId,
+    revisionId: revision.id,
+    pillId: revision.pillId,
+    isEnabled: plan.isEnabled,
+    updateTime: plan.updateTime?.toLocal(),
+    name: revision.name,
+    quantity: QuantityModel(
+      qty: revision.qty,
+      unit: revision.unit,
+      fraction: FractionModel(revision.numerator, revision.denominator),
+    ),
+    startDate: revision.startDate,
+    endDate: revision.endDate,
+    repeatValues:
+        revision.repeatValues.split(',').map((s) => int.parse(s)).toList(),
+    repeatUnit: revision.repeatUnit,
+    startTime: revision.startTime,
+    isExactTime: revision.isExactTime,
+    duration: revision.duration,
+    durationUnit: revision.durationUnit,
+    reminderValue: revision.reminderValue,
+    reminderUnit: revision.reminderUnit,
+    reminderMethod: revision.reminderMethod,
+    cycles: cycles,
+  );
+}
+
+RevisionsCompanion fromPlanToRevision(Plan plan) {
+  return RevisionsCompanion(
+    planId: Value(plan.id),
+    pillId: Value(plan.pillId),
+    name: Value(plan.name),
+    qty: Value(plan.qty),
+    unit: Value(plan.unit),
+    numerator: Value(plan.numerator),
+    denominator: Value(plan.denominator),
+    startDate: Value(plan.startDate),
+    endDate: Value(plan.endDate),
+    repeatValues: Value(plan.repeatValues),
+    repeatUnit: Value(plan.repeatUnit),
+    startTime: Value(plan.startTime),
+    isExactTime: Value(plan.isExactTime),
+    duration: Value(plan.duration),
+    durationUnit: Value(plan.durationUnit),
+    reminderValue: Value(plan.reminderValue),
+    reminderUnit: Value(plan.reminderUnit),
+    reminderMethod: Value(plan.reminderMethod),
+  );
 }
 
 // 嵌套周期模型

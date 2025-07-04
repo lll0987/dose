@@ -7,6 +7,7 @@ import '../models/quantity_model.dart';
 import '../models/transaction_model.dart';
 import '../providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../service/loading_service.dart';
 import '../utils/datetime.dart';
 import '../widgets/pill_card.dart';
 import '../widgets/quantity_input.dart';
@@ -320,9 +321,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   void _onPressed() async {
+    loadingService.show();
     _model.isCustom = true;
     _model.isNegative = _selectedSign.first;
     await context.read<TransactionProvider>().addTransaction(_model);
+    loadingService.hide();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.success_save),
