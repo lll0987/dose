@@ -185,131 +185,147 @@ class _DailyScreenState extends State<DailyScreen> {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 40,
-            child: Padding(
-              padding: EdgeInsets.only(top: 22),
-              child: Text(startTime),
-            ),
-          ),
-          SizedBox(width: 6),
-          Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              Container(
-                width: 2,
-                height: 140,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 28),
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).canvasColor,
-                    border: Border.all(
-                      color:
-                          startTime.isEmpty
-                              ? Colors.transparent
-                              : Theme.of(context).colorScheme.primary,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Card(
-              elevation: 0,
-              margin: EdgeInsets.only(top: 16),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 40,
               child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    if (disabled && isDone && item.plan.isExactTime)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Tooltip(
-                            message: timeText,
+                padding: EdgeInsets.only(top: 22),
+                child: Text(startTime),
+              ),
+            ),
+            SizedBox(width: 4),
+            SizedBox(
+              width: 8,
+              child: Column(
+                spacing: 4,
+                children: [
+                  if (startTime.isNotEmpty)
+                    Container(
+                      width: 2,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color:
+                            Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                      ),
+                    ),
+                  if (startTime.isNotEmpty)
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).canvasColor,
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color:
+                            Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Card(
+                elevation: 0,
+                margin: EdgeInsets.only(top: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      if (disabled && isDone && item.plan.isExactTime)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Tooltip(
+                              message: timeText,
+                              child: Text(
+                                timeText,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      Card(
+                        elevation: 1,
+                        child: ListTile(
+                          title: Tooltip(
+                            message: title,
                             child: Text(
-                              timeText,
+                              title,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
                           ),
+                          subtitle: Tooltip(
+                            message: item.plan.name,
+                            child: Text(
+                              item.plan.name,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          leading: PillImage(pill: pill),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed:
+                                disabled
+                                    ? null
+                                    : () => _onSubmit(
+                                      now: DateTime.now(),
+                                      plan: item.plan,
+                                    ),
+                            child: Text(
+                              isDone
+                                  ? ''
+                                  : disabled
+                                  ? AppLocalizations.of(context)!.ignored
+                                  : AppLocalizations.of(context)!.ignore,
+                            ),
+                          ),
+                          FilledButton(
+                            onPressed:
+                                disabled
+                                    ? null
+                                    : () => _onPressed(item.plan, missedPlan),
+                            child: Text(
+                              isDone
+                                  ? AppLocalizations.of(context)!.taken
+                                  : AppLocalizations.of(context)!.take,
+                            ),
+                          ),
                         ],
                       ),
-                    Card(
-                      elevation: 1,
-                      child: ListTile(
-                        title: Tooltip(
-                          message: title,
-                          child: Text(
-                            title,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        subtitle: Tooltip(
-                          message: item.plan.name,
-                          child: Text(
-                            item.plan.name,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        leading: PillImage(pill: pill),
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed:
-                              disabled
-                                  ? null
-                                  : () => _onSubmit(
-                                    now: DateTime.now(),
-                                    plan: item.plan,
-                                  ),
-                          child: Text(
-                            isDone
-                                ? ''
-                                : disabled
-                                ? AppLocalizations.of(context)!.ignored
-                                : AppLocalizations.of(context)!.ignore,
-                          ),
-                        ),
-                        FilledButton(
-                          onPressed:
-                              disabled
-                                  ? null
-                                  : () => _onPressed(item.plan, missedPlan),
-                          child: Text(
-                            isDone
-                                ? AppLocalizations.of(context)!.taken
-                                : AppLocalizations.of(context)!.take,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

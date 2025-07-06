@@ -62,7 +62,7 @@ class PillModel {
     final unit = getUnit();
     final defaultUnit = packSpecs.last.unit;
     String text = '$qty$unit';
-    if (q != null) text += '$q$defaultUnit';
+    if (q != null && q != 0) text += '$q$defaultUnit';
     if (quantity.fraction.isNotEmpty) {
       text +=
           ' + ${quantity.fraction.numerator!}/${quantity.fraction.denominator!}$defaultUnit';
