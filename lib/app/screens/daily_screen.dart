@@ -36,136 +36,146 @@ class _DailyScreenState extends State<DailyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer4<DailyProvider, PillProvider, PlanProvider, ThemeProvider>(
-        builder: (
-          context,
-          dailyProvider,
-          pillProvider,
-          planProvider,
-          themeProvider,
-          child,
-        ) {
-          if (planProvider.allPlans.isEmpty) {
-            return Center(
-              child: Text(AppLocalizations.of(context)!.empty_todayPlanList),
-            );
-          }
-          if (dailyProvider.dailyItems.isEmpty &&
-              dailyProvider.missedItems.isEmpty) {
-            return Center(
-              child: Text(AppLocalizations.of(context)!.empty_todayPlan),
-            );
-          }
+      body: SafeArea(
+        child: Consumer4<
+          DailyProvider,
+          PillProvider,
+          PlanProvider,
+          ThemeProvider
+        >(
+          builder: (
+            context,
+            dailyProvider,
+            pillProvider,
+            planProvider,
+            themeProvider,
+            child,
+          ) {
+            if (planProvider.allPlans.isEmpty) {
+              return Center(
+                child: Text(AppLocalizations.of(context)!.empty_todayPlanList),
+              );
+            }
+            if (dailyProvider.dailyItems.isEmpty &&
+                dailyProvider.missedItems.isEmpty) {
+              return Center(
+                child: Text(AppLocalizations.of(context)!.empty_todayPlan),
+              );
+            }
 
-          final today = dailyProvider.today;
-          final missday = dailyProvider.yesterday;
-          final todayCount = dailyProvider.dailyItems.length;
-          final missedCount = dailyProvider.missedItems.length;
+            final today = dailyProvider.today;
+            final missday = dailyProvider.yesterday;
+            final todayCount = dailyProvider.dailyItems.length;
+            final missedCount = dailyProvider.missedItems.length;
 
-          return Column(
-            children: [
-              // NEXT 首页增加日期等信息展示
-              // Text(DateTime.now().toString().split(' ').first),
-              if (missedCount > 0)
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color:
-                          themeProvider.isDarkMode(context)
-                              ? Theme.of(context).colorScheme.onSecondary
-                              : Theme.of(context).colorScheme.secondaryFixed,
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
+            return Column(
+              children: [
+                // NEXT 首页增加日期等信息展示
+                // Text(DateTime.now().toString().split(' ').first),
+                if (missedCount > 0)
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color:
+                            themeProvider.isDarkMode(context)
+                                ? Theme.of(context).colorScheme.onSecondary
+                                : Theme.of(context).colorScheme.secondaryFixed,
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: ExpansionTile(
-                      shape: Border(),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.missedPlanTitle,
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 0,
+                      child: ExpansionTile(
+                        shape: Border(),
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.missedPlanTitle,
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.error,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '$missedCount',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onError,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 0,
                               ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.error,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$missedCount',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onError,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        children: [
+                          SizedBox(
+                            height: min(missedCount.toDouble(), 2) * 75,
+                            child: ListView.separated(
+                              itemCount: missedCount,
+                              itemBuilder: (content, index) {
+                                final item = dailyProvider.missedItems[index];
+                                final dailyPlans =
+                                    dailyProvider.dailyItems
+                                        .map((e) => e.plan)
+                                        .toList();
+                                final todayPlan = item.plan.equalsPlan(
+                                  dailyPlans,
+                                );
+                                return _buildMissedItem(
+                                  context: content,
+                                  item: item,
+                                  pill: pillProvider.pillMap[item.plan.pillId]!,
+                                  todayPlan: todayPlan,
+                                  todayDate: today,
+                                  missedDate: missday,
+                                );
+                              },
+                              separatorBuilder: (_, __) => const Divider(),
                             ),
                           ),
                         ],
                       ),
-                      children: [
-                        SizedBox(
-                          height: min(missedCount.toDouble(), 2) * 75,
-                          child: ListView.separated(
-                            itemCount: missedCount,
-                            itemBuilder: (content, index) {
-                              final item = dailyProvider.missedItems[index];
-                              final dailyPlans =
-                                  dailyProvider.dailyItems
-                                      .map((e) => e.plan)
-                                      .toList();
-                              final todayPlan = item.plan.equalsPlan(
-                                dailyPlans,
-                              );
-                              return _buildMissedItem(
-                                context: content,
-                                item: item,
-                                pill: pillProvider.pillMap[item.plan.pillId]!,
-                                todayPlan: todayPlan,
-                                todayDate: today,
-                                missedDate: missday,
-                              );
-                            },
-                            separatorBuilder: (_, __) => const Divider(),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: todayCount,
+                    itemBuilder: (context, index) {
+                      final item = dailyProvider.dailyItems[index];
+                      final prev =
+                          index > 0
+                              ? dailyProvider.dailyItems[index - 1]
+                              : null;
+                      final startTime =
+                          prev?.plan.startTime == item.plan.startTime
+                              ? ''
+                              : item.plan.startTime;
+                      final missedPlans =
+                          dailyProvider.missedItems.map((e) => e.plan).toList();
+                      final missedPlan = item.plan.equalsPlan(missedPlans);
+                      return _buildItem(
+                        context: context,
+                        startTime: startTime,
+                        item: item,
+                        pill: pillProvider.pillMap[item.plan.pillId]!,
+                        missedPlan: missedPlan,
+                        bottom: index == todayCount - 1 ? 16 : 0,
+                      );
+                    },
+                  ),
                 ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: todayCount,
-                  itemBuilder: (context, index) {
-                    final item = dailyProvider.dailyItems[index];
-                    final prev =
-                        index > 0 ? dailyProvider.dailyItems[index - 1] : null;
-                    final startTime =
-                        prev?.plan.startTime == item.plan.startTime
-                            ? ''
-                            : item.plan.startTime;
-                    final missedPlans =
-                        dailyProvider.missedItems.map((e) => e.plan).toList();
-                    final missedPlan = item.plan.equalsPlan(missedPlans);
-                    return _buildItem(
-                      context: context,
-                      startTime: startTime,
-                      item: item,
-                      pill: pillProvider.pillMap[item.plan.pillId]!,
-                      missedPlan: missedPlan,
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -176,6 +186,7 @@ class _DailyScreenState extends State<DailyScreen> {
     required PlanItem item,
     required PillModel pill,
     PlanModel? missedPlan,
+    required double bottom,
   }) {
     final disabled = item.status != PlanStatus.missed;
     final isDone = item.status == PlanStatus.taken;
@@ -184,7 +195,7 @@ class _DailyScreenState extends State<DailyScreen> {
     final timeText = '${item.startTime} - ${item.endTime}';
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.only(left: 8, right: 8, bottom: bottom),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

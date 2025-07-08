@@ -26,6 +26,7 @@
     "disabled": "已停用",
     "medication": "用药",
     "withdrawal": "停药",
+    "success": "操作成功",
     "success_delete": "删除成功",
     "success_add": "添加成功",
     "success_update": "更新成功",
