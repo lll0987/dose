@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../models/pill_model.dart';
 import '../models/quantity_model.dart';
 import '../providers/pill_provider.dart';
+import '../providers/plan_provider.dart';
 import '../providers/theme_provider.dart';
 import '../service/loading_service.dart';
 import '../widgets/color_picker.dart';
@@ -20,8 +21,9 @@ import '../widgets/required_label.dart';
 
 class PillFormScreen extends StatefulWidget {
   final PillModel? pill;
+  final bool hasTransaction;
 
-  const PillFormScreen({super.key, this.pill});
+  const PillFormScreen({super.key, this.pill, required this.hasTransaction});
 
   @override
   State<PillFormScreen> createState() => _PillFormScreenState();
@@ -123,314 +125,350 @@ class _PillFormScreenState extends State<PillFormScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    spacing: 16,
-                    children: [
-                      TextFormField(
-                        decoration: InputDecoration(
-                          label: RequiredLabel(
-                            text: AppLocalizations.of(context)!.pillForm_name,
+                child: Consumer<PlanProvider>(
+                  builder: (context, provider, child) {
+                    final plans =
+                        _model.id == null
+                            ? null
+                            : provider.groupedPlans[_model.id];
+                    final hasPlan = plans != null && plans.isNotEmpty;
+                    final isUse = !hasPlan && !widget.hasTransaction;
+                    return Form(
+                      key: _formKey,
+                      child: Column(
+                        spacing: 16,
+                        children: [
+                          TextFormField(
+                            decoration: InputDecoration(
+                              label: RequiredLabel(
+                                text:
+                                    AppLocalizations.of(context)!.pillForm_name,
+                              ),
+                              filled: true,
+                              fillColor:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerLow,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(
+                                  context,
+                                )!.validToken_pillName_required;
+                              }
+                              return null;
+                            },
+                            initialValue: _model.name,
+                            onChanged:
+                                (value) => setState(() {
+                                  _model.name = value;
+                                }),
                           ),
-                          filled: true,
-                          fillColor:
-                              Theme.of(context).colorScheme.surfaceContainerLow,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.validToken_pillName_required;
-                          }
-                          return null;
-                        },
-                        initialValue: _model.name,
-                        onChanged:
-                            (value) => setState(() {
-                              _model.name = value;
-                            }),
-                      ),
-                      Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            spacing: 4,
+                          Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                spacing: 4,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.pillForm_packSpecs,
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.labelLarge,
+                                      ),
+                                    ],
+                                  ),
+                                  if (_model.packSpecs.length > 1)
+                                    _buildPackSpecsResult(context),
+                                  ..._model.packSpecs.mapIndexed((index, item) {
+                                    final isFirst = index == 0;
+                                    return Row(
+                                      children: [
+                                        SizedBox(
+                                          width:
+                                              isFirst
+                                                  ? 0
+                                                  : (index - 1) * _specSpace,
+                                        ),
+                                        if (!isFirst)
+                                          Icon(
+                                            Icons.subdirectory_arrow_right,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.surfaceDim,
+                                          ),
+                                        Expanded(
+                                          child: TextFormField(
+                                            enabled:
+                                                !isFirst &&
+                                                (!_isUpdate || isUse),
+                                            decoration: InputDecoration(
+                                              label: RequiredLabel(
+                                                text:
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.pillForm_qty,
+                                              ),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return AppLocalizations.of(
+                                                  context,
+                                                )!.validToken_qty_required;
+                                              }
+                                              if (int.tryParse(value) == null) {
+                                                return AppLocalizations.of(
+                                                  context,
+                                                )!.validToken_qty_integer;
+                                              }
+                                              return null;
+                                            },
+                                            initialValue: item.qty.toString(),
+                                            onChanged: (value) {
+                                              if (value.isEmpty) return;
+                                              setState(() {
+                                                item.qty = int.parse(value);
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        SizedBox(
+                                          width: 100,
+                                          child: TextFormField(
+                                            enabled: !_isUpdate || isUse,
+                                            decoration: InputDecoration(
+                                              label: RequiredLabel(
+                                                text:
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.pillForm_unit,
+                                              ),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return AppLocalizations.of(
+                                                  context,
+                                                )!.validToken_pillUnit_required;
+                                              }
+                                              if (_model.packSpecs.indexWhere(
+                                                    (s) => s.unit == value,
+                                                  ) !=
+                                                  index) {
+                                                return AppLocalizations.of(
+                                                  context,
+                                                )!.validToken_pillUnit_noRepeat;
+                                              }
+                                              return null;
+                                            },
+                                            initialValue: item.unit,
+                                            onChanged:
+                                                (value) => setState(() {
+                                                  item.unit = value;
+                                                  // _units.add(value);
+                                                  _reloadUnits();
+                                                  _setUnit(context);
+                                                }),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(
+                                            isFirst ? Icons.add : Icons.close,
+                                          ),
+                                          onPressed:
+                                              (_isUpdate && !isUse)
+                                                  ? null
+                                                  : isFirst
+                                                  ? () => _addPackSpec(context)
+                                                  : () => _removePackSpec(
+                                                    context,
+                                                    index,
+                                                  ),
+                                        ),
+                                      ],
+                                    );
+                                  }),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              if (_unitHintText != null)
+                                Text(
+                                  _unitHintText!,
+                                  style: TextStyle(
+                                    color:
+                                        context.read<ThemeProvider>().hintColor,
+                                  ),
+                                ),
                               Row(
                                 children: [
-                                  Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.pillForm_packSpecs,
-                                    style:
-                                        Theme.of(context).textTheme.labelLarge,
+                                  Expanded(
+                                    child: QuantityInput(
+                                      enabled: !_isUpdate || isUse,
+                                      labelText:
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.pillForm_initQty,
+                                      filled: true,
+                                      fillColor:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.surfaceContainerLow,
+                                      initialValue: _model.initialQuantity,
+                                      onChange:
+                                          (v) => setState(() {
+                                            _model.initialQuantity = v;
+                                            _unitDisabled =
+                                                v.fraction.numerator != null;
+                                            _setUnit(context);
+                                          }),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(
+                                        label: RequiredLabel(
+                                          text:
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.pillForm_initUnit,
+                                        ),
+                                        filled: true,
+                                        fillColor:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.surfaceContainerLow,
+                                      ),
+                                      items:
+                                          _units
+                                              .map(
+                                                (option) => DropdownMenuItem(
+                                                  value: option,
+                                                  child: Text(option),
+                                                ),
+                                              )
+                                              .toList(),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return AppLocalizations.of(
+                                            context,
+                                          )!.validToken_pillInitUnit_required;
+                                        }
+                                        return null;
+                                      },
+                                      value: _selectedUnit,
+                                      onChanged:
+                                          (_isUpdate && !isUse) || _unitDisabled
+                                              ? null
+                                              : (value) => setState(
+                                                () => _selectedUnit = value,
+                                              ),
+                                    ),
                                   ),
                                 ],
                               ),
-                              if (_model.packSpecs.length > 1)
-                                _buildPackSpecsResult(context),
-                              ..._model.packSpecs.mapIndexed((index, item) {
-                                final isFirst = index == 0;
-                                return Row(
-                                  children: [
-                                    SizedBox(
-                                      width:
-                                          isFirst
-                                              ? 0
-                                              : (index - 1) * _specSpace,
-                                    ),
-                                    if (!isFirst)
-                                      Icon(
-                                        Icons.subdirectory_arrow_right,
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.surfaceDim,
-                                      ),
-                                    Expanded(
-                                      child: TextFormField(
-                                        enabled: !isFirst && !_isUpdate,
-                                        decoration: InputDecoration(
-                                          label: RequiredLabel(
-                                            text:
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.pillForm_qty,
-                                          ),
-                                        ),
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return AppLocalizations.of(
-                                              context,
-                                            )!.validToken_qty_required;
-                                          }
-                                          if (int.tryParse(value) == null) {
-                                            return AppLocalizations.of(
-                                              context,
-                                            )!.validToken_qty_integer;
-                                          }
-                                          return null;
-                                        },
-                                        initialValue: item.qty.toString(),
-                                        onChanged:
-                                            (value) => setState(() {
-                                              item.qty = int.parse(value);
-                                            }),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    SizedBox(
-                                      width: 100,
-                                      child: TextFormField(
-                                        enabled: !_isUpdate,
-                                        decoration: InputDecoration(
-                                          label: RequiredLabel(
-                                            text:
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.pillForm_unit,
-                                          ),
-                                        ),
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return AppLocalizations.of(
-                                              context,
-                                            )!.validToken_pillUnit_required;
-                                          }
-                                          if (_model.packSpecs.indexWhere(
-                                                (s) => s.unit == value,
-                                              ) !=
-                                              index) {
-                                            return AppLocalizations.of(
-                                              context,
-                                            )!.validToken_pillUnit_noRepeat;
-                                          }
-                                          return null;
-                                        },
-                                        initialValue: item.unit,
-                                        onChanged:
-                                            (value) => setState(() {
-                                              item.unit = value;
-                                              // _units.add(value);
-                                              _reloadUnits();
-                                              _setUnit(context);
-                                            }),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        isFirst ? Icons.add : Icons.close,
-                                      ),
-                                      onPressed:
-                                          _isUpdate
-                                              ? null
-                                              : isFirst
-                                              ? () => _addPackSpec(context)
-                                              : () => _removePackSpec(
-                                                context,
-                                                index,
-                                              ),
-                                    ),
-                                  ],
-                                );
-                              }),
                             ],
                           ),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_unitHintText != null)
-                            Text(
-                              _unitHintText!,
-                              style: TextStyle(
-                                color: context.read<ThemeProvider>().hintColor,
+                          DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.pillForm_preUnit,
+                              filled: true,
+                              fillColor:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerLow,
+                            ),
+                            items:
+                                _units
+                                    .map(
+                                      (option) => DropdownMenuItem(
+                                        value: option,
+                                        child: Text(option),
+                                      ),
+                                    )
+                                    .toList(),
+                            value: _selectedPreUnit,
+                            onChanged:
+                                (value) =>
+                                    setState(() => _selectedPreUnit = value),
+                          ),
+                          Card(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: ListTile(
+                                title: Text(
+                                  AppLocalizations.of(context)!.pillForm_image,
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (_model.imagePath == null ||
+                                        _model.imagePath!.isEmpty)
+                                      IconButton(
+                                        onPressed:
+                                            () => _showBottomModal(context),
+                                        icon: Icon(Icons.add_a_photo_outlined),
+                                      ),
+                                    if (_model.imagePath != null &&
+                                        _model.imagePath!.isNotEmpty) ...[
+                                      InkWell(
+                                        child: PillImage(
+                                          pill: _model,
+                                          size: 64,
+                                        ),
+                                        onTap: () => _showBottomModal(context),
+                                      ),
+                                      IconButton(
+                                        onPressed: () async {
+                                          await File(
+                                            _model.imagePath!,
+                                          ).delete();
+                                          setState(() {
+                                            _model.imagePath = '';
+                                          });
+                                        },
+                                        icon: Icon(Icons.cancel_outlined),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
                             ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: QuantityInput(
-                                  enabled: !_isUpdate,
-                                  labelText:
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.pillForm_initQty,
-                                  filled: true,
-                                  fillColor:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerLow,
-                                  initialValue: _model.initialQuantity,
-                                  onChange:
-                                      (v) => setState(() {
-                                        _model.initialQuantity = v;
-                                        _unitDisabled =
-                                            v.fraction.numerator != null;
-                                        _setUnit(context);
-                                      }),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: DropdownButtonFormField<String>(
-                                  decoration: InputDecoration(
-                                    label: RequiredLabel(
-                                      text:
-                                          AppLocalizations.of(
-                                            context,
-                                          )!.pillForm_initUnit,
-                                    ),
-                                    filled: true,
-                                    fillColor:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerLow,
-                                  ),
-                                  items:
-                                      _units
-                                          .map(
-                                            (option) => DropdownMenuItem(
-                                              value: option,
-                                              child: Text(option),
-                                            ),
-                                          )
-                                          .toList(),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return AppLocalizations.of(
-                                        context,
-                                      )!.validToken_pillInitUnit_required;
-                                    }
-                                    return null;
-                                  },
-                                  value: _selectedUnit,
-                                  onChanged:
-                                      _isUpdate || _unitDisabled
-                                          ? null
-                                          : (value) => setState(
-                                            () => _selectedUnit = value,
-                                          ),
-                                ),
-                              ),
-                            ],
+                          ),
+                          ColorPicker(
+                            filled: true,
+                            fillColor:
+                                Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerLow,
+                            labelText:
+                                AppLocalizations.of(context)!.pillForm_color,
+                            initialValue: _selectedColor,
+                            onChanged:
+                                (v) => setState(() {
+                                  _selectedColor = v;
+                                }),
                           ),
                         ],
                       ),
-                      DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.pillForm_preUnit,
-                          filled: true,
-                          fillColor:
-                              Theme.of(context).colorScheme.surfaceContainerLow,
-                        ),
-                        items:
-                            _units
-                                .map(
-                                  (option) => DropdownMenuItem(
-                                    value: option,
-                                    child: Text(option),
-                                  ),
-                                )
-                                .toList(),
-                        value: _selectedPreUnit,
-                        onChanged:
-                            (value) => setState(() => _selectedPreUnit = value),
-                      ),
-                      Card(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: ListTile(
-                            title: Text(
-                              AppLocalizations.of(context)!.pillForm_image,
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (_model.imagePath == null ||
-                                    _model.imagePath!.isEmpty)
-                                  IconButton(
-                                    onPressed: () => _showBottomModal(context),
-                                    icon: Icon(Icons.add_a_photo_outlined),
-                                  ),
-                                if (_model.imagePath != null &&
-                                    _model.imagePath!.isNotEmpty) ...[
-                                  InkWell(
-                                    child: PillImage(pill: _model, size: 64),
-                                    onTap: () => _showBottomModal(context),
-                                  ),
-                                  IconButton(
-                                    onPressed: () async {
-                                      await File(_model.imagePath!).delete();
-                                      setState(() {
-                                        _model.imagePath = '';
-                                      });
-                                    },
-                                    icon: Icon(Icons.cancel_outlined),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      ColorPicker(
-                        filled: true,
-                        fillColor:
-                            Theme.of(context).colorScheme.surfaceContainerLow,
-                        labelText: AppLocalizations.of(context)!.pillForm_color,
-                        initialValue: _selectedColor,
-                        onChanged:
-                            (v) => setState(() {
-                              _selectedColor = v;
-                            }),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
             ),

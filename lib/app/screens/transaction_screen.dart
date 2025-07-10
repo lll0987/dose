@@ -34,7 +34,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     _model.quantities.add(
       QuantityModel(
         qty: 1,
-        unit: widget.initialData.getUnit(),
+        unit: widget.initialData.unit,
         fraction: FractionModel(null, null),
       ),
     );

@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 
 import '../../models/pill_model.dart';
-import '../../utils/result.dart';
 import '../app_database.dart';
 import '../tables/pills.dart';
 import '../tables/specs.dart';
@@ -85,19 +84,10 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
     return PillModel.fromPill(pill, specList);
   }
 
-  Future<Result<int>> addPill(PillModel pill) async {
-    final i = pill.packSpecs.indexWhere(
-      (p) => p.unit == pill.initialQuantity.unit,
-    );
-    if (i == -1) return Result.failure('初始数量单位应在包装规格列表中');
-    final total = pill.initialQuantity.qty * pill.getTotalQtyMultiple(i);
-    pill.quantity.qty = total;
-    pill.quantity.fraction.numerator = pill.initialQuantity.fraction.numerator;
-    pill.quantity.fraction.denominator =
-        pill.initialQuantity.fraction.denominator;
+  Future<int> addPill(PillModel pill) async {
     final id = await _add1(pill.toCompanion());
     await insertSpecs(id, pill.packSpecs);
-    return Result.success(id);
+    return id;
   }
 
   Future<bool> updatePill(PillModel pill) async {

@@ -124,6 +124,21 @@ class $PillsTable extends Pills with TableInfo<$PillsTable, Pill> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isNegativeMeta = const VerificationMeta(
+    'isNegative',
+  );
+  @override
+  late final GeneratedColumn<bool> isNegative = GeneratedColumn<bool>(
+    'is_negative',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_negative" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _preferredUnitMeta = const VerificationMeta(
     'preferredUnit',
   );
@@ -158,6 +173,7 @@ class $PillsTable extends Pills with TableInfo<$PillsTable, Pill> {
     qty,
     numerator,
     denominator,
+    isNegative,
     preferredUnit,
     themeValue,
   ];
@@ -244,6 +260,12 @@ class $PillsTable extends Pills with TableInfo<$PillsTable, Pill> {
         ),
       );
     }
+    if (data.containsKey('is_negative')) {
+      context.handle(
+        _isNegativeMeta,
+        isNegative.isAcceptableOrUnknown(data['is_negative']!, _isNegativeMeta),
+      );
+    }
     if (data.containsKey('preferred_unit')) {
       context.handle(
         _preferredUnitMeta,
@@ -313,6 +335,10 @@ class $PillsTable extends Pills with TableInfo<$PillsTable, Pill> {
         DriftSqlType.int,
         data['${effectivePrefix}denominator'],
       ),
+      isNegative: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_negative'],
+      ),
       preferredUnit: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}preferred_unit'],
@@ -341,6 +367,7 @@ class Pill extends DataClass implements Insertable<Pill> {
   final int qty;
   final int? numerator;
   final int? denominator;
+  final bool? isNegative;
   final String? preferredUnit;
   final int? themeValue;
   const Pill({
@@ -354,6 +381,7 @@ class Pill extends DataClass implements Insertable<Pill> {
     required this.qty,
     this.numerator,
     this.denominator,
+    this.isNegative,
     this.preferredUnit,
     this.themeValue,
   });
@@ -379,6 +407,9 @@ class Pill extends DataClass implements Insertable<Pill> {
     }
     if (!nullToAbsent || denominator != null) {
       map['denominator'] = Variable<int>(denominator);
+    }
+    if (!nullToAbsent || isNegative != null) {
+      map['is_negative'] = Variable<bool>(isNegative);
     }
     if (!nullToAbsent || preferredUnit != null) {
       map['preferred_unit'] = Variable<String>(preferredUnit);
@@ -416,6 +447,10 @@ class Pill extends DataClass implements Insertable<Pill> {
           denominator == null && nullToAbsent
               ? const Value.absent()
               : Value(denominator),
+      isNegative:
+          isNegative == null && nullToAbsent
+              ? const Value.absent()
+              : Value(isNegative),
       preferredUnit:
           preferredUnit == null && nullToAbsent
               ? const Value.absent()
@@ -443,6 +478,7 @@ class Pill extends DataClass implements Insertable<Pill> {
       qty: serializer.fromJson<int>(json['qty']),
       numerator: serializer.fromJson<int?>(json['numerator']),
       denominator: serializer.fromJson<int?>(json['denominator']),
+      isNegative: serializer.fromJson<bool?>(json['isNegative']),
       preferredUnit: serializer.fromJson<String?>(json['preferredUnit']),
       themeValue: serializer.fromJson<int?>(json['themeValue']),
     );
@@ -461,6 +497,7 @@ class Pill extends DataClass implements Insertable<Pill> {
       'qty': serializer.toJson<int>(qty),
       'numerator': serializer.toJson<int?>(numerator),
       'denominator': serializer.toJson<int?>(denominator),
+      'isNegative': serializer.toJson<bool?>(isNegative),
       'preferredUnit': serializer.toJson<String?>(preferredUnit),
       'themeValue': serializer.toJson<int?>(themeValue),
     };
@@ -477,6 +514,7 @@ class Pill extends DataClass implements Insertable<Pill> {
     int? qty,
     Value<int?> numerator = const Value.absent(),
     Value<int?> denominator = const Value.absent(),
+    Value<bool?> isNegative = const Value.absent(),
     Value<String?> preferredUnit = const Value.absent(),
     Value<int?> themeValue = const Value.absent(),
   }) => Pill(
@@ -490,6 +528,7 @@ class Pill extends DataClass implements Insertable<Pill> {
     qty: qty ?? this.qty,
     numerator: numerator.present ? numerator.value : this.numerator,
     denominator: denominator.present ? denominator.value : this.denominator,
+    isNegative: isNegative.present ? isNegative.value : this.isNegative,
     preferredUnit:
         preferredUnit.present ? preferredUnit.value : this.preferredUnit,
     themeValue: themeValue.present ? themeValue.value : this.themeValue,
@@ -511,6 +550,8 @@ class Pill extends DataClass implements Insertable<Pill> {
       numerator: data.numerator.present ? data.numerator.value : this.numerator,
       denominator:
           data.denominator.present ? data.denominator.value : this.denominator,
+      isNegative:
+          data.isNegative.present ? data.isNegative.value : this.isNegative,
       preferredUnit:
           data.preferredUnit.present
               ? data.preferredUnit.value
@@ -533,6 +574,7 @@ class Pill extends DataClass implements Insertable<Pill> {
           ..write('qty: $qty, ')
           ..write('numerator: $numerator, ')
           ..write('denominator: $denominator, ')
+          ..write('isNegative: $isNegative, ')
           ..write('preferredUnit: $preferredUnit, ')
           ..write('themeValue: $themeValue')
           ..write(')'))
@@ -551,6 +593,7 @@ class Pill extends DataClass implements Insertable<Pill> {
     qty,
     numerator,
     denominator,
+    isNegative,
     preferredUnit,
     themeValue,
   );
@@ -568,6 +611,7 @@ class Pill extends DataClass implements Insertable<Pill> {
           other.qty == this.qty &&
           other.numerator == this.numerator &&
           other.denominator == this.denominator &&
+          other.isNegative == this.isNegative &&
           other.preferredUnit == this.preferredUnit &&
           other.themeValue == this.themeValue);
 }
@@ -583,6 +627,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
   final Value<int> qty;
   final Value<int?> numerator;
   final Value<int?> denominator;
+  final Value<bool?> isNegative;
   final Value<String?> preferredUnit;
   final Value<int?> themeValue;
   const PillsCompanion({
@@ -596,6 +641,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
     this.qty = const Value.absent(),
     this.numerator = const Value.absent(),
     this.denominator = const Value.absent(),
+    this.isNegative = const Value.absent(),
     this.preferredUnit = const Value.absent(),
     this.themeValue = const Value.absent(),
   });
@@ -610,6 +656,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
     required int qty,
     this.numerator = const Value.absent(),
     this.denominator = const Value.absent(),
+    this.isNegative = const Value.absent(),
     this.preferredUnit = const Value.absent(),
     this.themeValue = const Value.absent(),
   }) : name = Value(name),
@@ -627,6 +674,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
     Expression<int>? qty,
     Expression<int>? numerator,
     Expression<int>? denominator,
+    Expression<bool>? isNegative,
     Expression<String>? preferredUnit,
     Expression<int>? themeValue,
   }) {
@@ -641,6 +689,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
       if (qty != null) 'qty': qty,
       if (numerator != null) 'numerator': numerator,
       if (denominator != null) 'denominator': denominator,
+      if (isNegative != null) 'is_negative': isNegative,
       if (preferredUnit != null) 'preferred_unit': preferredUnit,
       if (themeValue != null) 'theme_value': themeValue,
     });
@@ -657,6 +706,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
     Value<int>? qty,
     Value<int?>? numerator,
     Value<int?>? denominator,
+    Value<bool?>? isNegative,
     Value<String?>? preferredUnit,
     Value<int?>? themeValue,
   }) {
@@ -671,6 +721,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
       qty: qty ?? this.qty,
       numerator: numerator ?? this.numerator,
       denominator: denominator ?? this.denominator,
+      isNegative: isNegative ?? this.isNegative,
       preferredUnit: preferredUnit ?? this.preferredUnit,
       themeValue: themeValue ?? this.themeValue,
     );
@@ -709,6 +760,9 @@ class PillsCompanion extends UpdateCompanion<Pill> {
     if (denominator.present) {
       map['denominator'] = Variable<int>(denominator.value);
     }
+    if (isNegative.present) {
+      map['is_negative'] = Variable<bool>(isNegative.value);
+    }
     if (preferredUnit.present) {
       map['preferred_unit'] = Variable<String>(preferredUnit.value);
     }
@@ -731,6 +785,7 @@ class PillsCompanion extends UpdateCompanion<Pill> {
           ..write('qty: $qty, ')
           ..write('numerator: $numerator, ')
           ..write('denominator: $denominator, ')
+          ..write('isNegative: $isNegative, ')
           ..write('preferredUnit: $preferredUnit, ')
           ..write('themeValue: $themeValue')
           ..write(')'))
@@ -4991,6 +5046,7 @@ typedef $$PillsTableCreateCompanionBuilder =
       required int qty,
       Value<int?> numerator,
       Value<int?> denominator,
+      Value<bool?> isNegative,
       Value<String?> preferredUnit,
       Value<int?> themeValue,
     });
@@ -5006,6 +5062,7 @@ typedef $$PillsTableUpdateCompanionBuilder =
       Value<int> qty,
       Value<int?> numerator,
       Value<int?> denominator,
+      Value<bool?> isNegative,
       Value<String?> preferredUnit,
       Value<int?> themeValue,
     });
@@ -5144,6 +5201,11 @@ class $$PillsTableFilterComposer extends Composer<_$AppDatabase, $PillsTable> {
 
   ColumnFilters<int> get denominator => $composableBuilder(
     column: $table.denominator,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isNegative => $composableBuilder(
+    column: $table.isNegative,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5317,6 +5379,11 @@ class $$PillsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isNegative => $composableBuilder(
+    column: $table.isNegative,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get preferredUnit => $composableBuilder(
     column: $table.preferredUnit,
     builder: (column) => ColumnOrderings(column),
@@ -5374,6 +5441,11 @@ class $$PillsTableAnnotationComposer
 
   GeneratedColumn<int> get denominator => $composableBuilder(
     column: $table.denominator,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isNegative => $composableBuilder(
+    column: $table.isNegative,
     builder: (column) => column,
   );
 
@@ -5531,6 +5603,7 @@ class $$PillsTableTableManager
                 Value<int> qty = const Value.absent(),
                 Value<int?> numerator = const Value.absent(),
                 Value<int?> denominator = const Value.absent(),
+                Value<bool?> isNegative = const Value.absent(),
                 Value<String?> preferredUnit = const Value.absent(),
                 Value<int?> themeValue = const Value.absent(),
               }) => PillsCompanion(
@@ -5544,6 +5617,7 @@ class $$PillsTableTableManager
                 qty: qty,
                 numerator: numerator,
                 denominator: denominator,
+                isNegative: isNegative,
                 preferredUnit: preferredUnit,
                 themeValue: themeValue,
               ),
@@ -5559,6 +5633,7 @@ class $$PillsTableTableManager
                 required int qty,
                 Value<int?> numerator = const Value.absent(),
                 Value<int?> denominator = const Value.absent(),
+                Value<bool?> isNegative = const Value.absent(),
                 Value<String?> preferredUnit = const Value.absent(),
                 Value<int?> themeValue = const Value.absent(),
               }) => PillsCompanion.insert(
@@ -5572,6 +5647,7 @@ class $$PillsTableTableManager
                 qty: qty,
                 numerator: numerator,
                 denominator: denominator,
+                isNegative: isNegative,
                 preferredUnit: preferredUnit,
                 themeValue: themeValue,
               ),

@@ -29,7 +29,7 @@ void main() async {
   final pillDao = PillDao(db);
   final planDao = PlanDao(db);
   final transactionDao = TransactionDao(db);
-  final pillRepository = PillRepository(db, pillDao, planDao);
+  final pillRepository = PillRepository(db, pillDao, planDao, transactionDao);
   final planRepository = PlanRepository(db, planDao, pillDao, transactionDao);
   final transactionRepository = TransactionRepository(
     db,
@@ -38,8 +38,8 @@ void main() async {
   );
 
   final themeProvider = ThemeProvider();
-  final pillProvider = PillProvider(pillRepository);
   final planProvider = PlanProvider(planRepository);
+  final pillProvider = PillProvider(pillRepository, planProvider);
   final dailyProvider = DailyProvider(
     transactionRepository,
     planProvider,

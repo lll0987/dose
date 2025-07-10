@@ -25,6 +25,8 @@ class DailyScreen extends StatefulWidget {
 }
 
 class _DailyScreenState extends State<DailyScreen> {
+  final _minCount = 10;
+
   @override
   void initState() {
     super.initState();
@@ -68,24 +70,87 @@ class _DailyScreenState extends State<DailyScreen> {
             final todayCount = dailyProvider.dailyItems.length;
             final missedCount = dailyProvider.missedItems.length;
 
-            return Column(
-              children: [
-                // NEXT 首页增加日期等信息展示
-                // Text(DateTime.now().toString().split(' ').first),
-                if (missedCount > 0)
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Container(
+            final warningPillList =
+                pillProvider.pillPlanCount.entries
+                    .where((e) => e.value != -1 && e.value < _minCount)
+                    .map((e) => e.key)
+                    .toList();
+
+            // NEXT 首页增加日期等信息展示
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                children: [
+                  if (warningPillList.isNotEmpty || missedCount > 0)
+                    SizedBox(height: 8),
+                  if (warningPillList.isNotEmpty)
+                    Container(
                       decoration: BoxDecoration(
-                        color:
-                            themeProvider.isDarkMode(context)
-                                ? Theme.of(context).colorScheme.onSecondary
-                                : Theme.of(context).colorScheme.secondaryFixed,
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.error.withAlpha(25),
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 4,
+                        children:
+                            warningPillList.map((id) {
+                              final pill = pillProvider.pillMap[id]!;
+                              final message = AppLocalizations.of(
+                                context,
+                              )!.doses(
+                                pillProvider.pillPlanCount[id]!,
+                                pill.name,
+                              );
+                              return Row(
+                                children: [
+                                  Container(
+                                    width: 4,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: themeProvider.getColor(
+                                        pill.themeValue,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Tooltip(
+                                    message: message,
+                                    child: Text(
+                                      message,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color:
+                                            Theme.of(context).colorScheme.error,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                  if (warningPillList.isNotEmpty && missedCount > 0)
+                    SizedBox(height: 8),
+                  if (missedCount > 0)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha(35),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
                       child: ExpansionTile(
                         shape: Border(),
                         title: Row(
@@ -124,6 +189,9 @@ class _DailyScreenState extends State<DailyScreen> {
                                 final item = dailyProvider.missedItems[index];
                                 final dailyPlans =
                                     dailyProvider.dailyItems
+                                        .where(
+                                          (e) => e.status == PlanStatus.missed,
+                                        )
                                         .map((e) => e.plan)
                                         .toList();
                                 final todayPlan = item.plan.equalsPlan(
@@ -144,35 +212,39 @@ class _DailyScreenState extends State<DailyScreen> {
                         ],
                       ),
                     ),
+                  if (warningPillList.isNotEmpty || missedCount > 0)
+                    SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: todayCount,
+                      itemBuilder: (context, index) {
+                        final item = dailyProvider.dailyItems[index];
+                        final prev =
+                            index > 0
+                                ? dailyProvider.dailyItems[index - 1]
+                                : null;
+                        final startTime =
+                            prev?.plan.startTime == item.plan.startTime
+                                ? ''
+                                : item.plan.startTime;
+                        final missedPlans =
+                            dailyProvider.missedItems
+                                .map((e) => e.plan)
+                                .toList();
+                        final missedPlan = item.plan.equalsPlan(missedPlans);
+                        return _buildItem(
+                          context: context,
+                          startTime: startTime,
+                          item: item,
+                          pill: pillProvider.pillMap[item.plan.pillId]!,
+                          missedPlan: missedPlan,
+                          bottom: index == todayCount - 1 ? 8 : 0,
+                        );
+                      },
+                    ),
                   ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: todayCount,
-                    itemBuilder: (context, index) {
-                      final item = dailyProvider.dailyItems[index];
-                      final prev =
-                          index > 0
-                              ? dailyProvider.dailyItems[index - 1]
-                              : null;
-                      final startTime =
-                          prev?.plan.startTime == item.plan.startTime
-                              ? ''
-                              : item.plan.startTime;
-                      final missedPlans =
-                          dailyProvider.missedItems.map((e) => e.plan).toList();
-                      final missedPlan = item.plan.equalsPlan(missedPlans);
-                      return _buildItem(
-                        context: context,
-                        startTime: startTime,
-                        item: item,
-                        pill: pillProvider.pillMap[item.plan.pillId]!,
-                        missedPlan: missedPlan,
-                        bottom: index == todayCount - 1 ? 16 : 0,
-                      );
-                    },
-                  ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -195,7 +267,7 @@ class _DailyScreenState extends State<DailyScreen> {
     final timeText = '${item.startTime} - ${item.endTime}';
 
     return Padding(
-      padding: EdgeInsets.only(left: 8, right: 8, bottom: bottom),
+      padding: EdgeInsets.only(bottom: bottom),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,7 +484,7 @@ class _DailyScreenState extends State<DailyScreen> {
                             Navigator.of(context).pop();
                           },
                         ),
-                        if (!item.plan.isExactTime)
+                        if (!item.plan.isExactTime && todayPlan != null)
                           ListTile(
                             title: Text(
                               AppLocalizations.of(context)!.takenToday,
@@ -422,17 +494,13 @@ class _DailyScreenState extends State<DailyScreen> {
                               AppLocalizations.of(context)!.takenTodaySub,
                             ),
                             onTap: () async {
-                              final quantities =
-                                  todayPlan == null
-                                      ? [item.plan.quantity]
-                                      : [
-                                        item.plan.quantity,
-                                        todayPlan.quantity,
-                                      ];
                               _onSubmit(
                                 now: todayDate,
                                 plan: item.plan,
-                                quantities: quantities,
+                                quantities: [
+                                  item.plan.quantity,
+                                  todayPlan.quantity,
+                                ],
                               );
                               Navigator.of(context).pop();
                             },

@@ -439,7 +439,7 @@ class _MonthScreenState extends State<StatefulWidget> {
     );
     loadingService.hide();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.success_delete)),
+      SnackBar(content: Text(AppLocalizations.of(context)!.success)),
     );
   }
 

@@ -86,7 +86,9 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     final ids = list.map((e) => e.id).toList();
     final result =
         await (select(quantities)
-          ..where((tbl) => tbl.transactionId.isIn(ids))).getSingleOrNull();
+              ..where((tbl) => tbl.transactionId.isIn(ids))
+              ..limit(1))
+            .getSingleOrNull();
     return result != null;
   }
 
@@ -94,7 +96,9 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   Future<bool> hasTransactionByPill(int pillId) async {
     final result =
         await (select(transactions)
-          ..where((tbl) => tbl.pillId.equals(pillId))).getSingleOrNull();
+              ..where((tbl) => tbl.pillId.equals(pillId))
+              ..limit(1))
+            .getSingleOrNull();
     return result != null;
   }
 

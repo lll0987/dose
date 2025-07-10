@@ -11,6 +11,8 @@ class Pills extends Table {
   IntColumn get qty => integer()();
   IntColumn get numerator => integer().nullable()();
   IntColumn get denominator => integer().nullable()();
+  BoolColumn get isNegative =>
+      boolean().nullable().withDefault(const Constant(false))();
   TextColumn get preferredUnit => text().nullable()();
   IntColumn get themeValue => integer().nullable()();
 }

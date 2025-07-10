@@ -14,13 +14,9 @@ class PlanProvider with ChangeNotifier {
 
   List<PlanModel> get allPlans => _allPlans;
 
-  Map<int, PlanModel> get planMap {
-    final Map<int, PlanModel> result = {};
-    for (var plan in _allPlans) {
-      result[plan.id!] = plan;
-    }
-    return result;
-  }
+  Map<int, PlanModel> get planMap => {
+    for (var plan in _allPlans) plan.id!: plan,
+  };
 
   List<PlanModel> _allRevisionPlans = [];
 

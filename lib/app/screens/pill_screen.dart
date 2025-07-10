@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
+import '../database/repository/transaction_repository.dart';
 import '../providers/pill_provider.dart';
 import '../service/loading_service.dart';
 import '../widgets/pill_card.dart';
@@ -26,7 +27,9 @@ class _PillScreenState extends State<PillScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const PillFormScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const PillFormScreen(hasTransaction: false),
+                ),
               );
             },
             icon: const Icon(Icons.add),
@@ -49,13 +52,23 @@ class _PillScreenState extends State<PillScreen> {
               return PillCard(
                 // imgSize: 64,
                 pill: pill,
-                onTap:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PillFormScreen(pill: pill),
-                      ),
+                onTap: () async {
+                  loadingService.show();
+                  final result = await context
+                      .read<TransactionRepository>()
+                      .hasTransactionByPill(pill.id!);
+                  loadingService.hide();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => PillFormScreen(
+                            pill: pill,
+                            hasTransaction: result,
+                          ),
                     ),
+                  );
+                },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

@@ -192,7 +192,9 @@ class PlanDao extends DatabaseAccessor<AppDatabase> with _$PlanDaoMixin {
   Future<bool> hasPlanByPill(int pillId) async {
     final result =
         await (select(plans)
-          ..where((tbl) => tbl.pillId.equals(pillId))).getSingleOrNull();
+              ..where((tbl) => tbl.pillId.equals(pillId))
+              ..limit(1))
+            .getSingleOrNull();
     return result != null;
   }
 }

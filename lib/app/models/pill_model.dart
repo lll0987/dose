@@ -40,34 +40,70 @@ class PillModel {
     required this.packSpecs,
   });
 
-  String getUnit() {
-    return preferredUnit == null || preferredUnit!.isEmpty
-        ? packSpecs.last.unit
-        : preferredUnit!;
-  }
+  String get defaultUnit => packSpecs.last.unit;
 
-  (int, int?) _getPreQty(int quantity) {
-    if (preferredUnit == null ||
-        preferredUnit!.isEmpty ||
-        preferredUnit == packSpecs.last.unit) {
-      return (quantity, null);
-    }
-    final index = packSpecs.indexWhere((spec) => spec.unit == preferredUnit);
-    final multi = getTotalQtyMultiple(index);
-    return (quantity ~/ multi, quantity % multi);
-  }
+  String get unit =>
+      preferredUnit == null || preferredUnit!.isEmpty
+          ? defaultUnit
+          : preferredUnit!;
 
-  String getQtyText() {
-    final (qty, q) = _getPreQty(quantity.qty);
-    final unit = getUnit();
-    final defaultUnit = packSpecs.last.unit;
-    String text = '$qty$unit';
-    if (q != null && q != 0) text += '$q$defaultUnit';
-    if (quantity.fraction.isNotEmpty) {
-      text +=
-          ' + ${quantity.fraction.numerator!}/${quantity.fraction.denominator!}$defaultUnit';
+  bool get isAnotherUnit =>
+      preferredUnit != null &&
+      preferredUnit!.isNotEmpty &&
+      preferredUnit != packSpecs.last.unit;
+
+  String getQtyText({bool showFraction = false}) {
+    int pre = quantity.qty;
+    int? last;
+    if (isAnotherUnit) {
+      final index = packSpecs.indexWhere((spec) => spec.unit == preferredUnit);
+      final multi = getTotalQtyMultiple(index);
+      pre = quantity.qty ~/ multi;
+      last = quantity.qty % multi;
     }
-    return text;
+
+    final isPre = pre != 0;
+    final isLast = last != null && last != 0;
+    final isFraction = quantity.fraction.isNotEmpty;
+
+    final sign = quantity.isNegative ? '-' : '';
+    if (showFraction) {
+      // **分数形式**
+      final List<String> arr = [];
+      if (isPre || (!isAnotherUnit && !isFraction)) {
+        arr.add('$pre');
+      }
+      if (isAnotherUnit && isPre) {
+        arr.add(unit);
+      }
+      if (isLast) {
+        arr.add('$last');
+      }
+      if (isFraction) {
+        arr.add(
+          '${quantity.fraction.numerator!}/${quantity.fraction.denominator!}',
+        );
+      }
+      if (isLast || isFraction || !isAnotherUnit) {
+        arr.add(defaultUnit);
+      }
+      return sign + arr.join(' ');
+    } else {
+      // **小数形式**
+      final double fraction =
+          isFraction
+              ? quantity.fraction.numerator! / quantity.fraction.denominator!
+              : 0;
+      if (isAnotherUnit && isPre) {
+        final double num = last! + fraction;
+        final str = num.toStringAsFixed(isFraction ? 2 : 0);
+        return '$sign$pre$unit$str$defaultUnit';
+      }
+      final int q = isAnotherUnit ? last! : pre;
+      final double num = q + fraction;
+      final str = num.toStringAsFixed(isFraction ? 2 : 0);
+      return '$sign$str$unit';
+    }
   }
 
   int getTotalQtyMultiple(int index) {
@@ -87,6 +123,7 @@ class PillModel {
       qty: quantity.qty,
       numerator: quantity.fraction.numerator,
       denominator: quantity.fraction.denominator,
+      isNegative: quantity.isNegative,
       preferredUnit: preferredUnit,
       themeValue: themeValue,
     );
@@ -103,6 +140,7 @@ class PillModel {
       qty: Value(quantity.qty),
       numerator: Value(quantity.fraction.numerator),
       denominator: Value(quantity.fraction.denominator),
+      isNegative: Value(quantity.isNegative),
       preferredUnit: Value(preferredUnit),
       themeValue: Value(themeValue),
     );
@@ -121,6 +159,7 @@ class PillModel {
       quantity: QuantityModel(
         qty: pill.qty,
         fraction: FractionModel(pill.numerator, pill.denominator),
+        isNegative: pill.isNegative ?? false,
       ),
       preferredUnit: pill.preferredUnit,
       themeValue: pill.themeValue,

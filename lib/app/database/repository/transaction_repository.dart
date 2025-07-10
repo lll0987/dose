@@ -30,15 +30,17 @@ class TransactionRepository {
               ),
             );
           }).toList();
-      final quantity = QuantityModel.sumQuantities(quantities);
+      final quantity = QuantityModel.sum(quantities);
 
-      transaction.calcQty = quantity.displayText;
+      transaction.calcQty = quantity?.displayText ?? '';
       await _transactionDao.addTransaction(transaction);
 
-      if (transaction.isNegative) {
-        pill.quantity.substract(quantity);
-      } else {
-        pill.quantity = QuantityModel.sumQuantities([pill.quantity, quantity]);
+      if (quantity != null) {
+        if (transaction.isNegative) {
+          pill.quantity = pill.quantity - quantity;
+        } else {
+          pill.quantity = pill.quantity + quantity;
+        }
       }
       await _pillDao.update1(pill.toPill()!);
     });
@@ -68,5 +70,9 @@ class TransactionRepository {
 
   Future<Transaction?> getLastTransactionByPlan(int planId) {
     return _transactionDao.getLastTransactionByPlan(planId);
+  }
+
+  Future<bool> hasTransactionByPill(int pillId) {
+    return _transactionDao.hasTransactionByPill(pillId);
   }
 }
