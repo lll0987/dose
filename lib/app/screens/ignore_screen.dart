@@ -197,9 +197,7 @@ class _IgnoreScreenState extends State<StatefulWidget> {
     loadingService.show();
 
     final plan = _planList.firstWhere((element) => element.id == _selectedPlan);
-    final time = plan.startTime.split(':');
-    final hour = int.parse(time[0]);
-    final minute = int.parse(time[1]);
+    final (hour, minute) = getTimeFromString(plan.startTime)!;
 
     await context.read<TransactionProvider>().addTransactions(
       _dateList.map((e) {

@@ -47,7 +47,6 @@ class _MonthScreenState extends State<StatefulWidget> {
     final now = DateTime.now();
     _currentYear = now.year;
     _currentMonth = now.month;
-    _loadHistoryData();
   }
 
   @override
@@ -314,8 +313,9 @@ class _MonthScreenState extends State<StatefulWidget> {
                         final item = data[index];
                         final pill = pillProvider.pillMap[item.plan.pillId]!;
                         final quantity =
-                            item.transaction?.calcQty ??
-                            item.plan.quantity.displayText;
+                            item.qty == null || item.qty!.isEmpty
+                                ? item.plan.quantity.displayText
+                                : item.qty!;
                         final unit = item.plan.quantity.unit;
                         final text = '${pill.name}, $quantity$unit';
                         final subText =
@@ -444,9 +444,7 @@ class _MonthScreenState extends State<StatefulWidget> {
   }
 
   Future<void> _onAdd(DateTime date, PlanModel plan) async {
-    final [h, m] = plan.startTime.split(':');
-    int hour = int.parse(h);
-    int minute = int.parse(m);
+    var (hour, minute) = getTimeFromString(plan.startTime)!;
     if (plan.isExactTime) {
       final newTime = await showTimePicker(
         context: context,
@@ -458,12 +456,11 @@ class _MonthScreenState extends State<StatefulWidget> {
       minute = newTime.minute;
     }
     loadingService.show();
-    final startTime = DateTime(date.year, date.month, date.day, hour, minute);
-    // MEMO 药效时长不仅有小时单位时需要调整
-    final endTime =
-        plan.isExactTime
-            ? startTime.add(Duration(hours: plan.duration!))
-            : null;
+    final (startTime, endTime) = plan.getTimeRange(
+      date: date,
+      hour: hour,
+      minute: minute,
+    );
     await context.read<TransactionProvider>().addTransaction(
       TransactionModel(
         planId: plan.id,
@@ -473,6 +470,7 @@ class _MonthScreenState extends State<StatefulWidget> {
         startTime: startTime,
         endTime: endTime,
         isNegative: true,
+        isCustom: false,
       ),
     );
     loadingService.hide();

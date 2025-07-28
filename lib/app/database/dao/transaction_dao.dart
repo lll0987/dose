@@ -61,12 +61,6 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     return (delete(transactions)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Future<void> _addAll(List<Insertable<Transaction>> entities) {
-    return batch((b) {
-      b.insertAll(transactions, entities);
-    });
-  }
-
   Future<int> count() {
     return count();
   }
@@ -110,6 +104,7 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
         await (select(transactions)..where(
           (tbl) =>
               tbl.isCustom.equals(false) &
+              tbl.calcQty.isNotValue('0') &
               tbl.startTime.isBetweenValues(
                 start.toUtc(),
                 end.toUtc().subtract(const Duration(seconds: 1)),
@@ -132,16 +127,37 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<List<TransactionModel>> getTransactions(
-    DateTime start,
-    DateTime end,
-  ) async {
+    DateTime startDate,
+    DateTime endDate,
+    Map<int, int> map, {
+    int? planId,
+  }) async {
+    final lower =
+        startDate
+            .copyWith(
+              hour: 0,
+              minute: 0,
+              second: 0,
+              millisecond: 0,
+              microsecond: 0,
+            )
+            .toUtc();
+    final higher =
+        endDate
+            .copyWith(
+              hour: 23,
+              minute: 59,
+              second: 59,
+              millisecond: 999,
+              microsecond: 999,
+            )
+            .toUtc();
+    final records =
+        await (select(transactions)
+          ..where((tbl) => tbl.startTime.isBetweenValues(lower, higher))).get();
     final allTransactions =
-        await (select(transactions)..where(
-          (tbl) => tbl.startTime.isBetweenValues(
-            start.toUtc(),
-            end.toUtc().subtract(const Duration(seconds: 1)),
-          ),
-        )).get();
+        planId == null ? records : records.where((e) => e.planId == planId);
+
     final List<TransactionModel> result = [];
     for (var item in allTransactions) {
       final list = await getAllQuantities(item.id);
@@ -163,17 +179,6 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
       result.add(TransactionModel.fromTransaction(item, list));
     }
     return result;
-  }
-
-  Future<void> addTransactions(List<TransactionModel> transactions) {
-    assert(transactions.every((e) => e.quantities.isEmpty));
-    final timestamp = DateTime.now();
-    return _addAll(
-      transactions.map((e) {
-        e.timestamp = timestamp;
-        return e.toCompanion();
-      }).toList(),
-    );
   }
 
   Future<void> deleteTransactionFromPlan(int planId, DateTime date) async {

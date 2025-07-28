@@ -3,6 +3,14 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import 'quantity_model.dart';
 
+// MEMO 各状态组合含义
+// isCustom=true, isNegative=false, quantities.isNotEmpty: 用户在数量调整页面手动增加数量
+// isCustom=true, isNegative=true, quantities.isNotEmpty: 用户在数量调整页面手动减少数量
+// isCustom=true, isNegative=true, quantities.isEmpty: 用户在忽略日期页面添加忽略日期
+// isCustom=false, isNegative=true, quantities.isNotEmpty: 用户在首页/月视图页面点击用药按钮
+// isCustom=false, isNegative=true, quantities.isEmpty: 用户在首页/月视图页面点击忽略按钮
+// isCustom=false, isNegative=true, quantities.first=0: 系统自动添加的补服记录
+
 class TransactionModel {
   int? id;
 

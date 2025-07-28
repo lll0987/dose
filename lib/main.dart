@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 
 import 'app/database/app_database.dart';
 import 'app/database/dao/pill_dao.dart';
+import 'app/database/dao/plan_cache_dao.dart';
 import 'app/database/dao/plan_dao.dart';
 import 'app/database/dao/transaction_dao.dart';
 import 'app/database/repository/pill_repository.dart';
+import 'app/database/repository/plan_cache_repository.dart';
 import 'app/database/repository/plan_repository.dart';
 import 'app/database/repository/transaction_repository.dart';
 import 'app/providers/daily_provider.dart';
@@ -29,18 +31,34 @@ void main() async {
   final pillDao = PillDao(db);
   final planDao = PlanDao(db);
   final transactionDao = TransactionDao(db);
+  final planCacheDao = PlanCacheDao(db);
+
   final pillRepository = PillRepository(db, pillDao, planDao, transactionDao);
-  final planRepository = PlanRepository(db, planDao, pillDao, transactionDao);
+  final planRepository = PlanRepository(
+    db,
+    planDao,
+    pillDao,
+    planCacheDao,
+    transactionDao,
+  );
+  final planCacheRepository = PlanCacheRepository(
+    db,
+    planCacheDao,
+    planDao,
+    transactionDao,
+  );
   final transactionRepository = TransactionRepository(
     db,
     transactionDao,
     pillDao,
+    planCacheRepository,
   );
 
   final themeProvider = ThemeProvider();
   final planProvider = PlanProvider(planRepository);
   final pillProvider = PillProvider(pillRepository, planProvider);
   final dailyProvider = DailyProvider(
+    planCacheRepository,
     transactionRepository,
     planProvider,
     pillProvider,
@@ -58,11 +76,11 @@ void main() async {
         Provider(create: (_) => pillRepository),
         Provider(create: (_) => planRepository),
         Provider(create: (_) => transactionRepository),
-        ChangeNotifierProvider(create: (_) => pillProvider),
-        ChangeNotifierProvider(create: (_) => planProvider),
+        ChangeNotifierProvider(create: (_) => pillProvider..loadPills()),
+        ChangeNotifierProvider(create: (_) => planProvider..loadPlans()),
         ChangeNotifierProvider(create: (_) => transactionProvider),
         ChangeNotifierProvider(create: (_) => themeProvider),
-        ChangeNotifierProvider(create: (_) => dailyProvider),
+        ChangeNotifierProvider(create: (_) => dailyProvider..initData()),
       ],
       child: const MyApp(),
     ),

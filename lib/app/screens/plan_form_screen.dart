@@ -48,6 +48,8 @@ class _PlanFormState extends State<PlanFormScreen> {
     startDate: getFormatDate(DateTime.now()),
     endDate: '',
     startTime: '',
+    duration: 1,
+    durationUnit: 'hour',
     repeatValues: [1],
     repeatUnit: 'day',
     cycles: [],
@@ -65,7 +67,7 @@ class _PlanFormState extends State<PlanFormScreen> {
   bool _unitDisabled = false;
   String? _unitHintText;
 
-  // NEXT 向前补充计划历史
+  // NEXT 增加向前补充计划历史的功能
   DateTime? _transactionDate;
   bool _isNew = false;
 
@@ -86,13 +88,10 @@ class _PlanFormState extends State<PlanFormScreen> {
     super.initState();
     _model.startTime = getFormatTime(_startTime);
     if (widget.plan != null) {
-      final times = widget.plan!.startTime.split(':');
       _isUpdate = widget.plan!.id != null;
       _model = widget.plan!.copyWith();
-      _startTime = TimeOfDay(
-        hour: int.parse(times[0]),
-        minute: int.parse(times[1]),
-      );
+      final (hour, minute) = getTimeFromString(widget.plan!.startTime)!;
+      _startTime = TimeOfDay(hour: hour, minute: minute);
       _isCycle = _model.cycles.isNotEmpty;
       if (_model.duration != null) _durationValue = _model.duration!;
       if (_model.durationUnit != null) _durationUnit = _model.durationUnit!;
@@ -152,6 +151,7 @@ class _PlanFormState extends State<PlanFormScreen> {
                                   AppLocalizations.of(
                                     context,
                                   )!.planForm_quantity,
+                              zero: false,
                               initialValue: _model.quantity,
                               onChange:
                                   (v) => setState(() {
@@ -466,6 +466,24 @@ class _PlanFormState extends State<PlanFormScreen> {
               }
             },
           ),
+          _buildListTile(
+            title: AppLocalizations.of(context)!.planForm_duration,
+            trailing: _model.getDurationText(context),
+            subtitle: _errorText['duration'],
+            onTap: () async {
+              _durationValue = _model.duration ?? 1;
+              _durationUnit = _model.durationUnit ?? 'hour';
+              final result = await showDialog<bool>(
+                context: context,
+                builder: (context) => _buildDurationDialog(),
+              );
+              if (result == null || result == false) return;
+              setState(() {
+                _model.duration = _durationValue;
+                _model.durationUnit = _durationUnit;
+              });
+            },
+          ),
           ListTile(
             title: Text(AppLocalizations.of(context)!.planForm_isExactTime),
             trailing: Switch(
@@ -473,25 +491,6 @@ class _PlanFormState extends State<PlanFormScreen> {
               onChanged: (v) => setState(() => _model.isExactTime = v),
             ),
           ),
-          if (_model.isExactTime)
-            _buildListTile(
-              title: AppLocalizations.of(context)!.planForm_duration,
-              trailing: _model.getDurationText(context),
-              subtitle: _errorText['duration'],
-              onTap: () async {
-                _durationValue = _model.duration ?? 1;
-                _durationUnit = _model.durationUnit ?? 'hour';
-                final result = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => _buildDurationDialog(),
-                );
-                if (result == null || result == false) return;
-                setState(() {
-                  _model.duration = _durationValue;
-                  _model.durationUnit = _durationUnit;
-                });
-              },
-            ),
         ],
       ),
     );

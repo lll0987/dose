@@ -1,6 +1,6 @@
 name: dose_plus
 description: 'An app designed to reduce the mental burden for people on long-term medication.'
-version: 0.9.3+7
+version: 0.9.4+8
 
 environment:
     sdk: ^3.7.2

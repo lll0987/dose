@@ -124,7 +124,7 @@ class _RepeatSettingsState extends State<RepeatScreen> {
     widget.initialData.startDate = getFormatDate(_startDate);
     widget.initialData.endDate =
         _endDate == null ? '' : getFormatDate(_endDate!);
-    widget.initialData.repeatUnit = _repeatUnit!.toString();
+    widget.initialData.repeatUnit = _repeatUnit!.name;
     switch (_repeatUnit) {
       case DateUnit.day:
         widget.initialData.repeatValues = [_dayValue];

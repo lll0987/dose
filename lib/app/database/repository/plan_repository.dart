@@ -2,6 +2,7 @@ import '../../models/plan_model.dart';
 import '../../utils/result.dart';
 import '../app_database.dart';
 import '../dao/pill_dao.dart';
+import '../dao/plan_cache_dao.dart';
 import '../dao/plan_dao.dart';
 import '../dao/transaction_dao.dart';
 
@@ -9,9 +10,16 @@ class PlanRepository {
   final AppDatabase _db;
   final PlanDao _planDao;
   final PillDao _pillDao;
+  final PlanCacheDao _cacheDao;
   final TransactionDao _transactionDao;
 
-  PlanRepository(this._db, this._planDao, this._pillDao, this._transactionDao);
+  PlanRepository(
+    this._db,
+    this._planDao,
+    this._pillDao,
+    this._cacheDao,
+    this._transactionDao,
+  );
 
   Future<List<PlanModel>> getAllPlans() {
     return _db.transaction(() {
@@ -32,7 +40,13 @@ class PlanRepository {
   Future<bool> updatePlan(PlanModel plan, bool isNew) {
     // 提醒设置如果变更为不提醒，二次确认是否删除日历事件
     return _db.transaction(() async {
-      return _planDao.updatePlan(plan, isNew);
+      final result = await _planDao.updatePlan(plan, isNew);
+      await _cacheDao.deleteAllCaches(plan.id!);
+      // if (isNew) {
+      //   await _cacheDao.deleteCaches(plan.id!);
+      // } else {
+      // }
+      return result;
     });
   }
 

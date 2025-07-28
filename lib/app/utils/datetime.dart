@@ -54,3 +54,16 @@ String getWeekdayMinDisplayName(BuildContext context, int weekday) {
       throw ArgumentError('Invalid weekday: $weekday');
   }
 }
+
+String getCacheFormatDate(DateTime date) {
+  final num = date.year * 10000 + date.month * 100 + date.day;
+  return '$num';
+}
+
+(int, int)? getTimeFromString(String str) {
+  final time = str.split(':');
+  final hour = int.tryParse(time[0]);
+  final minute = int.tryParse(time[1]);
+  if (hour == null || minute == null) return null;
+  return (hour, minute);
+}

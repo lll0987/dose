@@ -83,6 +83,13 @@ class PlanDao extends DatabaseAccessor<AppDatabase> with _$PlanDaoMixin {
     return (select(plans)..where((tbl) => tbl.id.equals(id))).getSingle();
   }
 
+  Future<PlanModel> firstPlan(int id) async {
+    final plan =
+        await (select(plans)..where((tbl) => tbl.id.equals(id))).getSingle();
+    final list = await _getAllCycles(id, plan.revisionId);
+    return fromPlanToModel(plan, list);
+  }
+
   Future<List<PlanModel>> getAllPlans() async {
     final allPlans = await all();
     final List<PlanModel> result = [];

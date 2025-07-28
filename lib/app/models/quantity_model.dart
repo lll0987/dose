@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../database/app_database.dart';
 
 class FractionModel {
@@ -181,6 +183,31 @@ class QuantityModel {
     final num = fraction.numerator!.abs();
     final den = fraction.denominator!.abs();
     return qty == 0 ? '$num/$den' : '${qty.abs()} + $num/$den';
+  }
+
+  double get decimalValue {
+    final q = qty.abs();
+    if (fraction.isEmpty) return q.toDouble();
+    final num = fraction.numerator!.abs();
+    final den = fraction.denominator!.abs();
+    return q + num / den;
+  }
+
+  String toFixed({int? decimalPlaces}) {
+    if (decimalValue == 0) return '0';
+
+    decimalPlaces ??= 2;
+
+    // 使用 NumberFormat 控制小数位数
+    final formatter =
+        NumberFormat()
+          ..minimumFractionDigits = 0
+          ..maximumFractionDigits = decimalPlaces;
+
+    String result = formatter.format(decimalValue);
+
+    // 确保返回正确的格式
+    return result.isEmpty ? '0' : result;
   }
 
   static QuantityModel fromQuantity(Quantity quantity) {

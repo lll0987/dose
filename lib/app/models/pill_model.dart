@@ -90,18 +90,11 @@ class PillModel {
       return sign + arr.join(' ');
     } else {
       // **小数形式**
-      final double fraction =
-          isFraction
-              ? quantity.fraction.numerator! / quantity.fraction.denominator!
-              : 0;
       if (isAnotherUnit && isPre) {
-        final double num = last! + fraction;
-        final str = num.toStringAsFixed(isFraction ? 2 : 0);
+        final str = quantity.copyWith(qty: last!).toFixed();
         return '$sign$pre$unit$str$defaultUnit';
       }
-      final int q = isAnotherUnit ? last! : pre;
-      final double num = q + fraction;
-      final str = num.toStringAsFixed(isFraction ? 2 : 0);
+      final str = quantity.copyWith(qty: isAnotherUnit ? last! : pre).toFixed();
       return '$sign$str$unit';
     }
   }

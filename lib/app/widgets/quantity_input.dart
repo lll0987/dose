@@ -11,6 +11,7 @@ class QuantityInput extends StatefulWidget {
   final Color? fillColor;
   final QuantityModel? initialValue;
   final Function(QuantityModel) onChange;
+  final bool zero;
 
   const QuantityInput({
     super.key,
@@ -20,6 +21,7 @@ class QuantityInput extends StatefulWidget {
     this.fillColor,
     this.initialValue,
     required this.onChange,
+    this.zero = true,
   });
 
   @override
@@ -74,6 +76,12 @@ class _QuantityInputState extends State<QuantityInput> {
             filled: widget.filled,
             fillColor: widget.fillColor,
           ),
+          validator: (value) {
+            if (!widget.zero && value == '0') {
+              return AppLocalizations.of(context)!.validToken_qty_notZero;
+            }
+            return null;
+          },
         ),
       ),
     );

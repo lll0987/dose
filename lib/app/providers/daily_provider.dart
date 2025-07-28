@@ -4,19 +4,21 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../database/app_database.dart';
+import '../database/repository/plan_cache_repository.dart';
 import '../database/repository/transaction_repository.dart';
 import '../models/plan_model.dart';
-import '../models/transaction_model.dart';
 import '../utils/datetime.dart';
 import 'pill_provider.dart';
 import 'plan_provider.dart';
 
 class DailyProvider with ChangeNotifier {
+  final PlanCacheRepository _planCacheRepository;
   final TransactionRepository _transactionRepository;
   final PlanProvider _planProvider;
   final PillProvider _pillProvider;
 
   DailyProvider(
+    this._planCacheRepository,
     this._transactionRepository,
     this._planProvider,
     this._pillProvider,
@@ -33,24 +35,23 @@ class DailyProvider with ChangeNotifier {
     });
   }
 
-  Future<void> loadTransactions() async {
-    await loadDailyTransactions();
-    await loadMonthTransactions();
-    await loadYearTransactions();
-    notifyListeners();
+  Future<void> initData() async {
+    final now = DateTime.now();
+    await loadHistoryData(year: now.year, month: now.month);
+    await loadDailyData();
   }
 
-  Future<void> loadDailyData() async {
-    await loadDailyTransactions();
-    notifyListeners();
+  Future<void> loadAllData() async {
+    await loadDailyData();
+    await loadMonthData();
+    await loadYearTransactions();
   }
 
   Future<void> loadHistoryData({required int year, int? month}) async {
     _year = year;
     if (month != null) _month = month;
-    await loadMonthTransactions();
+    await loadMonthData();
     await loadYearTransactions();
-    notifyListeners();
   }
 
   Timer? _timer;
@@ -58,70 +59,49 @@ class DailyProvider with ChangeNotifier {
 
   DateTime get today => _today;
   DateTime get yesterday => _today.subtract(const Duration(days: 1));
-  DateTime get _todayEnd =>
-      _today.add(const Duration(days: 1)).subtract(const Duration(seconds: 1));
 
-  List<PlanModel> get dailyPlans =>
-      _getDailyPlans(_planProvider.allRevisionPlans, _today);
-  List<PlanModel> get missedPlans =>
-      _getDailyPlans(_planProvider.allRevisionPlans, yesterday);
-
-  List<TransactionModel> _dailyTransactions = [];
-  Future<void> loadDailyTransactions() async {
-    _dailyTransactions = await _transactionRepository.getTransactions(
+  List<PlanItem> dailyItems = [];
+  List<PlanItem> missedItems = [];
+  Future<void> loadDailyData() async {
+    final caches = await _planCacheRepository.getAllPlanCaches(
       yesterday,
-      _today.add(const Duration(days: 1)),
+      _today,
     );
-  }
+    final map = groupBy(caches, (e) => e.date);
 
-  List<PlanItem> get dailyItems {
-    return dailyPlans.map((plan) {
-      final transactions = getDayTransactions(
-        plan.id!,
-        _today,
-        _dailyTransactions,
-      );
-      final status = getPlanStatus(
-        plan: plan,
-        now: _today,
-        today: _todayEnd,
-        transactions: transactions,
-      );
-      return PlanItem(
-        plan: plan,
-        status: status,
-        transaction: transactions.firstOrNull,
-      );
-    }).toList();
-  }
+    final todayStr = getCacheFormatDate(_today);
+    dailyItems =
+        map[todayStr]!.where((e) => e.status != PlanStatus.none.name).map((e) {
+          return PlanItem(
+            plan: _planProvider.planMap[e.planId]!,
+            status: PlanStatus.fromString(e.status)!,
+          );
+        }).toList();
 
-  List<PlanItem> get missedItems {
-    List<PlanItem> result = [];
-    for (var plan in missedPlans) {
-      final transactions = getDayTransactions(
-        plan.id!,
-        yesterday,
-        _dailyTransactions,
-      );
-      final status = getPlanStatus(
-        plan: plan,
-        now: yesterday,
-        today: _todayEnd,
-        transactions: transactions,
-        planList: dailyPlans,
-        allTransactions: _dailyTransactions,
-      );
-      if (status == PlanStatus.missed) {
-        result.add(
-          PlanItem(
-            plan: plan,
-            status: status,
-            transaction: transactions.firstOrNull,
-          ),
-        );
-      }
+    final yesterdayStr = getCacheFormatDate(yesterday);
+    missedItems =
+        map[yesterdayStr]!.where((e) => e.status == PlanStatus.missed.name).map(
+          (e) {
+            return PlanItem(
+              plan: _planProvider.planMap[e.planId]!,
+              status: PlanStatus.fromString(e.status)!,
+            );
+          },
+        ).toList();
+
+    final missedPlans = missedItems.map((e) => e.plan).toList();
+    for (var item in dailyItems) {
+      final p = item.plan.equalsPlan(missedPlans);
+      if (p != null) item.missedPlan = p;
     }
-    return result;
+
+    final dailyPlans = dailyItems.map((e) => e.plan).toList();
+    for (var item in missedItems) {
+      final p = item.plan.equalsPlan(dailyPlans);
+      if (p != null) item.dailyPlan = p;
+    }
+
+    notifyListeners();
   }
 
   void refreshToday() {
@@ -151,65 +131,36 @@ class DailyProvider with ChangeNotifier {
 
   int _month = 1;
   int get month => _month;
-
   int get _monthDayCount => DateTime(_year, _month + 1, 0).day;
-  Map<int, List<PlanModel>> get _monthPlans {
-    Map<int, List<PlanModel>> result = {
-      0: _getDailyPlans(
-        _planProvider.allRevisionPlans,
-        DateTime(_year, _month + 1, 1),
-      ),
-    };
-    for (var i = 1; i <= _monthDayCount; i++) {
-      final day = DateTime(_year, _month, i);
-      result[i] = _getDailyPlans(_planProvider.allRevisionPlans, day);
-    }
-    return result;
-  }
 
-  List<TransactionModel> _monthTransactions = [];
-  Future<void> loadMonthTransactions() async {
-    final start = DateTime(_year, _month, 1);
-    final end = DateTime(_year, _month + 1, 2);
-    _monthTransactions =
-        (await _transactionRepository.getTransactions(
-          start,
-          end,
-        )).where((t) => t.planId != null).toList();
-  }
+  Map<int, List<PlanItem>> monthItems = {};
+  Future<void> loadMonthData() async {
+    final caches = await _planCacheRepository.getAllPlanCaches(
+      DateTime(_year, _month, 0),
+      DateTime(_year, _month, _monthDayCount),
+    );
+    final map = groupBy(caches, (e) => e.date);
+    final now = DateTime.now();
 
-  Map<int, List<PlanItem>> get monthItems {
-    Map<int, List<PlanItem>> result = {};
-    for (var entry in _monthPlans.entries) {
-      final day = entry.key;
-      final plans = entry.value;
-      final datetime = DateTime(_year, _month, day);
-      result.putIfAbsent(day, () => []);
-      result[day]!.addAll(
-        plans.map((plan) {
-          final transactions = getDayTransactions(
-            plan.id!,
-            datetime,
-            _monthTransactions,
-          );
-          final key = day == _monthDayCount ? 0 : day + 1;
-          final status = getPlanStatus(
-            plan: plan,
-            now: datetime,
-            today: _todayEnd,
-            transactions: transactions,
-            planList: _monthPlans[key],
-            allTransactions: _monthTransactions,
-          );
-          return PlanItem(
-            plan: plan,
-            status: status,
-            transaction: transactions.firstOrNull,
-          );
-        }),
-      );
+    monthItems = {};
+    for (var i = 0; i <= _monthDayCount; i++) {
+      final dayStr = getCacheFormatDate(DateTime(_year, _month, i));
+      final isScheduled = DateTime(_year, _month, i).isAfter(now);
+      monthItems[i] =
+          map[dayStr]!
+              .where((e) => e.status != PlanStatus.none.name)
+              .map(
+                (e) => PlanItem(
+                  plan: _planProvider.planMap[e.planId]!,
+                  status:
+                      isScheduled
+                          ? PlanStatus.scheduled
+                          : PlanStatus.fromString(e.status)!,
+                ),
+              )
+              .toList();
     }
-    return result;
+    notifyListeners();
   }
 
   int _year = 2025;
@@ -218,6 +169,7 @@ class DailyProvider with ChangeNotifier {
   List<Transaction> _yearTransactions = [];
   Future<void> loadYearTransactions() async {
     _yearTransactions = await _transactionRepository.getYearTransactions(_year);
+    notifyListeners();
   }
 
   Map<int, Map<int, List<int>>> get yearTransactions {
@@ -243,92 +195,29 @@ class DailyProvider with ChangeNotifier {
 class PlanItem {
   PlanModel plan;
   PlanStatus status;
-  TransactionModel? transaction;
+  DateTime? start;
+  DateTime? end;
+  String? qty;
+  PlanModel? missedPlan;
+  PlanModel? dailyPlan;
 
   String? get startTime =>
-      transaction == null
-          ? null
-          : getFormatTime(TimeOfDay.fromDateTime(transaction!.startTime));
+      start == null ? null : getFormatTime(TimeOfDay.fromDateTime(start!));
   String? get endTime =>
-      transaction == null || transaction!.endTime == null
-          ? null
-          : getFormatTime(TimeOfDay.fromDateTime(transaction!.endTime!));
+      end == null ? null : getFormatTime(TimeOfDay.fromDateTime(end!));
 
-  PlanItem({required this.plan, required this.status, this.transaction});
+  PlanItem({
+    required this.plan,
+    required this.status,
+    this.start,
+    this.end,
+    this.qty,
+    this.missedPlan,
+    this.dailyPlan,
+  });
 }
 
 DateTime _getToday() {
   final now = DateTime.now();
   return DateTime(now.year, now.month, now.day);
-}
-
-// 将 HH:mm 转换为总分钟数，便于比较
-int _toMinutes(String time) {
-  final parts = time.split(':');
-  final hour = int.parse(parts[0]);
-  final minute = int.parse(parts[1]);
-  return hour * 60 + minute;
-}
-
-// 获取指定日期的计划列表，按开始时间排序
-List<PlanModel> _getDailyPlans(List<PlanModel> allPlans, DateTime now) {
-  return allPlans.where((plan) => plan.isActive(now)).sorted((a, b) {
-    final aMin = _toMinutes(a.startTime);
-    final bMin = _toMinutes(b.startTime);
-    return aMin.compareTo(bMin); // 升序排列
-    // 若需要降序，则改为 bMin.compareTo(aMin)
-  }).toList();
-}
-
-List<TransactionModel> getDayTransactions(
-  int planId,
-  DateTime now,
-  List<TransactionModel> allTransactions,
-) {
-  return allTransactions
-      .where(
-        (t) =>
-            t.planId == planId &&
-            (!t.startTime.isBefore(now)) &&
-            t.startTime.isBefore(now.add(const Duration(days: 1))),
-      )
-      .toList();
-}
-
-// 计划状态
-PlanStatus getPlanStatus({
-  required PlanModel plan,
-  required DateTime now,
-  required DateTime today,
-  required List<TransactionModel> transactions,
-  List<PlanModel>? planList,
-  List<TransactionModel>? allTransactions,
-}) {
-  if (transactions.any((t) => t.quantities.isNotEmpty)) {
-    return PlanStatus.taken;
-  }
-  if (transactions.isNotEmpty) {
-    return PlanStatus.ignored;
-  }
-  if (today.isBefore(now)) {
-    return PlanStatus.scheduled;
-  }
-  if (planList == null || allTransactions == null) {
-    return PlanStatus.missed;
-  }
-
-  final equalsPlan = plan.equalsPlan(planList);
-  if (equalsPlan == null) return PlanStatus.missed;
-
-  final transactionList = getDayTransactions(
-    equalsPlan.id!,
-    now.add(const Duration(days: 1)),
-    allTransactions,
-  );
-  final transaction = transactionList.firstWhereOrNull(
-    (m) => m.quantities.length > 1,
-  );
-  if (transaction == null) return PlanStatus.missed;
-
-  return PlanStatus.supplemented;
 }

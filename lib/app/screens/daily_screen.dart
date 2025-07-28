@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +14,7 @@ import '../providers/plan_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../service/loading_service.dart';
+import '../utils/datetime.dart';
 import '../widgets/pill_image.dart';
 
 class DailyScreen extends StatefulWidget {
@@ -26,14 +26,6 @@ class DailyScreen extends StatefulWidget {
 
 class _DailyScreenState extends State<DailyScreen> {
   final _minCount = 10;
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<PillProvider>().loadPills();
-    context.read<PlanProvider>().loadPlans();
-    context.read<DailyProvider>().loadDailyTransactions();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +57,6 @@ class _DailyScreenState extends State<DailyScreen> {
               );
             }
 
-            final today = dailyProvider.today;
-            final missday = dailyProvider.yesterday;
             final todayCount = dailyProvider.dailyItems.length;
             final missedCount = dailyProvider.missedItems.length;
 
@@ -83,6 +73,7 @@ class _DailyScreenState extends State<DailyScreen> {
                 children: [
                   if (warningPillList.isNotEmpty || missedCount > 0)
                     SizedBox(height: 8),
+                  /* 次数提醒 */
                   if (warningPillList.isNotEmpty)
                     Container(
                       decoration: BoxDecoration(
@@ -91,10 +82,13 @@ class _DailyScreenState extends State<DailyScreen> {
                         ).colorScheme.error.withAlpha(25),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
+                      ),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 0,
                       ),
                       width: double.infinity,
                       child: Column(
@@ -142,15 +136,19 @@ class _DailyScreenState extends State<DailyScreen> {
                     ),
                   if (warningPillList.isNotEmpty && missedCount > 0)
                     SizedBox(height: 8),
+                  /* 漏药提醒 */
                   if (missedCount > 0)
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.primary.withAlpha(35),
+                        ).colorScheme.primary.withAlpha(25),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 0,
+                      ),
                       child: ExpansionTile(
                         shape: Border(),
                         title: Row(
@@ -187,23 +185,10 @@ class _DailyScreenState extends State<DailyScreen> {
                               itemCount: missedCount,
                               itemBuilder: (content, index) {
                                 final item = dailyProvider.missedItems[index];
-                                final dailyPlans =
-                                    dailyProvider.dailyItems
-                                        .where(
-                                          (e) => e.status == PlanStatus.missed,
-                                        )
-                                        .map((e) => e.plan)
-                                        .toList();
-                                final todayPlan = item.plan.equalsPlan(
-                                  dailyPlans,
-                                );
                                 return _buildMissedItem(
                                   context: content,
                                   item: item,
                                   pill: pillProvider.pillMap[item.plan.pillId]!,
-                                  todayPlan: todayPlan,
-                                  todayDate: today,
-                                  missedDate: missday,
                                 );
                               },
                               separatorBuilder: (_, __) => const Divider(),
@@ -227,17 +212,11 @@ class _DailyScreenState extends State<DailyScreen> {
                             prev?.plan.startTime == item.plan.startTime
                                 ? ''
                                 : item.plan.startTime;
-                        final missedPlans =
-                            dailyProvider.missedItems
-                                .map((e) => e.plan)
-                                .toList();
-                        final missedPlan = item.plan.equalsPlan(missedPlans);
                         return _buildItem(
                           context: context,
                           startTime: startTime,
                           item: item,
                           pill: pillProvider.pillMap[item.plan.pillId]!,
-                          missedPlan: missedPlan,
                           bottom: index == todayCount - 1 ? 8 : 0,
                         );
                       },
@@ -257,13 +236,15 @@ class _DailyScreenState extends State<DailyScreen> {
     required String startTime,
     required PlanItem item,
     required PillModel pill,
-    PlanModel? missedPlan,
     required double bottom,
   }) {
     final disabled = item.status != PlanStatus.missed;
     final isDone = item.status == PlanStatus.taken;
-    final title =
-        '${item.plan.quantity.displayText}${item.plan.quantity.unit}, ${pill.name}';
+    final quantity =
+        item.qty == null || item.qty!.isEmpty
+            ? item.plan.quantity.displayText
+            : item.qty!;
+    final title = '$quantity${item.plan.quantity.unit}, ${pill.name}';
     final timeText = '${item.startTime} - ${item.endTime}';
 
     return Padding(
@@ -377,10 +358,7 @@ class _DailyScreenState extends State<DailyScreen> {
                             onPressed:
                                 disabled
                                     ? null
-                                    : () => _onSubmit(
-                                      now: DateTime.now(),
-                                      plan: item.plan,
-                                    ),
+                                    : () => _onIgnore(plan: item.plan),
                             child: Text(
                               isDone
                                   ? ''
@@ -393,7 +371,23 @@ class _DailyScreenState extends State<DailyScreen> {
                             onPressed:
                                 disabled
                                     ? null
-                                    : () => _onPressed(item.plan, missedPlan),
+                                    : () async {
+                                      if (item.plan.isExactTime ||
+                                          item.missedPlan == null) {
+                                        _onTake(plan: item.plan);
+                                      } else {
+                                        final single = await _showDailyDialog();
+                                        if (single == null) return;
+                                        if (single) {
+                                          _onTake(plan: item.plan);
+                                        } else {
+                                          _onTakeBoth(
+                                            item.plan,
+                                            item.missedPlan!,
+                                          );
+                                        }
+                                      }
+                                    },
                             child: Text(
                               isDone
                                   ? AppLocalizations.of(context)!.taken
@@ -417,9 +411,6 @@ class _DailyScreenState extends State<DailyScreen> {
     required BuildContext context,
     required PlanItem item,
     required PillModel pill,
-    PlanModel? todayPlan,
-    required DateTime todayDate,
-    required DateTime missedDate,
   }) {
     final title = [
       '${item.plan.quantity.displayText}${item.plan.quantity.unit}',
@@ -441,75 +432,29 @@ class _DailyScreenState extends State<DailyScreen> {
         children: [
           TextButton(
             onPressed: () {
-              _onSubmit(now: missedDate, plan: item.plan);
+              _onIgnore(
+                plan: item.plan,
+                date: DateTime.now().subtract(const Duration(days: 1)),
+              );
             },
             child: Text(AppLocalizations.of(context)!.ignore),
           ),
           ElevatedButton(
-            onPressed: () {
-              // 打开底部弹窗
-              showModalBottomSheet(
-                context: context,
-                builder: (context) {
-                  return Container(
-                    padding: EdgeInsets.only(top: 16, bottom: 32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          title: Text(
-                            AppLocalizations.of(context)!.takenYesterday,
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(
-                            AppLocalizations.of(context)!.takenYesterdaySub,
-                          ),
-                          onTap: () async {
-                            int? hour, minute;
-                            if (item.plan.isExactTime) {
-                              final result = await _showExactTimePicker();
-                              if (result == null) {
-                                Navigator.of(context).pop();
-                                return;
-                              }
-                              (hour, minute) = result;
-                            }
-                            _onSubmit(
-                              now: missedDate,
-                              plan: item.plan,
-                              quantities: [item.plan.quantity],
-                              hour: hour,
-                              minute: minute,
-                            );
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        if (!item.plan.isExactTime && todayPlan != null)
-                          ListTile(
-                            title: Text(
-                              AppLocalizations.of(context)!.takenToday,
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            subtitle: Text(
-                              AppLocalizations.of(context)!.takenTodaySub,
-                            ),
-                            onTap: () async {
-                              _onSubmit(
-                                now: todayDate,
-                                plan: item.plan,
-                                quantities: [
-                                  item.plan.quantity,
-                                  todayPlan.quantity,
-                                ],
-                              );
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              );
+            onPressed: () async {
+              final date = DateTime.now().subtract(const Duration(days: 1));
+              if (item.plan.isExactTime) {
+                _onTake(plan: item.plan, date: date);
+              } else {
+                final isDaily = item.dailyPlan != null;
+                // 打开底部弹窗
+                final single = await _showMissedBottomSheet(isDaily);
+                if (single == null) return;
+                if (single) {
+                  _onTake(plan: item.plan, date: date);
+                } else {
+                  _onTakeBoth(item.dailyPlan!, item.plan);
+                }
+              }
             },
             child: Text(AppLocalizations.of(context)!.take),
           ),
@@ -518,97 +463,155 @@ class _DailyScreenState extends State<DailyScreen> {
     );
   }
 
-  Future<(int, int)?> _showExactTimePicker() async {
-    final now = DateTime.now();
-    final newTime = await showTimePicker(
+  Future<bool?> _showMissedBottomSheet(bool isDaily) async {
+    final result = await showModalBottomSheet<bool>(
       context: context,
-      initialTime: TimeOfDay(hour: now.hour, minute: now.minute),
-      initialEntryMode: TimePickerEntryMode.input,
-    );
-    if (newTime != null) {
-      return (newTime.hour, newTime.minute);
-    }
-    return null;
-  }
-
-  void _onPressed(PlanModel plan, PlanModel? missedPlan) async {
-    int? hour, minute;
-    List<QuantityModel> quantities = [plan.quantity];
-
-    if (plan.isExactTime) {
-      final result = await _showExactTimePicker();
-      if (result == null) return;
-      (hour, minute) = result;
-    } else if (missedPlan != null) {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(AppLocalizations.of(context)!.takeBothTitle),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(AppLocalizations.of(context)!.takeOnlyToday),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(top: 16, bottom: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.takenYesterday,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(AppLocalizations.of(context)!.takenYesterdaySub),
+                onTap: () => Navigator.of(context).pop(true),
               ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text(AppLocalizations.of(context)!.takeBoth),
-              ),
+              if (isDaily)
+                ListTile(
+                  title: Text(
+                    AppLocalizations.of(context)!.takenToday,
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(AppLocalizations.of(context)!.takenTodaySub),
+                  onTap: () => Navigator.of(context).pop(false),
+                ),
             ],
-          );
-        },
-      );
-      if (result!) {
-        quantities.add(missedPlan.quantity);
-      }
-    }
-    _onSubmit(
-      now: DateTime.now(),
-      plan: plan,
-      quantities: quantities,
-      hour: hour,
-      minute: minute,
+          ),
+        );
+      },
     );
+    return result;
   }
 
-  void _onSubmit({
-    required DateTime now,
-    required PlanModel plan,
-    List<QuantityModel>? quantities,
-    int? hour,
-    int? minute,
-  }) async {
-    loadingService.show();
-    final time = plan.startTime.split(':');
-    final startTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      hour ?? int.parse(time[0]),
-      minute ?? int.parse(time[1]),
+  Future<bool?> _showDailyDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Text(AppLocalizations.of(context)!.takeBothTitle),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(AppLocalizations.of(context)!.takeOnlyToday),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(AppLocalizations.of(context)!.takeBoth),
+            ),
+          ],
+        );
+      },
     );
-    // MEMO 药效时长不仅有小时单位时需要调整
-    final endTime =
-        hour == null || minute == null || plan.duration == null
-            ? null
-            : startTime.add(Duration(hours: plan.duration!));
+    return result;
+  }
+
+  void _onIgnore({required PlanModel plan, DateTime? date}) async {
+    date ??= DateTime.now();
+    loadingService.show();
     await context.read<TransactionProvider>().addTransaction(
       TransactionModel(
         planId: plan.id,
         revisionId: plan.revisionId,
         pillId: plan.pillId,
-        quantities: quantities ?? [],
-        startTime: startTime,
-        endTime: endTime,
+        quantities: [],
+        startTime: date,
+        endTime: null,
         isNegative: true,
+        isCustom: false,
       ),
     );
     loadingService.hide();
   }
-}
 
-PlanModel? getTodayPlan(List<PlanModel> todayPlans, PlanModel plan) {
-  return todayPlans.firstWhereOrNull(
-    (p) => p.pillId == plan.pillId && p.startTime == plan.startTime,
-  );
+  void _onTake({required PlanModel plan, DateTime? date}) async {
+    date ??= DateTime.now();
+    loadingService.show();
+    // 开始时间
+    var (hour, minute) = getTimeFromString(plan.startTime)!;
+    if (plan.isExactTime) {
+      final newTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay(hour: hour, minute: minute),
+        initialEntryMode: TimePickerEntryMode.input,
+      );
+      if (newTime == null) return;
+      hour = newTime.hour;
+      minute = newTime.minute;
+    }
+    // 开始/结束日期时间
+    final (startTime, endTime) = plan.getTimeRange(
+      date: date,
+      hour: hour,
+      minute: minute,
+    );
+    // 提交数据
+    await context.read<TransactionProvider>().addTransaction(
+      TransactionModel(
+        planId: plan.id,
+        revisionId: plan.revisionId,
+        pillId: plan.pillId,
+        quantities: [plan.quantity],
+        startTime: startTime,
+        endTime: endTime,
+        isNegative: true,
+        isCustom: false,
+      ),
+    );
+    loadingService.hide();
+  }
+
+  void _onTakeBoth(PlanModel dailyPlan, PlanModel missedPlan) async {
+    final date = DateTime.now();
+    loadingService.show();
+    final (startTime, endTime) = dailyPlan.getTimeRange(date: date);
+    final quantities = [dailyPlan.quantity, missedPlan.quantity];
+    final transaction = TransactionModel(
+      planId: dailyPlan.id,
+      revisionId: dailyPlan.revisionId,
+      pillId: dailyPlan.pillId,
+      quantities: quantities,
+      startTime: startTime,
+      endTime: endTime,
+      isNegative: true,
+      isCustom: false,
+    );
+
+    final yesterday = date.subtract(const Duration(days: 1));
+    final (start, end) = missedPlan.getTimeRange(date: yesterday);
+    final missed = TransactionModel(
+      planId: missedPlan.id,
+      revisionId: missedPlan.revisionId,
+      pillId: missedPlan.pillId,
+      quantities: [
+        missedPlan.quantity.copyWith(
+          qty: 0,
+          fraction: FractionModel(null, null),
+        ),
+      ],
+      startTime: start,
+      endTime: end,
+      isNegative: true,
+      isCustom: false,
+    );
+    // 提交数据
+    await context.read<TransactionProvider>().addTransactions([
+      transaction,
+      missed,
+    ]);
+    loadingService.hide();
+  }
 }

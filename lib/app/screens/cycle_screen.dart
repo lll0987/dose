@@ -38,19 +38,19 @@ class _CycleScreenState extends State<CycleScreen> {
   Widget build(BuildContext context) {
     _cycleUnits = [
       WheelOption(
-        value: DateUnit.day.toString(),
+        value: DateUnit.day.name,
         label: DateUnit.day.displayName(context),
       ),
       WheelOption(
-        value: DateUnit.week.toString(),
+        value: DateUnit.week.name,
         label: DateUnit.week.displayName(context),
       ),
       WheelOption(
-        value: DateUnit.month.toString(),
+        value: DateUnit.month.name,
         label: DateUnit.month.displayName(context),
       ),
       WheelOption(
-        value: DateUnit.year.toString(),
+        value: DateUnit.year.name,
         label: DateUnit.year.displayName(context),
       ),
     ];

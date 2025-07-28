@@ -17,8 +17,7 @@ class TransactionProvider with ChangeNotifier {
   );
 
   Future<void> loadTransactions() async {
-    await _dailyProvider.loadTransactions();
-    notifyListeners();
+    await _dailyProvider.loadAllData();
   }
 
   Future<void> addTransaction(TransactionModel transaction) async {

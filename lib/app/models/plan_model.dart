@@ -8,7 +8,18 @@ import '../database/app_database.dart';
 import '../utils/datetime.dart';
 import 'quantity_model.dart';
 
-enum PlanStatus { taken, ignored, supplemented, missed, scheduled }
+enum PlanStatus {
+  taken,
+  ignored,
+  supplemented,
+  missed,
+  scheduled,
+  none;
+
+  static PlanStatus? fromString(String name) {
+    return PlanStatus.values.firstWhereOrNull((e) => e.name == name);
+  }
+}
 
 class PlanModel {
   int? id;
@@ -97,10 +108,10 @@ class PlanModel {
     if (cycles.isEmpty) return false;
     final days =
         cycles.map((cycle) {
-          if (cycle.unit == DateUnit.day.toString()) return cycle.value;
-          if (cycle.unit == DateUnit.week.toString()) return cycle.value * 7;
-          if (cycle.unit == DateUnit.month.toString()) return cycle.value * 30;
-          if (cycle.unit == DateUnit.year.toString()) return cycle.value * 365;
+          if (cycle.unit == DateUnit.day.name) return cycle.value;
+          if (cycle.unit == DateUnit.week.name) return cycle.value * 7;
+          if (cycle.unit == DateUnit.month.name) return cycle.value * 30;
+          if (cycle.unit == DateUnit.year.name) return cycle.value * 365;
           return 0;
         }).toList();
 
@@ -138,18 +149,18 @@ class PlanModel {
     final isStop = _isStop(totalDay);
     if (isStop) return false;
 
-    if (repeatUnit == DateUnit.day.toString()) {
+    if (repeatUnit == DateUnit.day.name) {
       final val = repeatValues[0];
       if (val < 2) return true;
       return totalDay % val == 0;
     }
 
-    if (repeatUnit == DateUnit.week.toString()) {
+    if (repeatUnit == DateUnit.week.name) {
       final currentWeekday = now.weekday; // Monday = 1 ... Sunday = 7
       return repeatValues.contains(currentWeekday);
     }
 
-    if (repeatUnit == DateUnit.month.toString()) {
+    if (repeatUnit == DateUnit.month.name) {
       final currentDay = now.day;
       final values = repeatValues;
       if (values[0] == -1) {
@@ -159,7 +170,7 @@ class PlanModel {
       return values.contains(currentDay);
     }
 
-    if (repeatUnit == DateUnit.year.toString()) {
+    if (repeatUnit == DateUnit.year.name) {
       if (repeatValues.length != 2) return false;
       final month = repeatValues[0];
       final day = repeatValues[1];
@@ -173,6 +184,20 @@ class PlanModel {
     return planList.firstWhereOrNull(
       (m) => m.pillId == pillId && m.startTime == startTime,
     );
+  }
+
+  (DateTime, DateTime?) getTimeRange({
+    required DateTime date,
+    int? hour,
+    int? minute,
+  }) {
+    if (hour == null || minute == null) {
+      (hour, minute) = getTimeFromString(startTime)!;
+    }
+    final start = DateTime(date.year, date.month, date.day, hour, minute);
+    // NEXT 药效时长不仅有小时单位时需要调整结束日期时间计算逻辑
+    final end = duration == null ? null : start.add(Duration(hours: duration!));
+    return (start, end);
   }
 
   // 处理频率显示
@@ -539,25 +564,40 @@ enum DateUnit {
     }
   }
 
-  // 获取字符串值
-  @override
-  String toString() {
-    return super.toString().split('.').last;
-  }
-
   // 根据字符串值返回对应的枚举值
-  static DateUnit? fromString(String value) {
-    switch (value) {
-      case 'day':
-        return DateUnit.day;
-      case 'week':
-        return DateUnit.week;
-      case 'month':
-        return DateUnit.month;
-      case 'year':
-        return DateUnit.year;
-      default:
-        return null; // 如果字符串无效，返回 null
-    }
+  static DateUnit? fromString(String name) {
+    return DateUnit.values.firstWhereOrNull((e) => e.name == name);
+  }
+}
+
+class PlanCacheModel {
+  int planId;
+  int? revisionId;
+  String date;
+  String status;
+  String? qty;
+  DateTime? start;
+  DateTime? end;
+
+  PlanCacheModel({
+    required this.planId,
+    this.revisionId,
+    required this.date,
+    required this.status,
+    this.qty,
+    this.start,
+    this.end,
+  });
+
+  static PlanCacheModel fromPlanStatusCache(PlanStatusCache e) {
+    return PlanCacheModel(
+      planId: e.planId,
+      revisionId: e.revisionId,
+      date: e.date,
+      status: e.status,
+      qty: e.qty,
+      start: e.start,
+      end: e.end,
+    );
   }
 }

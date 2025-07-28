@@ -65,6 +65,7 @@
     "validToken_denominator_required": "请输入分母",
     "validToken_qty_required": "请输入数量",
     "validToken_qty_integer": "请输入正整数",
+    "validToken_qty_notZero": "数量不能为0",
     "validToken_pillName_required": "请输入药物名称",
     "validToken_pillUnit_required": "请输入单位",
     "validToken_pillUnit_noRepeat": "单位不可重复",

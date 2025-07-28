@@ -5004,6 +5004,499 @@ class QuantitiesCompanion extends UpdateCompanion<Quantity> {
   }
 }
 
+class $PlanStatusCachesTable extends PlanStatusCaches
+    with TableInfo<$PlanStatusCachesTable, PlanStatusCache> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlanStatusCachesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
+  @override
+  late final GeneratedColumn<int> planId = GeneratedColumn<int>(
+    'plan_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES plans (id)',
+    ),
+  );
+  static const VerificationMeta _revisionIdMeta = const VerificationMeta(
+    'revisionId',
+  );
+  @override
+  late final GeneratedColumn<int> revisionId = GeneratedColumn<int>(
+    'revision_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES revisions (id)',
+    ),
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _qtyMeta = const VerificationMeta('qty');
+  @override
+  late final GeneratedColumn<String> qty = GeneratedColumn<String>(
+    'qty',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startMeta = const VerificationMeta('start');
+  @override
+  late final GeneratedColumn<DateTime> start = GeneratedColumn<DateTime>(
+    'start',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _endMeta = const VerificationMeta('end');
+  @override
+  late final GeneratedColumn<DateTime> end = GeneratedColumn<DateTime>(
+    'end',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    planId,
+    revisionId,
+    date,
+    status,
+    qty,
+    start,
+    end,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'plan_status_caches';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlanStatusCache> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('plan_id')) {
+      context.handle(
+        _planIdMeta,
+        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_planIdMeta);
+    }
+    if (data.containsKey('revision_id')) {
+      context.handle(
+        _revisionIdMeta,
+        revisionId.isAcceptableOrUnknown(data['revision_id']!, _revisionIdMeta),
+      );
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('qty')) {
+      context.handle(
+        _qtyMeta,
+        qty.isAcceptableOrUnknown(data['qty']!, _qtyMeta),
+      );
+    }
+    if (data.containsKey('start')) {
+      context.handle(
+        _startMeta,
+        start.isAcceptableOrUnknown(data['start']!, _startMeta),
+      );
+    }
+    if (data.containsKey('end')) {
+      context.handle(
+        _endMeta,
+        end.isAcceptableOrUnknown(data['end']!, _endMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PlanStatusCache map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlanStatusCache(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      planId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}plan_id'],
+          )!,
+      revisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision_id'],
+      ),
+      date:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}date'],
+          )!,
+      status:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}status'],
+          )!,
+      qty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}qty'],
+      ),
+      start: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}start'],
+      ),
+      end: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}end'],
+      ),
+    );
+  }
+
+  @override
+  $PlanStatusCachesTable createAlias(String alias) {
+    return $PlanStatusCachesTable(attachedDatabase, alias);
+  }
+}
+
+class PlanStatusCache extends DataClass implements Insertable<PlanStatusCache> {
+  final int id;
+  final int planId;
+  final int? revisionId;
+  final String date;
+  final String status;
+  final String? qty;
+  final DateTime? start;
+  final DateTime? end;
+  const PlanStatusCache({
+    required this.id,
+    required this.planId,
+    this.revisionId,
+    required this.date,
+    required this.status,
+    this.qty,
+    this.start,
+    this.end,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['plan_id'] = Variable<int>(planId);
+    if (!nullToAbsent || revisionId != null) {
+      map['revision_id'] = Variable<int>(revisionId);
+    }
+    map['date'] = Variable<String>(date);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || qty != null) {
+      map['qty'] = Variable<String>(qty);
+    }
+    if (!nullToAbsent || start != null) {
+      map['start'] = Variable<DateTime>(start);
+    }
+    if (!nullToAbsent || end != null) {
+      map['end'] = Variable<DateTime>(end);
+    }
+    return map;
+  }
+
+  PlanStatusCachesCompanion toCompanion(bool nullToAbsent) {
+    return PlanStatusCachesCompanion(
+      id: Value(id),
+      planId: Value(planId),
+      revisionId:
+          revisionId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(revisionId),
+      date: Value(date),
+      status: Value(status),
+      qty: qty == null && nullToAbsent ? const Value.absent() : Value(qty),
+      start:
+          start == null && nullToAbsent ? const Value.absent() : Value(start),
+      end: end == null && nullToAbsent ? const Value.absent() : Value(end),
+    );
+  }
+
+  factory PlanStatusCache.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlanStatusCache(
+      id: serializer.fromJson<int>(json['id']),
+      planId: serializer.fromJson<int>(json['planId']),
+      revisionId: serializer.fromJson<int?>(json['revisionId']),
+      date: serializer.fromJson<String>(json['date']),
+      status: serializer.fromJson<String>(json['status']),
+      qty: serializer.fromJson<String?>(json['qty']),
+      start: serializer.fromJson<DateTime?>(json['start']),
+      end: serializer.fromJson<DateTime?>(json['end']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'planId': serializer.toJson<int>(planId),
+      'revisionId': serializer.toJson<int?>(revisionId),
+      'date': serializer.toJson<String>(date),
+      'status': serializer.toJson<String>(status),
+      'qty': serializer.toJson<String?>(qty),
+      'start': serializer.toJson<DateTime?>(start),
+      'end': serializer.toJson<DateTime?>(end),
+    };
+  }
+
+  PlanStatusCache copyWith({
+    int? id,
+    int? planId,
+    Value<int?> revisionId = const Value.absent(),
+    String? date,
+    String? status,
+    Value<String?> qty = const Value.absent(),
+    Value<DateTime?> start = const Value.absent(),
+    Value<DateTime?> end = const Value.absent(),
+  }) => PlanStatusCache(
+    id: id ?? this.id,
+    planId: planId ?? this.planId,
+    revisionId: revisionId.present ? revisionId.value : this.revisionId,
+    date: date ?? this.date,
+    status: status ?? this.status,
+    qty: qty.present ? qty.value : this.qty,
+    start: start.present ? start.value : this.start,
+    end: end.present ? end.value : this.end,
+  );
+  PlanStatusCache copyWithCompanion(PlanStatusCachesCompanion data) {
+    return PlanStatusCache(
+      id: data.id.present ? data.id.value : this.id,
+      planId: data.planId.present ? data.planId.value : this.planId,
+      revisionId:
+          data.revisionId.present ? data.revisionId.value : this.revisionId,
+      date: data.date.present ? data.date.value : this.date,
+      status: data.status.present ? data.status.value : this.status,
+      qty: data.qty.present ? data.qty.value : this.qty,
+      start: data.start.present ? data.start.value : this.start,
+      end: data.end.present ? data.end.value : this.end,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanStatusCache(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('revisionId: $revisionId, ')
+          ..write('date: $date, ')
+          ..write('status: $status, ')
+          ..write('qty: $qty, ')
+          ..write('start: $start, ')
+          ..write('end: $end')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, planId, revisionId, date, status, qty, start, end);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlanStatusCache &&
+          other.id == this.id &&
+          other.planId == this.planId &&
+          other.revisionId == this.revisionId &&
+          other.date == this.date &&
+          other.status == this.status &&
+          other.qty == this.qty &&
+          other.start == this.start &&
+          other.end == this.end);
+}
+
+class PlanStatusCachesCompanion extends UpdateCompanion<PlanStatusCache> {
+  final Value<int> id;
+  final Value<int> planId;
+  final Value<int?> revisionId;
+  final Value<String> date;
+  final Value<String> status;
+  final Value<String?> qty;
+  final Value<DateTime?> start;
+  final Value<DateTime?> end;
+  const PlanStatusCachesCompanion({
+    this.id = const Value.absent(),
+    this.planId = const Value.absent(),
+    this.revisionId = const Value.absent(),
+    this.date = const Value.absent(),
+    this.status = const Value.absent(),
+    this.qty = const Value.absent(),
+    this.start = const Value.absent(),
+    this.end = const Value.absent(),
+  });
+  PlanStatusCachesCompanion.insert({
+    this.id = const Value.absent(),
+    required int planId,
+    this.revisionId = const Value.absent(),
+    required String date,
+    required String status,
+    this.qty = const Value.absent(),
+    this.start = const Value.absent(),
+    this.end = const Value.absent(),
+  }) : planId = Value(planId),
+       date = Value(date),
+       status = Value(status);
+  static Insertable<PlanStatusCache> custom({
+    Expression<int>? id,
+    Expression<int>? planId,
+    Expression<int>? revisionId,
+    Expression<String>? date,
+    Expression<String>? status,
+    Expression<String>? qty,
+    Expression<DateTime>? start,
+    Expression<DateTime>? end,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (planId != null) 'plan_id': planId,
+      if (revisionId != null) 'revision_id': revisionId,
+      if (date != null) 'date': date,
+      if (status != null) 'status': status,
+      if (qty != null) 'qty': qty,
+      if (start != null) 'start': start,
+      if (end != null) 'end': end,
+    });
+  }
+
+  PlanStatusCachesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? planId,
+    Value<int?>? revisionId,
+    Value<String>? date,
+    Value<String>? status,
+    Value<String?>? qty,
+    Value<DateTime?>? start,
+    Value<DateTime?>? end,
+  }) {
+    return PlanStatusCachesCompanion(
+      id: id ?? this.id,
+      planId: planId ?? this.planId,
+      revisionId: revisionId ?? this.revisionId,
+      date: date ?? this.date,
+      status: status ?? this.status,
+      qty: qty ?? this.qty,
+      start: start ?? this.start,
+      end: end ?? this.end,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (planId.present) {
+      map['plan_id'] = Variable<int>(planId.value);
+    }
+    if (revisionId.present) {
+      map['revision_id'] = Variable<int>(revisionId.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (qty.present) {
+      map['qty'] = Variable<String>(qty.value);
+    }
+    if (start.present) {
+      map['start'] = Variable<DateTime>(start.value);
+    }
+    if (end.present) {
+      map['end'] = Variable<DateTime>(end.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanStatusCachesCompanion(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('revisionId: $revisionId, ')
+          ..write('date: $date, ')
+          ..write('status: $status, ')
+          ..write('qty: $qty, ')
+          ..write('start: $start, ')
+          ..write('end: $end')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5014,11 +5507,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CyclesTable cycles = $CyclesTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $QuantitiesTable quantities = $QuantitiesTable(this);
+  late final $PlanStatusCachesTable planStatusCaches = $PlanStatusCachesTable(
+    this,
+  );
   late final PillDao pillDao = PillDao(this as AppDatabase);
   late final PlanDao planDao = PlanDao(this as AppDatabase);
   late final TransactionDao transactionDao = TransactionDao(
     this as AppDatabase,
   );
+  late final PlanCacheDao planCacheDao = PlanCacheDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5031,6 +5528,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cycles,
     transactions,
     quantities,
+    planStatusCaches,
   ];
 }
 
@@ -6203,6 +6701,26 @@ final class $$PlansTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$PlanStatusCachesTable, List<PlanStatusCache>>
+  _planStatusCachesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.planStatusCaches,
+    aliasName: $_aliasNameGenerator(db.plans.id, db.planStatusCaches.planId),
+  );
+
+  $$PlanStatusCachesTableProcessedTableManager get planStatusCachesRefs {
+    final manager = $$PlanStatusCachesTableTableManager(
+      $_db,
+      $_db.planStatusCaches,
+    ).filter((f) => f.planId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _planStatusCachesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
@@ -6402,6 +6920,31 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
           }) => $$TransactionsTableFilterComposer(
             $db: $db,
             $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> planStatusCachesRefs(
+    Expression<bool> Function($$PlanStatusCachesTableFilterComposer f) f,
+  ) {
+    final $$PlanStatusCachesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.planStatusCaches,
+      getReferencedColumn: (t) => t.planId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanStatusCachesTableFilterComposer(
+            $db: $db,
+            $table: $db.planStatusCaches,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -6731,6 +7274,31 @@ class $$PlansTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> planStatusCachesRefs<T extends Object>(
+    Expression<T> Function($$PlanStatusCachesTableAnnotationComposer a) f,
+  ) {
+    final $$PlanStatusCachesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.planStatusCaches,
+      getReferencedColumn: (t) => t.planId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanStatusCachesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.planStatusCaches,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PlansTableTableManager
@@ -6751,6 +7319,7 @@ class $$PlansTableTableManager
             bool revisionsRefs,
             bool cyclesRefs,
             bool transactionsRefs,
+            bool planStatusCachesRefs,
           })
         > {
   $$PlansTableTableManager(_$AppDatabase db, $PlansTable table)
@@ -6871,6 +7440,7 @@ class $$PlansTableTableManager
             revisionsRefs = false,
             cyclesRefs = false,
             transactionsRefs = false,
+            planStatusCachesRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
@@ -6878,6 +7448,7 @@ class $$PlansTableTableManager
                 if (revisionsRefs) db.revisions,
                 if (cyclesRefs) db.cycles,
                 if (transactionsRefs) db.transactions,
+                if (planStatusCachesRefs) db.planStatusCaches,
               ],
               addJoins: <
                 T extends TableManagerState<
@@ -6959,6 +7530,27 @@ class $$PlansTableTableManager
                               referencedItems.where((e) => e.planId == item.id),
                       typedResults: items,
                     ),
+                  if (planStatusCachesRefs)
+                    await $_getPrefetchedData<
+                      Plan,
+                      $PlansTable,
+                      PlanStatusCache
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PlansTableReferences
+                          ._planStatusCachesRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$PlansTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).planStatusCachesRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) =>
+                              referencedItems.where((e) => e.planId == item.id),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
@@ -6984,6 +7576,7 @@ typedef $$PlansTableProcessedTableManager =
         bool revisionsRefs,
         bool cyclesRefs,
         bool transactionsRefs,
+        bool planStatusCachesRefs,
       })
     >;
 typedef $$RevisionsTableCreateCompanionBuilder =
@@ -7106,6 +7699,29 @@ final class $$RevisionsTableReferences
     ).filter((f) => f.revisionId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$PlanStatusCachesTable, List<PlanStatusCache>>
+  _planStatusCachesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.planStatusCaches,
+    aliasName: $_aliasNameGenerator(
+      db.revisions.id,
+      db.planStatusCaches.revisionId,
+    ),
+  );
+
+  $$PlanStatusCachesTableProcessedTableManager get planStatusCachesRefs {
+    final manager = $$PlanStatusCachesTableTableManager(
+      $_db,
+      $_db.planStatusCaches,
+    ).filter((f) => f.revisionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _planStatusCachesRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -7293,6 +7909,31 @@ class $$RevisionsTableFilterComposer
           }) => $$TransactionsTableFilterComposer(
             $db: $db,
             $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> planStatusCachesRefs(
+    Expression<bool> Function($$PlanStatusCachesTableFilterComposer f) f,
+  ) {
+    final $$PlanStatusCachesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.planStatusCaches,
+      getReferencedColumn: (t) => t.revisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanStatusCachesTableFilterComposer(
+            $db: $db,
+            $table: $db.planStatusCaches,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7615,6 +8256,31 @@ class $$RevisionsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> planStatusCachesRefs<T extends Object>(
+    Expression<T> Function($$PlanStatusCachesTableAnnotationComposer a) f,
+  ) {
+    final $$PlanStatusCachesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.planStatusCaches,
+      getReferencedColumn: (t) => t.revisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanStatusCachesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.planStatusCaches,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$RevisionsTableTableManager
@@ -7635,6 +8301,7 @@ class $$RevisionsTableTableManager
             bool pillId,
             bool cyclesRefs,
             bool transactionsRefs,
+            bool planStatusCachesRefs,
           })
         > {
   $$RevisionsTableTableManager(_$AppDatabase db, $RevisionsTable table)
@@ -7747,12 +8414,14 @@ class $$RevisionsTableTableManager
             pillId = false,
             cyclesRefs = false,
             transactionsRefs = false,
+            planStatusCachesRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (cyclesRefs) db.cycles,
                 if (transactionsRefs) db.transactions,
+                if (planStatusCachesRefs) db.planStatusCaches,
               ],
               addJoins: <
                 T extends TableManagerState<
@@ -7838,6 +8507,28 @@ class $$RevisionsTableTableManager
                           ),
                       typedResults: items,
                     ),
+                  if (planStatusCachesRefs)
+                    await $_getPrefetchedData<
+                      Revision,
+                      $RevisionsTable,
+                      PlanStatusCache
+                    >(
+                      currentTable: table,
+                      referencedTable: $$RevisionsTableReferences
+                          ._planStatusCachesRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$RevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).planStatusCachesRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.revisionId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
@@ -7863,6 +8554,7 @@ typedef $$RevisionsTableProcessedTableManager =
         bool pillId,
         bool cyclesRefs,
         bool transactionsRefs,
+        bool planStatusCachesRefs,
       })
     >;
 typedef $$CyclesTableCreateCompanionBuilder =
@@ -9354,6 +10046,480 @@ typedef $$QuantitiesTableProcessedTableManager =
       Quantity,
       PrefetchHooks Function({bool transactionId})
     >;
+typedef $$PlanStatusCachesTableCreateCompanionBuilder =
+    PlanStatusCachesCompanion Function({
+      Value<int> id,
+      required int planId,
+      Value<int?> revisionId,
+      required String date,
+      required String status,
+      Value<String?> qty,
+      Value<DateTime?> start,
+      Value<DateTime?> end,
+    });
+typedef $$PlanStatusCachesTableUpdateCompanionBuilder =
+    PlanStatusCachesCompanion Function({
+      Value<int> id,
+      Value<int> planId,
+      Value<int?> revisionId,
+      Value<String> date,
+      Value<String> status,
+      Value<String?> qty,
+      Value<DateTime?> start,
+      Value<DateTime?> end,
+    });
+
+final class $$PlanStatusCachesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $PlanStatusCachesTable, PlanStatusCache> {
+  $$PlanStatusCachesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PlansTable _planIdTable(_$AppDatabase db) => db.plans.createAlias(
+    $_aliasNameGenerator(db.planStatusCaches.planId, db.plans.id),
+  );
+
+  $$PlansTableProcessedTableManager get planId {
+    final $_column = $_itemColumn<int>('plan_id')!;
+
+    final manager = $$PlansTableTableManager(
+      $_db,
+      $_db.plans,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_planIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RevisionsTable _revisionIdTable(_$AppDatabase db) =>
+      db.revisions.createAlias(
+        $_aliasNameGenerator(db.planStatusCaches.revisionId, db.revisions.id),
+      );
+
+  $$RevisionsTableProcessedTableManager? get revisionId {
+    final $_column = $_itemColumn<int>('revision_id');
+    if ($_column == null) return null;
+    final manager = $$RevisionsTableTableManager(
+      $_db,
+      $_db.revisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_revisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PlanStatusCachesTableFilterComposer
+    extends Composer<_$AppDatabase, $PlanStatusCachesTable> {
+  $$PlanStatusCachesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get start => $composableBuilder(
+    column: $table.start,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get end => $composableBuilder(
+    column: $table.end,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PlansTableFilterComposer get planId {
+    final $$PlansTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.plans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlansTableFilterComposer(
+            $db: $db,
+            $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RevisionsTableFilterComposer get revisionId {
+    final $$RevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanStatusCachesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlanStatusCachesTable> {
+  $$PlanStatusCachesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get start => $composableBuilder(
+    column: $table.start,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get end => $composableBuilder(
+    column: $table.end,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PlansTableOrderingComposer get planId {
+    final $$PlansTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.plans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlansTableOrderingComposer(
+            $db: $db,
+            $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RevisionsTableOrderingComposer get revisionId {
+    final $$RevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanStatusCachesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlanStatusCachesTable> {
+  $$PlanStatusCachesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get qty =>
+      $composableBuilder(column: $table.qty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get start =>
+      $composableBuilder(column: $table.start, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get end =>
+      $composableBuilder(column: $table.end, builder: (column) => column);
+
+  $$PlansTableAnnotationComposer get planId {
+    final $$PlansTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.plans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlansTableAnnotationComposer(
+            $db: $db,
+            $table: $db.plans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RevisionsTableAnnotationComposer get revisionId {
+    final $$RevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.revisionId,
+      referencedTable: $db.revisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.revisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanStatusCachesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlanStatusCachesTable,
+          PlanStatusCache,
+          $$PlanStatusCachesTableFilterComposer,
+          $$PlanStatusCachesTableOrderingComposer,
+          $$PlanStatusCachesTableAnnotationComposer,
+          $$PlanStatusCachesTableCreateCompanionBuilder,
+          $$PlanStatusCachesTableUpdateCompanionBuilder,
+          (PlanStatusCache, $$PlanStatusCachesTableReferences),
+          PlanStatusCache,
+          PrefetchHooks Function({bool planId, bool revisionId})
+        > {
+  $$PlanStatusCachesTableTableManager(
+    _$AppDatabase db,
+    $PlanStatusCachesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () =>
+                  $$PlanStatusCachesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$PlanStatusCachesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer:
+              () => $$PlanStatusCachesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> planId = const Value.absent(),
+                Value<int?> revisionId = const Value.absent(),
+                Value<String> date = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> qty = const Value.absent(),
+                Value<DateTime?> start = const Value.absent(),
+                Value<DateTime?> end = const Value.absent(),
+              }) => PlanStatusCachesCompanion(
+                id: id,
+                planId: planId,
+                revisionId: revisionId,
+                date: date,
+                status: status,
+                qty: qty,
+                start: start,
+                end: end,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int planId,
+                Value<int?> revisionId = const Value.absent(),
+                required String date,
+                required String status,
+                Value<String?> qty = const Value.absent(),
+                Value<DateTime?> start = const Value.absent(),
+                Value<DateTime?> end = const Value.absent(),
+              }) => PlanStatusCachesCompanion.insert(
+                id: id,
+                planId: planId,
+                revisionId: revisionId,
+                date: date,
+                status: status,
+                qty: qty,
+                start: start,
+                end: end,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$PlanStatusCachesTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({planId = false, revisionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (planId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.planId,
+                            referencedTable: $$PlanStatusCachesTableReferences
+                                ._planIdTable(db),
+                            referencedColumn:
+                                $$PlanStatusCachesTableReferences
+                                    ._planIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+                if (revisionId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.revisionId,
+                            referencedTable: $$PlanStatusCachesTableReferences
+                                ._revisionIdTable(db),
+                            referencedColumn:
+                                $$PlanStatusCachesTableReferences
+                                    ._revisionIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlanStatusCachesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlanStatusCachesTable,
+      PlanStatusCache,
+      $$PlanStatusCachesTableFilterComposer,
+      $$PlanStatusCachesTableOrderingComposer,
+      $$PlanStatusCachesTableAnnotationComposer,
+      $$PlanStatusCachesTableCreateCompanionBuilder,
+      $$PlanStatusCachesTableUpdateCompanionBuilder,
+      (PlanStatusCache, $$PlanStatusCachesTableReferences),
+      PlanStatusCache,
+      PrefetchHooks Function({bool planId, bool revisionId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9372,4 +10538,6 @@ class $AppDatabaseManager {
       $$TransactionsTableTableManager(_db, _db.transactions);
   $$QuantitiesTableTableManager get quantities =>
       $$QuantitiesTableTableManager(_db, _db.quantities);
+  $$PlanStatusCachesTableTableManager get planStatusCaches =>
+      $$PlanStatusCachesTableTableManager(_db, _db.planStatusCaches);
 }
