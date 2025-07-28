@@ -52,12 +52,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await migrator.addColumn(pills, pills.isNegative);
       }
-      if (from < 5) {
-        await migrator.createTable(planStatusCaches);
-      }
-      if (from < 6) {
-        await migrator.addColumn(planStatusCaches, planStatusCaches.revisionId);
-      }
+      // if (from < 5) {
+      //   await migrator.createTable(planStatusCaches);
+      // }
+      // if (from < 6) {
+      //   await migrator.addColumn(planStatusCaches, planStatusCaches.revisionId);
+      // }
       if (from < 7) {
         await migrator.deleteTable('plan_status_caches');
         await migrator.createTable(planStatusCaches);

@@ -204,6 +204,7 @@ class _IgnoreScreenState extends State<StatefulWidget> {
         return TransactionModel(
           pillId: plan.pillId,
           planId: plan.id,
+          revisionId: plan.revisionId,
           quantities: [],
           startTime: DateTime(e.year, e.month, e.day, hour, minute),
           endTime: null,

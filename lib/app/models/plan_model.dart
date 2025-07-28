@@ -532,12 +532,14 @@ class PlanItemModel {
   int pillId;
   String text;
   String startTime;
+  int? revisionId;
 
   PlanItemModel({
     required this.id,
     required this.pillId,
     required this.text,
     required this.startTime,
+    this.revisionId,
   });
 }
 

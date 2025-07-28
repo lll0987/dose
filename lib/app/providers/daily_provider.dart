@@ -28,6 +28,7 @@ class DailyProvider with ChangeNotifier {
     // 监听 plan 的变化，用于通知 daily 的监听者（如 UI）
     _planProvider.addListener(() {
       notifyListeners(); // 转发通知
+      loadAllData();
     });
 
     _pillProvider.addListener(() {
@@ -71,23 +72,25 @@ class DailyProvider with ChangeNotifier {
 
     final todayStr = getCacheFormatDate(_today);
     dailyItems =
-        map[todayStr]!.where((e) => e.status != PlanStatus.none.name).map((e) {
+        map[todayStr]?.where((e) => e.status != PlanStatus.none.name).map((e) {
           return PlanItem(
             plan: _planProvider.planMap[e.planId]!,
             status: PlanStatus.fromString(e.status)!,
           );
-        }).toList();
+        }).toList() ??
+        [];
 
     final yesterdayStr = getCacheFormatDate(yesterday);
     missedItems =
-        map[yesterdayStr]!.where((e) => e.status == PlanStatus.missed.name).map(
+        map[yesterdayStr]?.where((e) => e.status == PlanStatus.missed.name).map(
           (e) {
             return PlanItem(
               plan: _planProvider.planMap[e.planId]!,
               status: PlanStatus.fromString(e.status)!,
             );
           },
-        ).toList();
+        ).toList() ??
+        [];
 
     final missedPlans = missedItems.map((e) => e.plan).toList();
     for (var item in dailyItems) {
@@ -147,8 +150,8 @@ class DailyProvider with ChangeNotifier {
       final dayStr = getCacheFormatDate(DateTime(_year, _month, i));
       final isScheduled = DateTime(_year, _month, i).isAfter(now);
       monthItems[i] =
-          map[dayStr]!
-              .where((e) => e.status != PlanStatus.none.name)
+          map[dayStr]
+              ?.where((e) => e.status != PlanStatus.none.name)
               .map(
                 (e) => PlanItem(
                   plan: _planProvider.planMap[e.planId]!,
@@ -158,7 +161,8 @@ class DailyProvider with ChangeNotifier {
                           : PlanStatus.fromString(e.status)!,
                 ),
               )
-              .toList();
+              .toList() ??
+          [];
     }
     notifyListeners();
   }

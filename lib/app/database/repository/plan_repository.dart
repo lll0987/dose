@@ -87,6 +87,7 @@ class PlanRepository {
           pillId: pill.id,
           text: '${pill.name}, ${plan.name}',
           startTime: plan.startTime,
+          revisionId: plan.revisionId,
         );
       }).toList();
     });

@@ -30,15 +30,16 @@ class TransactionRepository {
       transaction.calcQty = quantity?.displayText ?? '';
       await _transactionDao.addTransaction(transaction);
 
-      await _cacheRepository.updateCache(transaction);
+      if (transaction.planId != null) {
+        await _cacheRepository.updateCache(transaction);
+      }
 
       if (quantity == null || quantity.decimalValue == 0) return;
-      if (transaction.isNegative) {
-        pill.quantity = pill.quantity - quantity;
-      } else {
-        pill.quantity = pill.quantity + quantity;
-      }
-      await _pillDao.update1(pill.toPill()!);
+      final newQty =
+          transaction.isNegative
+              ? pill.quantity - quantity
+              : pill.quantity + quantity;
+      await _pillDao.updatePillQuantity(pill.id!, newQty);
     });
   }
 
@@ -47,21 +48,24 @@ class TransactionRepository {
       final map = groupBy(transactions, (e) => e.pillId);
       for (final entry in map.entries) {
         final pill = await _pillDao.firstPill(entry.key);
+        QuantityModel newQty = pill.quantity.copyWith();
         // final quantities = entry.value.expand((e) => e.quantities).toList();
         // final quantity = _getSumQuantity(quantities, pill);
         for (var transaction in entry.value) {
           final qty = _getSumQuantity(transaction.quantities, pill);
           transaction.calcQty = qty?.displayText ?? '';
           await _transactionDao.addTransaction(transaction);
-          await _cacheRepository.updateCache(transaction);
+          if (transaction.planId != null) {
+            await _cacheRepository.updateCache(transaction);
+          }
           if (qty == null || qty.decimalValue == 0) continue;
           if (transaction.isNegative) {
-            pill.quantity = pill.quantity - qty;
+            newQty = pill.quantity - qty;
           } else {
-            pill.quantity = pill.quantity + qty;
+            newQty = pill.quantity + qty;
           }
         }
-        await _pillDao.update1(pill.toPill()!);
+        await _pillDao.updatePillQuantity(pill.id!, newQty);
       }
     });
   }

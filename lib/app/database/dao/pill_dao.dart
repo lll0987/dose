@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../models/pill_model.dart';
+import '../../models/quantity_model.dart';
 import '../app_database.dart';
 import '../tables/pills.dart';
 import '../tables/specs.dart';
@@ -101,5 +102,15 @@ class PillDao extends DatabaseAccessor<AppDatabase> with _$PillDaoMixin {
 
   Future<void> deletePill(int id) async {
     await delete1(id);
+  }
+
+  Future<int> updatePillQuantity(int id, QuantityModel quantity) {
+    return (update(pills)..where((tbl) => tbl.id.equals(id))).write(
+      PillsCompanion(
+        qty: Value(quantity.qty),
+        numerator: Value(quantity.fraction.numerator),
+        denominator: Value(quantity.fraction.denominator),
+      ),
+    );
   }
 }

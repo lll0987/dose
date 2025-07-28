@@ -95,7 +95,7 @@ class PillModel {
         return '$sign$pre$unit$str$defaultUnit';
       }
       final str = quantity.copyWith(qty: isAnotherUnit ? last! : pre).toFixed();
-      return '$sign$str$unit';
+      return '$sign$str$defaultUnit';
     }
   }
 
