@@ -1,6 +1,6 @@
 name: dose_plus
 description: 'An app designed to reduce the mental burden for people on long-term medication.'
-version: 0.9.5+9
+version: 0.9.6+10
 
 environment:
     sdk: ^3.7.2
@@ -23,6 +23,7 @@ dependencies:
     image_cropper: ^9.1.0
     photo_view: ^0.15.0
     intl: ^0.19.0
+    shared_preferences: ^2.5.3
 
 dev_dependencies:
     flutter_test:

@@ -214,5 +214,14 @@
     "statusOption_taken": "Taken",
     "@statusOption_taken": {},
     "statusOption_scheduled": "Scheduled",
-    "@statusOption_scheduled": {}
+    "@statusOption_scheduled": {},
+    "settings": "Settings",
+    "setting_language": "Language",
+    "setting_pattern": "Date pattern",
+    "setting_minCount": "Warning doses",
+    "setting_defTime": "Default plan time",
+    "setting_themeMode": "Theme mode",
+    "setting_themeMode_dark": "Dark",
+    "setting_themeMode_light": "Light",
+    "setting_themeMode_system": "System"
 }

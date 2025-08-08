@@ -214,5 +214,14 @@
     "statusOption_taken": "已用药",
     "@statusOption_taken": {},
     "statusOption_scheduled": "未开始",
-    "@statusOption_scheduled": {}
+    "@statusOption_scheduled": {},
+    "settings": "设置",
+    "setting_language": "语言",
+    "setting_pattern": "首页日期格式",
+    "setting_minCount": "预警次数",
+    "setting_defTime": "默认计划时间",
+    "setting_themeMode": "深色模式",
+    "setting_themeMode_dark": "深色",
+    "setting_themeMode_light": "浅色",
+    "setting_themeMode_system": "跟随系统"
 }

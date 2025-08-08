@@ -34,8 +34,12 @@ class _PlanFormState extends State<PlanFormScreen> {
   // List<PillModel> _pills = [];
   List<String> _units = [];
 
+  // 药物tab最多显示3项
+  final int _maxPillCount = 3;
   List<PillModel> get _pills =>
-      _pillList.length > 3 ? _pillList.sublist(0, 3) : _pillList;
+      _pillList.length > _maxPillCount
+          ? _pillList.sublist(0, _maxPillCount)
+          : _pillList;
 
   PlanModel _model = PlanModel(
     pillId: 0,
@@ -55,6 +59,7 @@ class _PlanFormState extends State<PlanFormScreen> {
     cycles: [],
   );
 
+  // MEMO 默认计划时间8点
   TimeOfDay _startTime = TimeOfDay(hour: 8, minute: 0);
 
   bool _isCycle = false;

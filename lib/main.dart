@@ -13,8 +13,10 @@ import 'app/database/repository/plan_cache_repository.dart';
 import 'app/database/repository/plan_repository.dart';
 import 'app/database/repository/transaction_repository.dart';
 import 'app/providers/daily_provider.dart';
+import 'app/providers/language_provider.dart';
 import 'app/providers/pill_provider.dart';
 import 'app/providers/plan_provider.dart';
+import 'app/providers/setting_provider.dart';
 import 'app/providers/theme_provider.dart';
 import 'app/providers/transaction_provider.dart';
 import 'app/screens/daily_screen.dart';
@@ -26,6 +28,10 @@ import 'app/widgets/loading_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final themeProvider = ThemeProvider();
+  final languageProvider = LanguageProvider();
+  final settingProvider = SettingProvider();
 
   final db = AppDatabase();
   final pillDao = PillDao(db);
@@ -54,7 +60,6 @@ void main() async {
     planCacheRepository,
   );
 
-  final themeProvider = ThemeProvider();
   final planProvider = PlanProvider(planRepository);
   final pillProvider = PillProvider(pillRepository, planProvider);
   final dailyProvider = DailyProvider(
@@ -76,10 +81,12 @@ void main() async {
         Provider(create: (_) => pillRepository),
         Provider(create: (_) => planRepository),
         Provider(create: (_) => transactionRepository),
+        ChangeNotifierProvider(create: (_) => themeProvider..init()),
+        ChangeNotifierProvider(create: (_) => languageProvider..init()),
+        ChangeNotifierProvider(create: (_) => settingProvider..init()),
         ChangeNotifierProvider(create: (_) => pillProvider..loadPills()),
         ChangeNotifierProvider(create: (_) => planProvider..loadPlans()),
         ChangeNotifierProvider(create: (_) => transactionProvider),
-        ChangeNotifierProvider(create: (_) => themeProvider),
         ChangeNotifierProvider(create: (_) => dailyProvider..initData()),
       ],
       child: const MyApp(),
@@ -92,10 +99,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
+    return Consumer2<ThemeProvider, LanguageProvider>(
+      builder: (context, themeProvider, languageProvider, child) {
         return MaterialApp(
           title: 'Dose+',
+          locale: languageProvider.locale, // 关键：使用自定义 locale
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/pill_model.dart';
@@ -9,13 +10,16 @@ import '../models/plan_model.dart';
 import '../models/quantity_model.dart';
 import '../models/transaction_model.dart';
 import '../providers/daily_provider.dart';
+import '../providers/language_provider.dart';
 import '../providers/pill_provider.dart';
 import '../providers/plan_provider.dart';
+import '../providers/setting_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../service/loading_service.dart';
 import '../utils/datetime.dart';
 import '../widgets/pill_image.dart';
+import 'setting_screen.dart';
 
 class DailyScreen extends StatefulWidget {
   const DailyScreen({super.key});
@@ -25,208 +29,210 @@ class DailyScreen extends StatefulWidget {
 }
 
 class _DailyScreenState extends State<DailyScreen> {
-  final _minCount = 10;
-
   @override
   Widget build(BuildContext context) {
+    final dailyProvider = context.watch<DailyProvider>();
+    final settingProvider = context.watch<SettingProvider>();
+    final languageProvider = context.watch<LanguageProvider>();
+    final title = DateFormat(
+      settingProvider.datePattern,
+      languageProvider.languageCode,
+    ).format(dailyProvider.today);
     return Scaffold(
-      body: SafeArea(
-        child: Consumer4<
-          DailyProvider,
-          PillProvider,
-          PlanProvider,
-          ThemeProvider
-        >(
-          builder: (
-            context,
-            dailyProvider,
-            pillProvider,
-            planProvider,
-            themeProvider,
-            child,
-          ) {
-            if (planProvider.allPlans.isEmpty) {
-              return Center(
-                child: Text(AppLocalizations.of(context)!.empty_todayPlanList),
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingScreen()),
               );
-            }
-            if (dailyProvider.dailyItems.isEmpty &&
-                dailyProvider.missedItems.isEmpty) {
-              return Center(
-                child: Text(AppLocalizations.of(context)!.empty_todayPlan),
-              );
-            }
+            },
+            icon: const Icon(Icons.settings),
+          ),
+        ],
+      ),
+      body: Consumer3<PillProvider, PlanProvider, ThemeProvider>(
+        builder: (context, pillProvider, planProvider, themeProvider, child) {
+          if (planProvider.allPlans.isEmpty) {
+            return Center(
+              child: Text(AppLocalizations.of(context)!.empty_todayPlanList),
+            );
+          }
+          if (dailyProvider.dailyItems.isEmpty &&
+              dailyProvider.missedItems.isEmpty) {
+            return Center(
+              child: Text(AppLocalizations.of(context)!.empty_todayPlan),
+            );
+          }
 
-            final todayCount = dailyProvider.dailyItems.length;
-            final missedCount = dailyProvider.missedItems.length;
+          final todayCount = dailyProvider.dailyItems.length;
+          final missedCount = dailyProvider.missedItems.length;
 
-            final warningPillList =
-                pillProvider.pillPlanCount.entries
-                    .where((e) => e.value != -1 && e.value < _minCount)
-                    .map((e) => e.key)
-                    .toList();
+          final warningPillList =
+              pillProvider.pillPlanCount.entries
+                  .where(
+                    (e) => e.value != -1 && e.value < settingProvider.minCount,
+                  )
+                  .map((e) => e.key)
+                  .toList();
 
-            // NEXT 首页增加日期等信息展示
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Column(
-                children: [
-                  if (warningPillList.isNotEmpty || missedCount > 0)
-                    SizedBox(height: 8),
-                  /* 次数提醒 */
-                  if (warningPillList.isNotEmpty)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.error.withAlpha(25),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 0,
-                      ),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children:
-                            warningPillList.map((id) {
-                              final pill = pillProvider.pillMap[id]!;
-                              final message = AppLocalizations.of(
-                                context,
-                              )!.doses(
-                                pillProvider.pillPlanCount[id]!,
-                                pill.name,
-                              );
-                              return Row(
-                                children: [
-                                  Container(
-                                    width: 4,
-                                    height: 4,
-                                    decoration: BoxDecoration(
-                                      color: themeProvider.getColor(
-                                        pill.themeValue,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  SizedBox(width: 4),
-                                  Tooltip(
-                                    message: message,
-                                    child: Text(
-                                      message,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color:
-                                            Theme.of(context).colorScheme.error,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                      ),
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              children: [
+                if (warningPillList.isNotEmpty || missedCount > 0)
+                  SizedBox(height: 8),
+                /* 次数提醒 */
+                if (warningPillList.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error.withAlpha(25),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  if (warningPillList.isNotEmpty && missedCount > 0)
-                    SizedBox(height: 8),
-                  /* 漏药提醒 */
-                  if (missedCount > 0)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withAlpha(25),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 0,
-                      ),
-                      child: ExpansionTile(
-                        shape: Border(),
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.missedPlanTitle,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.error,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '$missedCount',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onError,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 0,
+                    ),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children:
+                          warningPillList.map((id) {
+                            final pill = pillProvider.pillMap[id]!;
+                            final message = AppLocalizations.of(context)!.doses(
+                              pillProvider.pillPlanCount[id]!,
+                              pill.name,
+                            );
+                            return Row(
+                              children: [
+                                Container(
+                                  width: 4,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: themeProvider.getColor(
+                                      pill.themeValue,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
+                                SizedBox(width: 4),
+                                Tooltip(
+                                  message: message,
+                                  child: Text(
+                                    message,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                    ),
+                  ),
+                if (warningPillList.isNotEmpty && missedCount > 0)
+                  SizedBox(height: 8),
+                /* 漏药提醒 */
+                if (missedCount > 0)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withAlpha(25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 0,
+                    ),
+                    child: ExpansionTile(
+                      shape: Border(),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(
-                            height: min(missedCount.toDouble(), 2) * 75,
-                            child: ListView.separated(
-                              itemCount: missedCount,
-                              itemBuilder: (content, index) {
-                                final item = dailyProvider.missedItems[index];
-                                return _buildMissedItem(
-                                  context: content,
-                                  item: item,
-                                  pill: pillProvider.pillMap[item.plan.pillId]!,
-                                );
-                              },
-                              separatorBuilder: (_, __) => const Divider(),
+                          Text(
+                            AppLocalizations.of(context)!.missedPlanTitle,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.error,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '$missedCount',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onError,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  if (warningPillList.isNotEmpty || missedCount > 0)
-                    SizedBox(height: 8),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: todayCount,
-                      itemBuilder: (context, index) {
-                        final item = dailyProvider.dailyItems[index];
-                        final prev =
-                            index > 0
-                                ? dailyProvider.dailyItems[index - 1]
-                                : null;
-                        final startTime =
-                            prev?.plan.startTime == item.plan.startTime
-                                ? ''
-                                : item.plan.startTime;
-                        return _buildItem(
-                          context: context,
-                          startTime: startTime,
-                          item: item,
-                          pill: pillProvider.pillMap[item.plan.pillId]!,
-                          bottom: index == todayCount - 1 ? 8 : 0,
-                        );
-                      },
+                      children: [
+                        SizedBox(
+                          height: min(missedCount.toDouble(), 2) * 75,
+                          child: ListView.separated(
+                            itemCount: missedCount,
+                            itemBuilder: (content, index) {
+                              final item = dailyProvider.missedItems[index];
+                              return _buildMissedItem(
+                                context: content,
+                                item: item,
+                                pill: pillProvider.pillMap[item.plan.pillId]!,
+                              );
+                            },
+                            separatorBuilder: (_, __) => const Divider(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                if (warningPillList.isNotEmpty || missedCount > 0)
+                  SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: todayCount,
+                    itemBuilder: (context, index) {
+                      final item = dailyProvider.dailyItems[index];
+                      final prev =
+                          index > 0
+                              ? dailyProvider.dailyItems[index - 1]
+                              : null;
+                      final startTime =
+                          prev?.plan.startTime == item.plan.startTime
+                              ? ''
+                              : item.plan.startTime;
+                      return _buildItem(
+                        context: context,
+                        startTime: startTime,
+                        item: item,
+                        pill: pillProvider.pillMap[item.plan.pillId]!,
+                        bottom: index == todayCount - 1 ? 8 : 0,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

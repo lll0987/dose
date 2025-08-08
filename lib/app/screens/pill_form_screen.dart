@@ -43,7 +43,9 @@ class _PillFormScreenState extends State<PillFormScreen> {
     packSpecs: [SpecModel(qty: 1, unit: '')],
   );
 
+  // 包装规格5层
   final int _specDepth = 5;
+  // 包装规格缩进宽度24
   final double _specSpace = 24;
 
   List<String> _units = [];
